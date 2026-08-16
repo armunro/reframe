@@ -601,7 +601,9 @@
                                                       Foreground="#D4D4D4"
                                                       FontSize="11"
                                                       VerticalAlignment="Center"
+                                                      Margin="0,0,10,0"
                                                       ToolTip="When checked, the first row of tabular data is used for column headers. When unchecked, all rows are treated as data."/>
+                                            <TextBox Text="{Binding SurrogateHeaders, UpdateSourceTrigger=PropertyChanged}" Width="160" Height="22" FontSize="11" Style="{StaticResource CatalystTextBoxStyle}" Tag="Surrogate headers..." ToolTip="Surrogate / override column headers (comma or delimited)"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                                             <Button Content="Extract Selected" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToLines" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
@@ -1069,6 +1071,23 @@
                                                       Margin="0,0,0,6"
                                                       ToolTip="When checked, the first row of tabular data is used for column headers. When unchecked, all rows are treated as data."/>
 
+                                            <!-- Surrogate / Override Headers -->
+                                            <TextBlock Text="Surrogate / Override Headers:" Foreground="#AAAAAA" FontSize="11" Margin="0,0,0,3"/>
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding SurrogateHeaders, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CatalystTextBoxStyle}" Tag="e.g. ID, Name, Email..."/>
+                                                <Button Grid.Column="1" Content="✨ Auto" Command="{Binding ActionCommand}" CommandParameter="GenerateSurrogateHeaders" ToolTip="Auto-generate surrogate headers (Col1, Col2...)" Style="{StaticResource ToolButtonStyle}" Margin="3,0,0,0" Padding="4,1" FontSize="10"/>
+                                                <Button Grid.Column="2" Content="❌" Command="{Binding ActionCommand}" CommandParameter="ClearSurrogateHeaders" ToolTip="Clear surrogate headers" Style="{StaticResource ToolButtonStyle}" Margin="2,0,0,0" Padding="4,1" FontSize="10"/>
+                                            </Grid>
+                                            <UniformGrid Columns="2" Margin="0,0,0,6">
+                                                <Button Content="🏷️ Apply / Override" Command="{Binding ActionCommand}" CommandParameter="ApplySurrogateHeaders" ToolTip="Apply surrogate headers to table columns" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="➕ Prepend to Text" Command="{Binding ActionCommand}" CommandParameter="PrependSurrogateHeader" ToolTip="Add/replace header row in tabular text" Style="{StaticResource ToolButtonStyle}"/>
+                                            </UniformGrid>
+
                                             <!-- Column Selection -->
                                             <Grid Margin="0,0,0,3">
                                                 <Grid.ColumnDefinitions>
@@ -1224,6 +1243,12 @@
                                                 <TextBlock Text="Val: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
                                                 <ComboBox Grid.Column="1" ItemsSource="{Binding DetectedColumns}" SelectedItem="{Binding SelectedValueColumn, Mode=TwoWay}" Style="{StaticResource CatalystComboBoxStyle}"/>
                                             </Grid>
+                                            <CheckBox Content="Include rest of properties in value"
+                                                      IsChecked="{Binding KeyValueIncludeRestOfColumns, UpdateSourceTrigger=PropertyChanged}"
+                                                      Foreground="#D4D4D4"
+                                                      FontSize="11"
+                                                      Margin="0,0,0,6"
+                                                      ToolTip="When checked, the value is an object or map containing all other properties and columns instead of a single column."/>
                                             <UniformGrid Columns="3">
                                                 <Button Content="📦 JSON Object" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueJson" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="📜 YAML Map" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueYaml" Style="{StaticResource ToolButtonStyle}"/>
@@ -1317,13 +1342,16 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0" Text="{Binding StructuredQueryPath, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CatalystTextBoxStyle}" Tag="Path / Key (e.g. $.users, name)..."/>
+                                                <TextBox Grid.Column="0" Text="{Binding StructuredQueryPath, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CatalystTextBoxStyle}" Tag="XPath / Path / Key (e.g. //item/*, //@id, $.users)..."/>
                                                 <Button Grid.Column="1" Content="🔍 Query" Command="{Binding ActionCommand}" CommandParameter="QueryStructuredPath" Style="{StaticResource ToolButtonStyle}" Margin="3,0,0,0"/>
                                             </Grid>
                                             <UniformGrid Columns="2">
+                                                <Button Content="🧭 XPath Query" Command="{Binding ActionCommand}" CommandParameter="QueryXPath" Style="{StaticResource PrimaryToolButtonStyle}"/>
+                                                <Button Content="🏷️ XPath Values" Command="{Binding ActionCommand}" CommandParameter="ExtractXPathValues" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="🗺️ Extract All Paths" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredPaths" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="🔑 Extract All Keys" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="📋 Extract All Values" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredValues" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🏷️ Extract Attributes" Command="{Binding ActionCommand}" CommandParameter="ExtractXPathAttributes" Style="{StaticResource ToolButtonStyle}"/>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Expander>

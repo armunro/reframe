@@ -196,27 +196,62 @@ public static class TabularConverter
         return sb.ToString();
     }
 
-    public static string ToKeyValueJson(TabularData table, int keyColIndex, int valueColIndex, bool indented = true)
+    public static string ToKeyValueJson(TabularData table, int keyColIndex, int valueColIndex, bool includeRestOfColumns = false, bool indented = true)
     {
-        var dict = new Dictionary<string, string>();
-        foreach (var row in table.Rows)
-        {
-            string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
-            string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
-            if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
-            {
-                dict[key] = val;
-            }
-        }
-
         var options = new JsonSerializerOptions
         {
             WriteIndented = indented,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
-        return JsonSerializer.Serialize(dict, options);
+        if (includeRestOfColumns || valueColIndex < 0)
+        {
+            var headers = table.Columns.Select((c, idx) => string.IsNullOrWhiteSpace(c) ? $"Column_{idx + 1}" : c).ToList();
+            var dict = new Dictionary<string, Dictionary<string, object?>>();
+
+            foreach (var row in table.Rows)
+            {
+                string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+                if (string.IsNullOrEmpty(key) || dict.ContainsKey(key)) continue;
+
+                var valDict = new Dictionary<string, object?>();
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    if (i == keyColIndex) continue;
+                    string rawVal = i < row.Count ? row[i] : string.Empty;
+                    if (long.TryParse(rawVal, out long lVal))
+                        valDict[headers[i]] = lVal;
+                    else if (double.TryParse(rawVal, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
+                        valDict[headers[i]] = dVal;
+                    else if (bool.TryParse(rawVal, out bool bVal))
+                        valDict[headers[i]] = bVal;
+                    else
+                        valDict[headers[i]] = rawVal;
+                }
+                dict[key] = valDict;
+            }
+
+            return JsonSerializer.Serialize(dict, options);
+        }
+        else
+        {
+            var dict = new Dictionary<string, string>();
+            foreach (var row in table.Rows)
+            {
+                string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+                string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
+                if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
+                {
+                    dict[key] = val;
+                }
+            }
+
+            return JsonSerializer.Serialize(dict, options);
+        }
     }
+
+    public static string ToKeyValueJson(TabularData table, int keyColIndex, bool includeRestOfColumns, bool indented = true)
+        => ToKeyValueJson(table, keyColIndex, -1, includeRestOfColumns, indented);
 
     public static string ToYaml(TabularData table)
     {
@@ -269,23 +304,52 @@ public static class TabularConverter
         return serializer.Serialize(list).TrimEnd('\r', '\n');
     }
 
-    public static string ToKeyValueYaml(TabularData table, int keyColIndex, int valueColIndex)
+    public static string ToKeyValueYaml(TabularData table, int keyColIndex, int valueColIndex, bool includeRestOfColumns = false)
     {
         var dict = new Dictionary<string, object?>();
-        foreach (var row in table.Rows)
+
+        if (includeRestOfColumns || valueColIndex < 0)
         {
-            string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
-            string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
-            if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
+            var headers = table.Columns.Select((c, idx) => string.IsNullOrWhiteSpace(c) ? $"Column_{idx + 1}" : c).ToList();
+            foreach (var row in table.Rows)
             {
-                if (long.TryParse(val, out long lVal))
-                    dict[key] = lVal;
-                else if (double.TryParse(val, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
-                    dict[key] = dVal;
-                else if (bool.TryParse(val, out bool bVal))
-                    dict[key] = bVal;
-                else
-                    dict[key] = val;
+                string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+                if (string.IsNullOrEmpty(key) || dict.ContainsKey(key)) continue;
+
+                var valDict = new Dictionary<string, object?>();
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    if (i == keyColIndex) continue;
+                    string rawVal = i < row.Count ? row[i] : string.Empty;
+                    if (long.TryParse(rawVal, out long lVal))
+                        valDict[headers[i]] = lVal;
+                    else if (double.TryParse(rawVal, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
+                        valDict[headers[i]] = dVal;
+                    else if (bool.TryParse(rawVal, out bool bVal))
+                        valDict[headers[i]] = bVal;
+                    else
+                        valDict[headers[i]] = rawVal;
+                }
+                dict[key] = valDict;
+            }
+        }
+        else
+        {
+            foreach (var row in table.Rows)
+            {
+                string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+                string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
+                if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
+                {
+                    if (long.TryParse(val, out long lVal))
+                        dict[key] = lVal;
+                    else if (double.TryParse(val, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
+                        dict[key] = dVal;
+                    else if (bool.TryParse(val, out bool bVal))
+                        dict[key] = bVal;
+                    else
+                        dict[key] = val;
+                }
             }
         }
 
@@ -296,20 +360,48 @@ public static class TabularConverter
         return serializer.Serialize(dict).TrimEnd('\r', '\n');
     }
 
-    public static string ToKeyValueQueryString(TabularData table, int keyColIndex, int valueColIndex)
+    public static string ToKeyValueYaml(TabularData table, int keyColIndex, bool includeRestOfColumns)
+        => ToKeyValueYaml(table, keyColIndex, -1, includeRestOfColumns);
+
+    public static string ToKeyValueQueryString(TabularData table, int keyColIndex, int valueColIndex, bool includeRestOfColumns = false)
     {
         var pairs = new List<string>();
-        foreach (var row in table.Rows)
+
+        if (includeRestOfColumns || valueColIndex < 0)
         {
-            string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
-            string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
-            if (!string.IsNullOrEmpty(key))
+            var headers = table.Columns.Select((c, idx) => string.IsNullOrWhiteSpace(c) ? $"Column_{idx + 1}" : c).ToList();
+            foreach (var row in table.Rows)
             {
-                pairs.Add($"{Uri.EscapeDataString(key)}={Uri.EscapeDataString(val)}");
+                string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+                if (string.IsNullOrEmpty(key)) continue;
+
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    if (i == keyColIndex) continue;
+                    string colName = headers[i];
+                    string val = i < row.Count ? row[i] : string.Empty;
+                    pairs.Add($"{Uri.EscapeDataString(key)}[{Uri.EscapeDataString(colName)}]={Uri.EscapeDataString(val)}");
+                }
             }
         }
+        else
+        {
+            foreach (var row in table.Rows)
+            {
+                string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+                string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
+                if (!string.IsNullOrEmpty(key))
+                {
+                    pairs.Add($"{Uri.EscapeDataString(key)}={Uri.EscapeDataString(val)}");
+                }
+            }
+        }
+
         return string.Join("&", pairs);
     }
+
+    public static string ToKeyValueQueryString(TabularData table, int keyColIndex, bool includeRestOfColumns)
+        => ToKeyValueQueryString(table, keyColIndex, -1, includeRestOfColumns);
 
     public static string ToSqlInClause(TabularData table, int colIndex, bool quoteStrings = true)
     {

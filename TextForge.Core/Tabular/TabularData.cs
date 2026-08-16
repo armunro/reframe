@@ -221,4 +221,110 @@ public class TabularData
         }
         return list;
     }
+
+    /// <summary>
+    /// Converts rows into key-value pairs where key is from the key column and value is a dictionary
+    /// containing all other column names and their values.
+    /// </summary>
+    public List<KeyValuePair<string, Dictionary<string, object?>>> ToKeyValueObjectPairs(int keyColumnIndex)
+    {
+        var list = new List<KeyValuePair<string, Dictionary<string, object?>>>();
+        var headers = Columns.Select((c, idx) => string.IsNullOrWhiteSpace(c) ? $"Column_{idx + 1}" : c).ToList();
+
+        foreach (var row in Rows)
+        {
+            string key = (keyColumnIndex >= 0 && keyColumnIndex < row.Count) ? row[keyColumnIndex] : string.Empty;
+            var valDict = new Dictionary<string, object?>();
+            for (int i = 0; i < headers.Count; i++)
+            {
+                if (i == keyColumnIndex) continue;
+                string rawVal = i < row.Count ? row[i] : string.Empty;
+                if (long.TryParse(rawVal, out long lVal))
+                {
+                    valDict[headers[i]] = lVal;
+                }
+                else if (double.TryParse(rawVal, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
+                {
+                    valDict[headers[i]] = dVal;
+                }
+                else if (bool.TryParse(rawVal, out bool bVal))
+                {
+                    valDict[headers[i]] = bVal;
+                }
+                else
+                {
+                    valDict[headers[i]] = rawVal;
+                }
+            }
+            list.Add(new KeyValuePair<string, Dictionary<string, object?>>(key, valDict));
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// Overrides current column headers with the provided surrogate headers in-place,
+    /// setting HasHeaders to true and standardizing row lengths.
+    /// </summary>
+    public void OverrideHeaders(IEnumerable<string> headers)
+    {
+        var headerList = headers.Where(h => !string.IsNullOrWhiteSpace(h)).Select(h => h.Trim()).ToList();
+        if (headerList.Count == 0) return;
+
+        int targetColCount = Math.Max(Columns.Count, headerList.Count);
+        if (targetColCount == 0 && Rows.Count > 0)
+        {
+            targetColCount = Rows.Max(r => r.Count);
+        }
+        targetColCount = Math.Max(targetColCount, headerList.Count);
+
+        var newColumns = new List<string>();
+        for (int i = 0; i < targetColCount; i++)
+        {
+            if (i < headerList.Count && !string.IsNullOrWhiteSpace(headerList[i]))
+            {
+                newColumns.Add(headerList[i]);
+            }
+            else if (i < Columns.Count && !string.IsNullOrWhiteSpace(Columns[i]))
+            {
+                newColumns.Add(Columns[i]);
+            }
+            else
+            {
+                newColumns.Add($"Column {i + 1}");
+            }
+        }
+
+        Columns = newColumns;
+        HasHeaders = true;
+
+        foreach (var row in Rows)
+        {
+            while (row.Count < Columns.Count)
+            {
+                row.Add(string.Empty);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Returns a clone of the table with surrogate headers applied.
+    /// </summary>
+    public TabularData WithSurrogateHeaders(IEnumerable<string> headers)
+    {
+        var result = Clone();
+        result.OverrideHeaders(headers);
+        return result;
+    }
+
+    /// <summary>
+    /// Generates and assigns surrogate headers (e.g. Column_1, Column_2 or Col1, Col2).
+    /// </summary>
+    public void SetSurrogateHeaders(string prefix = "Column_", int? count = null)
+    {
+        int colCount = count ?? (Columns.Count > 0 ? Columns.Count : (Rows.Count > 0 ? Rows.Max(r => r.Count) : 0));
+        if (colCount <= 0) colCount = 1;
+
+        var genHeaders = Enumerable.Range(1, colCount).Select(i => $"{prefix}{i}").ToList();
+        OverrideHeaders(genHeaders);
+    }
 }

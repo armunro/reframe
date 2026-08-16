@@ -12,7 +12,7 @@ public static class TabularParser
     private static readonly HashSet<string> CommonHeaderKeywords = new(StringComparer.OrdinalIgnoreCase)
     {
         "id", "identifier", "key", "pk", "fk", "code", "sku", "pin", "tenant", "guid", "uuid", "hash",
-        "name", "first name", "firstname", "fname", "last name", "lastname", "lname", "full name", "fullname", "middle name",
+        "name", "first name", "firstname", "fname", "last name", "lastname", "lname", "full name", "fullname", "middle name", "server name", "servername",
         "title", "desc", "description", "summary", "details", "comment", "comments", "notes", "memo", "text", "body", "content", "message",
         "email", "e-mail", "mail", "phone", "mobile", "tel", "telephone", "fax", "contact",
         "address", "street", "city", "state", "province", "zip", "zipcode", "postal", "postalcode", "country", "region", "location", "lat", "latitude", "long", "longitude", "lng",
@@ -23,12 +23,15 @@ public static class TabularParser
         "price", "cost", "amount", "total", "subtotal", "tax", "fee", "rate", "salary", "wage", "balance", "revenue", "income", "expense", "discount", "unit_price", "unitprice",
         "qty", "quantity", "count", "num", "number", "size", "length", "width", "height", "weight", "depth", "order", "seq", "sequence", "index", "rank", "position", "pos", "step", "level", "version", "ver",
         "url", "uri", "link", "href", "endpoint", "path", "ip", "ip address", "ipaddress", "host", "hostname", "server", "port", "domain", "protocol",
+        "environment", "env", "pipeline", "service", "app", "application", "build", "agent", "branch", "commit", "release", "platform", "cluster", "node", "instance", "job", "task", "project", "repo", "repository", "feature", "module", "component", "config", "setting", "settings", "option", "options",
         "action", "event", "source", "target", "value", "val", "data", "result", "flag", "enabled", "active", "is_active", "isactive", "item", "product", "fruit", "color", "colour"
     };
 
-    public static TabularData? DetectAndParse(string? text, bool? assumeHeader = null)
+    public static TabularData? DetectAndParse(string? text, bool? assumeHeader = null, IEnumerable<string>? surrogateHeaders = null)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
+
+        TabularData? table = null;
 
         // 1. Check if HTML table
         if (HtmlTableParser.IsHtmlTable(text))
@@ -36,42 +39,65 @@ public static class TabularParser
             var htmlTable = HtmlTableParser.Parse(text, assumeHeader);
             if (htmlTable.Columns.Count > 0)
             {
-                return htmlTable;
+                table = htmlTable;
             }
         }
 
         // 2. Check if JSON array of objects or arrays
-        var jsonTable = TryParseJsonArray(text, assumeHeader);
-        if (jsonTable != null) return jsonTable;
+        if (table == null)
+        {
+            table = TryParseJsonArray(text, assumeHeader);
+        }
 
         // 3. Check if YAML array of objects or arrays
-        var yamlTable = TryParseYaml(text, assumeHeader);
-        if (yamlTable != null) return yamlTable;
+        if (table == null)
+        {
+            table = TryParseYaml(text, assumeHeader);
+        }
 
         // 4. Check if Markdown table
-        if (MarkdownTableParser.IsMarkdownTable(text))
+        if (table == null && MarkdownTableParser.IsMarkdownTable(text))
         {
-            return MarkdownTableParser.Parse(text, assumeHeader);
+            table = MarkdownTableParser.Parse(text, assumeHeader);
         }
 
         // 5. Auto-detect delimiter
-        char? bestDelimiter = DetectDelimiter(text);
-        if (bestDelimiter == null) return null;
+        if (table == null)
+        {
+            char? bestDelimiter = DetectDelimiter(text);
+            if (bestDelimiter != null)
+            {
+                table = Parse(text, bestDelimiter.Value, assumeHeader);
+            }
+        }
 
-        return Parse(text, bestDelimiter.Value, assumeHeader);
+        if (table != null && surrogateHeaders != null)
+        {
+            var list = surrogateHeaders.ToList();
+            if (list.Count > 0)
+            {
+                table.OverrideHeaders(list);
+            }
+        }
+
+        return table;
     }
 
-    public static TabularData Parse(string? text, char delimiter, bool? assumeHeader = null)
+    public static TabularData Parse(string? text, char delimiter, bool? assumeHeader = null, IEnumerable<string>? surrogateHeaders = null)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            return new TabularData { Delimiter = delimiter, HasHeaders = assumeHeader ?? true };
+            var emptyResult = new TabularData { Delimiter = delimiter, HasHeaders = assumeHeader ?? true };
+            if (surrogateHeaders != null) emptyResult.OverrideHeaders(surrogateHeaders);
+            return emptyResult;
         }
 
         var allRows = ParseCsvRecords(text, delimiter);
         if (allRows.Count == 0)
         {
-            return new TabularData { Delimiter = delimiter, HasHeaders = assumeHeader ?? true };
+            var emptyResult = new TabularData { Delimiter = delimiter, HasHeaders = assumeHeader ?? true };
+            if (surrogateHeaders != null) emptyResult.OverrideHeaders(surrogateHeaders);
+            return emptyResult;
         }
 
         bool hasHeaders = assumeHeader ?? DetectHasHeaders(allRows);
@@ -104,7 +130,69 @@ public static class TabularParser
             while (row.Count < colCount) row.Add(string.Empty);
         }
 
+        if (surrogateHeaders != null)
+        {
+            var list = surrogateHeaders.ToList();
+            if (list.Count > 0)
+            {
+                result.OverrideHeaders(list);
+            }
+        }
+
         return result;
+    }
+
+    /// <summary>
+    /// Parses a string of headers (comma, tab, pipe, semicolon, or newline separated) into a list of header names.
+    /// </summary>
+    public static List<string> ParseHeaderList(string? headerText, char? defaultDelimiter = null)
+    {
+        if (string.IsNullOrWhiteSpace(headerText)) return new List<string>();
+
+        // Check if multi-line
+        var lines = headerText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        if (lines.Length > 1)
+        {
+            return lines.Select(l => l.Trim().Trim('"', '\'')).Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
+        }
+
+        string singleLine = headerText.Trim();
+
+        // Detect delimiter in single line: comma, tab, pipe, semicolon
+        char? delim = defaultDelimiter;
+        if (delim == null)
+        {
+            if (singleLine.Contains('\t')) delim = '\t';
+            else if (singleLine.Contains('|')) delim = '|';
+            else if (singleLine.Contains(',')) delim = ',';
+            else if (singleLine.Contains(';')) delim = ';';
+        }
+
+        if (delim != null)
+        {
+            var records = ParseCsvRecords(singleLine, delim.Value);
+            if (records.Count > 0 && records[0].Count > 0)
+            {
+                var list = records[0].Select(c => c.Trim().Trim('"', '\'')).Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+                if (list.Count > 0) return list;
+            }
+        }
+
+        // Fallback: split on whitespace
+        var whitespaceParts = singleLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(s => s.Trim().Trim('"', '\''))
+                                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                                        .ToList();
+        return whitespaceParts.Count > 0 ? whitespaceParts : new List<string> { singleLine };
+    }
+
+    /// <summary>
+    /// Generates a list of default surrogate header names (e.g. Column_1, Column_2 or Col1, Col2).
+    /// </summary>
+    public static List<string> GenerateSurrogateHeaders(int count, string prefix = "Column_")
+    {
+        if (count <= 0) count = 1;
+        return Enumerable.Range(1, count).Select(i => $"{prefix}{i}").ToList();
     }
 
     public static bool DetectHasHeaders(IReadOnlyList<IReadOnlyList<string>> rows)
@@ -198,9 +286,16 @@ public static class TabularParser
     {
         if (string.IsNullOrWhiteSpace(s)) return false;
         if (CommonHeaderKeywords.Contains(s)) return true;
-        string normalized = Regex.Replace(s, @"[\s_\-\.]+", "");
+        string normalized = Regex.Replace(s, @"[\s_\-\.\/]+", "");
         if (CommonHeaderKeywords.Contains(normalized)) return true;
         if (HeaderPatternRegex.IsMatch(s) || HeaderPatternRegex.IsMatch(normalized)) return true;
+
+        var parts = s.Split(new[] { ' ', '/', '-', '_', '.' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 1 && parts.Any(p => CommonHeaderKeywords.Contains(p) || HeaderPatternRegex.IsMatch(p)))
+        {
+            return true;
+        }
+
         return false;
     }
 

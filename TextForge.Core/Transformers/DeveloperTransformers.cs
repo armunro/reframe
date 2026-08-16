@@ -316,6 +316,9 @@ public static class DeveloperTransformers
     public static string OmitStructuredKeys(string? text, string? keyList) => Structured.StructuredTransformers.OmitKeys(text, keyList);
     public static string RemoveNullsAndEmpty(string? text) => Structured.StructuredTransformers.RemoveNullsAndEmpty(text);
     public static string QueryStructuredPath(string? text, string? query) => Structured.StructuredTransformers.QueryPath(text, query);
+    public static string QueryXPath(string? text, string? query) => Structured.StructuredTransformers.QueryXPath(text, query);
+    public static string ExtractXPathValues(string? text, string? query) => Structured.StructuredTransformers.ExtractXPathValues(text, query);
+    public static string ExtractXPathAttributes(string? text, string? query = "//@*") => Structured.StructuredTransformers.ExtractXPathAttributes(text, query);
     public static string StructuredToCsv(string? text, char delimiter = ',') => Structured.StructuredTransformers.ToCsv(text, delimiter);
     public static string StructuredToTsv(string? text) => Structured.StructuredTransformers.ToTsv(text);
     public static string StructuredToMarkdown(string? text) => Structured.StructuredTransformers.ToMarkdownTable(text);

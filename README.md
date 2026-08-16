@@ -49,13 +49,20 @@
   - **JSON Array of Objects** & JSON Array of Arrays
   - **YAML Array of Objects** & YAML Sequences
   - **SQL INSERT Statements**
+- **Surrogate Headers & Header Overrides**:
+  - Add custom surrogate headers for tables without existing headers (or when "First row contains headers" is unchecked).
+  - Override existing table headers with custom column names (delimited by comma, tab, pipe, semicolon, or newlines).
+  - One-click auto-generation of sequential surrogate headers (`Col1, Col2...` or `Column_1, Column_2...`).
+  - Prepend or replace header rows directly in tabular output or table grid preview.
+  - Automatically reflected across all tabular conversions (JSON objects, YAML, SQL INSERT statements, Markdown, etc.).
 - **Column Operations**:
   - Extract specific columns with custom prefixes, suffixes, or delimiters.
   - Transform single columns (find/replace, prefix/suffix).
   - Filter tabular rows by column value.
   - Sort tabular data by column with natural numeric support.
-  - Generate Key-Value maps from selected key and value columns (JSON, YAML, or delimiter/URL format).
-- **Interactive Preview**: Live tabular data grid preview showing detected headers and structured rows.
+  - Generate Key-Value maps from selected key and value columns (JSON, YAML, or URL query format).
+  - **Rest of Properties as Value Object**: Option to include all remaining columns/properties in the generated value object (e.g. dictionary/JSON object/YAML map of all other columns keyed by the chosen primary key column).
+- **Interactive Preview**: Live tabular data grid preview showing detected headers and structured rows with real-time surrogate header editing.
 
 ### 3. Structured Data, Conversions & Tree Viewer
 - **Dedicated Structured Transformations Sidebar Tab**:
@@ -78,8 +85,12 @@
   - **Omit / Remove Keys**: Strip specified sensitive or unnecessary keys.
   - **Remove Nulls & Empty**: Recursively remove `null` values, empty strings, and empty objects/arrays.
 - **Querying & Value Extraction**:
-  - **JSONPath & XPath Query**: Query expressions (e.g., `$.users[*].name`, `firstName`, `/catalog/book/title`).
-  - **Extract All Paths**: Extract all distinct JSONPaths or XPaths.
+  - **XPath Query & Wildcards**: Execute full XPath 1.0 expressions across XML, JSON, and YAML structured data. Supports element wildcards (`//*`, `//book/*`, `/*/*/*`), attribute wildcards (`//@*`, `//book/@*`, `//@id`), element filters/predicates (`//book[price > 40]`, `//book[1]`), text selectors (`//title/text()`), and XPath functions (`count(//book)`, `sum(//price)`).
+  - **Namespace-Tolerant XPath**: Transparently evaluates queries across XML documents with default or unprefixed namespaces.
+  - **Extract XPath Values**: Extract matching inner text or scalar values into a clean line-delimited list.
+  - **Extract XPath Attributes**: Extract all matching attributes and values formatted as `@attr="value"`.
+  - **JSONPath & Node Query**: Query structured documents with JSONPath expressions or property names (e.g., `$.users[*].name`, `firstName`).
+  - **Extract All Paths**: Extract all distinct JSONPaths or XPaths across the structure.
   - **Extract All Keys**: Extract unique property / element names.
   - **Extract All Values**: Extract all scalar values into a line list.
 - **Flattening & Unflattening**:

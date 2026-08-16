@@ -86,11 +86,13 @@ public class MainViewModel : INotifyPropertyChanged
 
     // Tabular Options
     private string _sqlTableName = "MyTable";
+    private string _surrogateHeaders = "";
     private ObservableCollection<string> _detectedColumns = new();
     private ObservableCollection<ColumnItem> _columnItems = new();
     private string? _selectedColumn;
     private string? _selectedKeyColumn;
     private string? _selectedValueColumn;
+    private bool _keyValueIncludeRestOfColumns = false;
     private string _tableExtractDelimiter = ", ";
     private string _tableColumnPrefix = "";
     private string _tableColumnSuffix = "";
@@ -492,6 +494,20 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public string SurrogateHeaders
+    {
+        get => _surrogateHeaders;
+        set
+        {
+            if (_surrogateHeaders != value)
+            {
+                _surrogateHeaders = value;
+                OnPropertyChanged();
+                OnSurrogateHeadersChanged();
+            }
+        }
+    }
+
     public ObservableCollection<string> DetectedColumns => _detectedColumns;
     public ObservableCollection<ColumnItem> ColumnItems => _columnItems;
 
@@ -531,6 +547,20 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 _selectedValueColumn = value;
                 OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool KeyValueIncludeRestOfColumns
+    {
+        get => _keyValueIncludeRestOfColumns;
+        set
+        {
+            if (_keyValueIncludeRestOfColumns != value)
+            {
+                _keyValueIncludeRestOfColumns = value;
+                OnPropertyChanged();
+                TriggerRealTime();
             }
         }
     }
@@ -1336,58 +1366,22 @@ public class MainViewModel : INotifyPropertyChanged
     {
         // Update tabular preview with auto-detected headers
         _currentTable = TabularParser.DetectAndParse(_inputText);
-        if (_currentTable != null && _currentTable.Columns.Count > 0)
+        if (_currentTable != null)
         {
             _hasHeaders = _currentTable.HasHeaders;
             OnPropertyChanged(nameof(HasHeaders));
-            UpdateDataTable(_currentTable);
 
-            DetectedColumns.Clear();
-            ColumnItems.Clear();
-
-            for (int i = 0; i < _currentTable.Columns.Count; i++)
+            if (!string.IsNullOrWhiteSpace(_surrogateHeaders))
             {
-                string col = _currentTable.Columns[i];
-                DetectedColumns.Add(col);
-
-                string sample = _currentTable.Rows.Count > 0 && i < _currentTable.Rows[0].Count ? _currentTable.Rows[0][i] : string.Empty;
-                ColumnItems.Add(new ColumnItem
+                var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, _currentTable.Delimiter);
+                if (customHeaders.Count > 0)
                 {
-                    Index = i,
-                    Name = col,
-                    SampleValue = sample,
-                    IsSelected = true
-                });
-            }
-
-            if (DetectedColumns.Count > 0)
-            {
-                if (string.IsNullOrEmpty(SelectedColumn) || !DetectedColumns.Contains(SelectedColumn))
-                {
-                    SelectedColumn = DetectedColumns[0];
-                }
-                if (string.IsNullOrEmpty(SelectedKeyColumn) || !DetectedColumns.Contains(SelectedKeyColumn))
-                {
-                    SelectedKeyColumn = DetectedColumns[0];
-                }
-                if (string.IsNullOrEmpty(SelectedValueColumn) || !DetectedColumns.Contains(SelectedValueColumn))
-                {
-                    SelectedValueColumn = DetectedColumns.Count > 1 ? DetectedColumns[1] : DetectedColumns[0];
+                    _currentTable.OverrideHeaders(customHeaders);
                 }
             }
         }
-        else
-        {
-            PreviewDataTable = null;
-            DetectedColumns.Clear();
-            ColumnItems.Clear();
-            SelectedColumn = null;
-            SelectedKeyColumn = null;
-            SelectedValueColumn = null;
-        }
 
-        Analysis = TextAnalyzer.Analyze(_inputText, _currentTable?.HasHeaders);
-        OnPropertyChanged(nameof(HasTabularData));
+        UpdateColumnsAndPreviewFromCurrentTable();
 
         AnalyzeStructuredData();
 
@@ -1513,6 +1507,39 @@ public class MainViewModel : INotifyPropertyChanged
         if (string.IsNullOrWhiteSpace(_inputText)) return;
 
         _currentTable = TabularParser.DetectAndParse(_inputText, _hasHeaders);
+        if (_currentTable != null && !string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, _currentTable.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                _currentTable.OverrideHeaders(customHeaders);
+            }
+        }
+
+        UpdateColumnsAndPreviewFromCurrentTable();
+        TriggerRealTime();
+    }
+
+    private void OnSurrogateHeadersChanged()
+    {
+        if (string.IsNullOrWhiteSpace(_inputText)) return;
+
+        _currentTable = TabularParser.DetectAndParse(_inputText, _hasHeaders);
+        if (_currentTable != null && !string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, _currentTable.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                _currentTable.OverrideHeaders(customHeaders);
+            }
+        }
+
+        UpdateColumnsAndPreviewFromCurrentTable();
+        TriggerRealTime();
+    }
+
+    private void UpdateColumnsAndPreviewFromCurrentTable()
+    {
         if (_currentTable != null && _currentTable.Columns.Count > 0)
         {
             UpdateDataTable(_currentTable);
@@ -1556,12 +1583,14 @@ public class MainViewModel : INotifyPropertyChanged
             PreviewDataTable = null;
             DetectedColumns.Clear();
             ColumnItems.Clear();
+            SelectedColumn = null;
+            SelectedKeyColumn = null;
+            SelectedValueColumn = null;
         }
 
-        Analysis = TextAnalyzer.Analyze(_inputText, _hasHeaders);
+        Analysis = TextAnalyzer.Analyze(_inputText, _currentTable?.HasHeaders ?? _hasHeaders);
         OnPropertyChanged(nameof(HasTabularData));
         UpdateTabHighlights();
-        TriggerRealTime();
     }
 
     private void UpdateDataTable(TabularData table)
@@ -1653,6 +1682,10 @@ public class MainViewModel : INotifyPropertyChanged
                 "ToHtmlTable" => ConvertTabular(t => TabularConverter.ToHtmlTable(t)),
                 "TransposeTable" => ConvertTabular(t => TabularConverter.ToCsv(t.Transpose(), t.Delimiter ?? ',')),
                 "ExtractColumn" => ExtractSelectedColumn(),
+                "ApplySurrogateHeaders" or "OverrideTableHeaders" => PrependSurrogateHeaderAction(),
+                "GenerateSurrogateHeaders" => GenerateSurrogateHeadersAction(),
+                "ClearSurrogateHeaders" => ClearSurrogateHeadersAction(),
+                "PrependSurrogateHeader" or "AddSurrogateHeader" => PrependSurrogateHeaderAction(),
 
                 // Tabular Column Selection & Break Apart Transforms
                 "ExtractSelectedToCsv" => ExtractSelectedColumnsAsTable(t => TabularConverter.ToCsv(t, ',')),
@@ -1672,9 +1705,12 @@ public class MainViewModel : INotifyPropertyChanged
                 "TransformSelectedTrim" => TransformSelectedColumns(s => s.Trim()),
                 "TransformSelectedPrefixSuffix" => TransformSelectedColumns(s => $"{TableColumnPrefix}{s}{TableColumnSuffix}"),
                 "TransformSelectedReplace" => TransformSelectedColumns(s => string.IsNullOrEmpty(TableColumnFind) ? s : s.Replace(TableColumnFind, TableColumnReplaceWith)),
-                "TableToKeyValueJson" => GenerateKeyValue(t => TabularConverter.ToKeyValueJson(t, GetKeyColIdx(), GetValColIdx())),
-                "TableToKeyValueYaml" => GenerateKeyValue(t => TabularConverter.ToKeyValueYaml(t, GetKeyColIdx(), GetValColIdx())),
-                "TableToKeyValueQuery" => GenerateKeyValue(t => TabularConverter.ToKeyValueQueryString(t, GetKeyColIdx(), GetValColIdx())),
+                "TableToKeyValueJson" => GenerateKeyValue(t => TabularConverter.ToKeyValueJson(t, GetKeyColIdx(), GetValColIdx(), KeyValueIncludeRestOfColumns)),
+                "TableToKeyValueYaml" => GenerateKeyValue(t => TabularConverter.ToKeyValueYaml(t, GetKeyColIdx(), GetValColIdx(), KeyValueIncludeRestOfColumns)),
+                "TableToKeyValueQuery" => GenerateKeyValue(t => TabularConverter.ToKeyValueQueryString(t, GetKeyColIdx(), GetValColIdx(), KeyValueIncludeRestOfColumns)),
+                "TableToKeyValueJsonRest" => GenerateKeyValue(t => TabularConverter.ToKeyValueJson(t, GetKeyColIdx(), includeRestOfColumns: true)),
+                "TableToKeyValueYamlRest" => GenerateKeyValue(t => TabularConverter.ToKeyValueYaml(t, GetKeyColIdx(), includeRestOfColumns: true)),
+                "TableToKeyValueQueryRest" => GenerateKeyValue(t => TabularConverter.ToKeyValueQueryString(t, GetKeyColIdx(), includeRestOfColumns: true)),
 
                 // Developer & Code
                 "ToCSharpArray" => DeveloperTransformers.ToCSharpArray(InputText),
@@ -1740,6 +1776,9 @@ public class MainViewModel : INotifyPropertyChanged
                 "OmitStructuredKeys" => EncodingTransformers.OmitStructuredKeys(InputText, StructuredFilterKeyList),
                 "RemoveNullsAndEmpty" => EncodingTransformers.RemoveNullsAndEmpty(InputText),
                 "QueryStructuredPath" => EncodingTransformers.QueryStructuredPath(InputText, StructuredQueryPath),
+                "QueryXPath" or "QueryStructuredXPath" => EncodingTransformers.QueryXPath(InputText, StructuredQueryPath),
+                "ExtractXPathValues" => EncodingTransformers.ExtractXPathValues(InputText, StructuredQueryPath),
+                "ExtractXPathAttributes" => EncodingTransformers.ExtractXPathAttributes(InputText, StructuredQueryPath),
                 "StructuredToCsv" => EncodingTransformers.StructuredToCsv(InputText, ','),
                 "StructuredToTsv" => EncodingTransformers.StructuredToTsv(InputText),
                 "StructuredToMarkdown" => EncodingTransformers.StructuredToMarkdown(InputText),
@@ -1918,9 +1957,80 @@ public class MainViewModel : INotifyPropertyChanged
         return generator(table);
     }
 
+    private string PrependSurrogateHeaderAction()
+    {
+        var table = _currentTable?.Clone() ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
+        if (table == null || (table.Columns.Count == 0 && table.Rows.Count == 0)) return InputText;
+
+        if (!string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, table.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                table.OverrideHeaders(customHeaders);
+            }
+        }
+
+        table.HasHeaders = true;
+        if (table.Delimiter == '\t')
+        {
+            return TabularConverter.ToTsv(table);
+        }
+        else if (table.Delimiter == '|')
+        {
+            return TabularConverter.ToMarkdownTable(table);
+        }
+        else
+        {
+            return TabularConverter.ToCsv(table, table.Delimiter ?? ',');
+        }
+    }
+
+    private string GenerateSurrogateHeadersAction()
+    {
+        int colCount = 0;
+        if (_currentTable != null && _currentTable.Columns.Count > 0)
+        {
+            colCount = _currentTable.Columns.Count;
+        }
+        else if (_currentTable != null && _currentTable.Rows.Count > 0)
+        {
+            colCount = _currentTable.Rows.Max(r => r.Count);
+        }
+        else
+        {
+            var detected = TabularParser.DetectAndParse(InputText, _hasHeaders);
+            colCount = detected?.Columns.Count ?? 3;
+        }
+
+        if (colCount <= 0) colCount = 3;
+        var headers = TabularParser.GenerateSurrogateHeaders(colCount, "Col");
+        SurrogateHeaders = string.Join(", ", headers);
+        return PrependSurrogateHeaderAction();
+    }
+
+    private string ClearSurrogateHeadersAction()
+    {
+        SurrogateHeaders = string.Empty;
+        var table = _currentTable ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
+        if (table == null || (table.Columns.Count == 0 && table.Rows.Count == 0)) return InputText;
+        if (table.Delimiter == '\t')
+        {
+            return TabularConverter.ToTsv(table);
+        }
+        else if (table.Delimiter == '|')
+        {
+            return TabularConverter.ToMarkdownTable(table);
+        }
+        else
+        {
+            return TabularConverter.ToCsv(table, table.Delimiter ?? ',');
+        }
+    }
+
     private string ConvertTabular(Func<TabularData, string> converter)
     {
-        var table = _currentTable ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
+        var table = _currentTable?.Clone() ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
         if (table == null || (table.Columns.Count == 0 && table.Rows.Count == 0))
         {
             // Try parsing lines as single column table
@@ -1931,6 +2041,14 @@ public class MainViewModel : INotifyPropertyChanged
                 Rows = lines.Select(l => new List<string> { l.Trim() }).ToList(),
                 HasHeaders = true
             };
+        }
+        if (!string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, table.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                table.OverrideHeaders(customHeaders);
+            }
         }
         return converter(table);
     }

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using TextForge.Core.Tabular;
 using TextForge.Core.Transformers;
 using YamlDotNet.Serialization;
@@ -1330,33 +1331,40 @@ public static class StructuredTransformers
         string query = queryPath.Trim();
         string trimmed = text.Trim();
 
-        // 1. XML XPath
-        if (trimmed.StartsWith('<') && trimmed.EndsWith('>'))
+        // 1. Check if query is XPath syntax (starts with /, //, ./, @, *, contains /* or contains XPath functions/predicates or XML input)
+        bool isXPathQuery = query.StartsWith('/') ||
+                            query.StartsWith("./") ||
+                            query.StartsWith('@') ||
+                            query.StartsWith('*') ||
+                            query.StartsWith("count(") ||
+                            query.StartsWith("sum(") ||
+                            query.StartsWith("string(") ||
+                            query.StartsWith("boolean(") ||
+                            query.StartsWith("name(") ||
+                            query.StartsWith("local-name(") ||
+                            query.Contains("/*") ||
+                            query.Contains("//") ||
+                            (trimmed.StartsWith('<') && trimmed.EndsWith('>'));
+
+        if (isXPathQuery)
         {
             try
             {
-                var doc = XDocument.Parse(trimmed);
-                if (query.StartsWith('/') || query.StartsWith('.'))
+                string xpathResult = QueryXPath(text, query);
+                if (!xpathResult.StartsWith("No results matching") &&
+                    !xpathResult.StartsWith("XPath error") &&
+                    !xpathResult.StartsWith("Error"))
                 {
-                    var xPathNodes = System.Xml.XPath.Extensions.XPathSelectElements(doc, query).ToList();
-                    if (xPathNodes.Count > 0)
-                    {
-                        var sb = new StringBuilder();
-                        foreach (var el in xPathNodes)
-                        {
-                            sb.AppendLine(el.ToString());
-                        }
-                        return sb.ToString().Trim();
-                    }
+                    return xpathResult;
                 }
             }
             catch
             {
-                // Fallback to node search
+                // Fallback to structured node / JSONPath search
             }
         }
 
-        // 2. StructuredDataParser search for node path or name
+        // 2. StructuredDataParser search for node path or name or JSONPath
         var parseResult = StructuredDataParser.Parse(text);
         if (parseResult.Success)
         {
@@ -1380,7 +1388,344 @@ public static class StructuredTransformers
             }
         }
 
+        // 3. If QueryXPath hadn't been tried or returned no results, give clear feedback
+        if (isXPathQuery)
+        {
+            return QueryXPath(text, query);
+        }
+
         return $"No results matching query '{queryPath}'";
+    }
+
+    /// <summary>
+    /// Executes an XPath query on XML, JSON, or YAML structured data, supporting full XPath 1.0 syntax,
+    /// wildcards (*, //*, //@*, /*/*), predicates, attribute selections, and functions (count, sum, string).
+    /// </summary>
+    public static string QueryXPath(string? text, string? xpathQuery)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(xpathQuery)) return text;
+
+        try
+        {
+            var results = EvaluateXPathInternal(text, xpathQuery.Trim());
+            if (results.Count == 0)
+            {
+                return $"No results matching XPath '{xpathQuery}'";
+            }
+
+            return string.Join(Environment.NewLine, results);
+        }
+        catch (XPathException ex)
+        {
+            return $"XPath error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error querying XPath: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Extracts inner text and scalar values of nodes matching an XPath query across structured data.
+    /// </summary>
+    public static string ExtractXPathValues(string? text, string? xpathQuery)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        string query = string.IsNullOrWhiteSpace(xpathQuery) ? "//*[not(*)]/text() | //@*" : xpathQuery.Trim();
+
+        try
+        {
+            var doc = GetXDocumentFromStructured(text);
+            if (doc == null) return "Error: Unable to parse structured data for XPath.";
+
+            var results = EvaluateXPathValuesInternal(doc, query);
+            if (results.Count == 0)
+            {
+                var strippedDoc = RemoveNamespaces(doc);
+                results = EvaluateXPathValuesInternal(strippedDoc, query);
+            }
+
+            if (results.Count == 0)
+            {
+                return $"No results matching XPath '{query}'";
+            }
+
+            return string.Join(Environment.NewLine, results);
+        }
+        catch (XPathException ex)
+        {
+            return $"XPath error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error extracting XPath values: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Extracts attribute names and values matching an XPath query across structured data.
+    /// </summary>
+    public static string ExtractXPathAttributes(string? text, string? xpathQuery = null)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        string query = string.IsNullOrWhiteSpace(xpathQuery) ? "//@*" : xpathQuery.Trim();
+
+        try
+        {
+            var doc = GetXDocumentFromStructured(text);
+            if (doc == null) return "Error: Unable to parse structured data for XPath.";
+
+            var results = EvaluateXPathAttributesInternal(doc, query);
+            if (results.Count == 0)
+            {
+                var strippedDoc = RemoveNamespaces(doc);
+                results = EvaluateXPathAttributesInternal(strippedDoc, query);
+            }
+
+            if (results.Count == 0)
+            {
+                return $"No attributes matching XPath '{query}'";
+            }
+
+            return string.Join(Environment.NewLine, results);
+        }
+        catch (XPathException ex)
+        {
+            return $"XPath error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error extracting XPath attributes: {ex.Message}";
+        }
+    }
+
+    private static XDocument? GetXDocumentFromStructured(string text)
+    {
+        string trimmed = text.Trim();
+        if (trimmed.StartsWith('<') && trimmed.EndsWith('>'))
+        {
+            return XDocument.Parse(trimmed);
+        }
+
+        if ((trimmed.StartsWith('{') && trimmed.EndsWith('}')) || (trimmed.StartsWith('[') && trimmed.EndsWith(']')))
+        {
+            string xml = JsonToXml(trimmed, "root", indented: true);
+            return XDocument.Parse(xml);
+        }
+
+        if (TextBeautifier.IsYaml(trimmed))
+        {
+            string xml = YamlToXml(trimmed, "root", indented: true);
+            return XDocument.Parse(xml);
+        }
+
+        try
+        {
+            return XDocument.Parse(trimmed);
+        }
+        catch
+        {
+            try
+            {
+                string xml = JsonToXml(trimmed, "root", indented: true);
+                return XDocument.Parse(xml);
+            }
+            catch
+            {
+                string xml = YamlToXml(trimmed, "root", indented: true);
+                return XDocument.Parse(xml);
+            }
+        }
+    }
+
+    private static List<string> EvaluateXPathInternal(string text, string xpathQuery)
+    {
+        var doc = GetXDocumentFromStructured(text);
+        if (doc == null) return new List<string>();
+
+        var list = EvaluateXPathNodes(doc, xpathQuery);
+        if (list.Count == 0)
+        {
+            var strippedDoc = RemoveNamespaces(doc);
+            list = EvaluateXPathNodes(strippedDoc, xpathQuery);
+        }
+
+        return list;
+    }
+
+    private static List<string> EvaluateXPathNodes(XDocument doc, string xpathQuery)
+    {
+        var results = new List<string>();
+        object evaluation = doc.XPathEvaluate(xpathQuery);
+
+        if (evaluation is IEnumerable enumerable && !(evaluation is string))
+        {
+            foreach (var item in enumerable)
+            {
+                if (item is XElement el)
+                {
+                    results.Add(el.ToString());
+                }
+                else if (item is XAttribute attr)
+                {
+                    results.Add($"@{attr.Name.LocalName}=\"{attr.Value}\"");
+                }
+                else if (item is XText txt)
+                {
+                    if (!string.IsNullOrWhiteSpace(txt.Value))
+                    {
+                        results.Add(txt.Value.Trim());
+                    }
+                }
+                else if (item is XComment comment)
+                {
+                    results.Add($"<!--{comment.Value}-->");
+                }
+                else if (item is XNode node)
+                {
+                    results.Add(node.ToString());
+                }
+                else if (item != null)
+                {
+                    results.Add(item.ToString() ?? string.Empty);
+                }
+            }
+        }
+        else if (evaluation is double d)
+        {
+            double rounded = Math.Round(d, 8);
+            results.Add(rounded % 1 == 0 ? ((long)rounded).ToString() : rounded.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+        else if (evaluation is bool b)
+        {
+            results.Add(b ? "true" : "false");
+        }
+        else if (evaluation is string s)
+        {
+            if (!string.IsNullOrEmpty(s))
+            {
+                results.Add(s);
+            }
+        }
+        else if (evaluation != null)
+        {
+            results.Add(evaluation.ToString() ?? string.Empty);
+        }
+
+        return results;
+    }
+
+    private static List<string> EvaluateXPathValuesInternal(XDocument doc, string xpathQuery)
+    {
+        var results = new List<string>();
+        object evaluation = doc.XPathEvaluate(xpathQuery);
+
+        if (evaluation is IEnumerable enumerable && !(evaluation is string))
+        {
+            foreach (var item in enumerable)
+            {
+                if (item is XElement el)
+                {
+                    if (!string.IsNullOrWhiteSpace(el.Value))
+                        results.Add(el.Value.Trim());
+                }
+                else if (item is XAttribute attr)
+                {
+                    results.Add(attr.Value);
+                }
+                else if (item is XText txt)
+                {
+                    if (!string.IsNullOrWhiteSpace(txt.Value))
+                        results.Add(txt.Value.Trim());
+                }
+                else if (item != null)
+                {
+                    string str = item.ToString() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(str))
+                        results.Add(str);
+                }
+            }
+        }
+        else if (evaluation is double d)
+        {
+            double rounded = Math.Round(d, 8);
+            results.Add(rounded % 1 == 0 ? ((long)rounded).ToString() : rounded.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+        else if (evaluation is bool b)
+        {
+            results.Add(b ? "true" : "false");
+        }
+        else if (evaluation is string s)
+        {
+            results.Add(s);
+        }
+
+        return results;
+    }
+
+    private static List<string> EvaluateXPathAttributesInternal(XDocument doc, string xpathQuery)
+    {
+        var results = new List<string>();
+        object evaluation = doc.XPathEvaluate(xpathQuery);
+
+        if (evaluation is IEnumerable enumerable && !(evaluation is string))
+        {
+            foreach (var item in enumerable)
+            {
+                if (item is XAttribute attrNode)
+                {
+                    string parent = attrNode.Parent != null ? $"{attrNode.Parent.Name.LocalName}: " : "";
+                    results.Add($"{parent}@{attrNode.Name.LocalName}=\"{attrNode.Value}\"");
+                }
+                else if (item is XElement el)
+                {
+                    foreach (var elementAttr in el.Attributes())
+                    {
+                        if (!elementAttr.IsNamespaceDeclaration)
+                        {
+                            results.Add($"{el.Name.LocalName}: @{elementAttr.Name.LocalName}=\"{elementAttr.Value}\"");
+                        }
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private static XDocument RemoveNamespaces(XDocument doc)
+    {
+        var newDoc = new XDocument();
+        if (doc.Root != null)
+        {
+            newDoc.Add(RemoveNamespaces(doc.Root));
+        }
+        return newDoc;
+    }
+
+    private static XElement RemoveNamespaces(XElement element)
+    {
+        var newElement = new XElement(element.Name.LocalName);
+        foreach (var attr in element.Attributes())
+        {
+            if (!attr.IsNamespaceDeclaration)
+            {
+                newElement.Add(new XAttribute(attr.Name.LocalName, attr.Value));
+            }
+        }
+        foreach (var node in element.Nodes())
+        {
+            if (node is XElement childEl)
+            {
+                newElement.Add(RemoveNamespaces(childEl));
+            }
+            else
+            {
+                newElement.Add(node);
+            }
+        }
+        return newElement;
     }
 
     private static void FindMatchingQueryNodes(StructuredDataNode node, string query, List<StructuredDataNode> matches)
