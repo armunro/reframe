@@ -4,6 +4,8 @@ using TextForge.Core.Tabular;
 using TextForge.Core.Transformers;
 using Xunit;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace TextForge.Tests;
 
 public class SolidInterfacesTests

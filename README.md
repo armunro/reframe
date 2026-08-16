@@ -187,11 +187,26 @@ textforge/
 │   └── App.xaml             # Application startup and resource definitions
 │
 ├── TextForge.Core/          # Core Business Logic & Transformers (.NET 9)
-│   ├── Analysis/            # Text analyzer and statistics engine
+│   ├── Analysis/            # Text analyzer, models & format detection
+│   │   ├── Analyzers/       # ITextAnalyzer & DefaultTextAnalyzer implementations
+│   │   └── Models/          # TextAnalysisResult & analysis models
 │   ├── History/             # Input and operation history management
 │   ├── State/               # UI section state persistence
-│   ├── Tabular/             # CSV, TSV, Markdown, and HTML table parsers & converters
-│   └── Transformers/        # Line, Case, Developer, Encoding, and Beautifier transformers
+│   ├── Structured/          # JSON, XML, YAML structured data parser & transformers
+│   │   ├── Models/          # StructuredDataNode & StructuredNodeType
+│   │   ├── Parsers/         # IStructuredDataParser & StructuredDataParserService
+│   │   └── Transformers/    # IStructuredTransformer & StructuredTransformerService
+│   ├── Tabular/             # CSV, TSV, Markdown, HTML, and JSON/YAML table processing
+│   │   ├── Converters/      # ITabularConverter & TabularConverterService
+│   │   ├── Models/          # TabularData representation
+│   │   └── Parsers/         # ITabularParser, TabularParserService & format-specific parsers
+│   └── Transformers/        # Modular text transformation services and pipelines
+│       ├── Case/            # Casing transformations (camel, Pascal, snake, kebab, etc.)
+│       ├── Core/            # ITextTransformer, pipeline execution & transformer registry
+│       ├── Developer/       # Code array generators, SQL IN, JSON/C# escape
+│       ├── Encoding/        # Base64, URL, HTML, JWT encoders/decoders
+│       ├── Formatting/      # JSON, XML, YAML beautifiers and formatters
+│       └── Line/            # Quoting, sorting, deduplication, filtering, line numbering
 │
 └── TextForge.Tests/         # Comprehensive Unit Tests (xUnit)
     ├── FileLoadingTests.cs
