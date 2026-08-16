@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace TextForge.Core.Tabular;
 
@@ -214,6 +216,84 @@ public static class TabularConverter
         };
 
         return JsonSerializer.Serialize(dict, options);
+    }
+
+    public static string ToYaml(TabularData table)
+    {
+        var list = new List<Dictionary<string, object?>>();
+        var headers = table.Columns.Select((c, idx) => string.IsNullOrWhiteSpace(c) ? $"Column_{idx + 1}" : c).ToList();
+
+        foreach (var row in table.Rows)
+        {
+            var dict = new Dictionary<string, object?>();
+            for (int i = 0; i < headers.Count; i++)
+            {
+                string rawVal = i < row.Count ? row[i] : string.Empty;
+                if (long.TryParse(rawVal, out long lVal))
+                {
+                    dict[headers[i]] = lVal;
+                }
+                else if (double.TryParse(rawVal, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
+                {
+                    dict[headers[i]] = dVal;
+                }
+                else if (bool.TryParse(rawVal, out bool bVal))
+                {
+                    dict[headers[i]] = bVal;
+                }
+                else
+                {
+                    dict[headers[i]] = rawVal;
+                }
+            }
+            list.Add(dict);
+        }
+
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(NullNamingConvention.Instance)
+            .Build();
+
+        return serializer.Serialize(list).TrimEnd('\r', '\n');
+    }
+
+    public static string ToYamlArrays(TabularData table)
+    {
+        var list = new List<List<string>>();
+        if (table.HasHeaders && table.Columns.Count > 0)
+        {
+            list.Add(table.Columns);
+        }
+        list.AddRange(table.Rows);
+
+        var serializer = new SerializerBuilder().Build();
+        return serializer.Serialize(list).TrimEnd('\r', '\n');
+    }
+
+    public static string ToKeyValueYaml(TabularData table, int keyColIndex, int valueColIndex)
+    {
+        var dict = new Dictionary<string, object?>();
+        foreach (var row in table.Rows)
+        {
+            string key = (keyColIndex >= 0 && keyColIndex < row.Count) ? row[keyColIndex] : string.Empty;
+            string val = (valueColIndex >= 0 && valueColIndex < row.Count) ? row[valueColIndex] : string.Empty;
+            if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
+            {
+                if (long.TryParse(val, out long lVal))
+                    dict[key] = lVal;
+                else if (double.TryParse(val, System.Globalization.CultureInfo.InvariantCulture, out double dVal))
+                    dict[key] = dVal;
+                else if (bool.TryParse(val, out bool bVal))
+                    dict[key] = bVal;
+                else
+                    dict[key] = val;
+            }
+        }
+
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(NullNamingConvention.Instance)
+            .Build();
+
+        return serializer.Serialize(dict).TrimEnd('\r', '\n');
     }
 
     public static string ToKeyValueQueryString(TabularData table, int keyColIndex, int valueColIndex)

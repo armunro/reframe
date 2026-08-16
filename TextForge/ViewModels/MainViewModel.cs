@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
@@ -20,6 +21,8 @@ public class MainViewModel : INotifyPropertyChanged
     private string _statusMessage = "Ready";
     private bool _isRealTimeTransform = true;
     private bool _isWordWrap = false;
+    private bool _autoSendOutputToInput = false;
+    private bool _isAutoSendingOutput = false;
     private TextAnalysisResult _analysis = new();
     private DataTable? _previewDataTable;
     private TabularData? _currentTable;
@@ -123,9 +126,9 @@ public class MainViewModel : INotifyPropertyChanged
                 _inputText = value;
                 OnPropertyChanged();
                 AnalyzeInput();
-                if (IsRealTimeTransform)
+                if (IsRealTimeTransform && !_isAutoSendingOutput)
                 {
-                    ExecuteCurrentAction();
+                    ExecuteCurrentAction(autoSendToInput: false);
                 }
             }
         }
@@ -170,7 +173,7 @@ public class MainViewModel : INotifyPropertyChanged
                 OnPropertyChanged();
                 if (value)
                 {
-                    ExecuteCurrentAction();
+                    ExecuteCurrentAction(autoSendToInput: false);
                 }
             }
         }
@@ -184,6 +187,19 @@ public class MainViewModel : INotifyPropertyChanged
             if (_isWordWrap != value)
             {
                 _isWordWrap = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool AutoSendOutputToInput
+    {
+        get => _autoSendOutputToInput;
+        set
+        {
+            if (_autoSendOutputToInput != value)
+            {
+                _autoSendOutputToInput = value;
                 OnPropertyChanged();
             }
         }
@@ -266,6 +282,7 @@ public class MainViewModel : INotifyPropertyChanged
         return format switch
         {
             DetectedFormat.Json => "JSON",
+            DetectedFormat.Yaml => "YAML",
             DetectedFormat.CsvTable => "CSV",
             DetectedFormat.TsvTable => "TSV",
             DetectedFormat.HtmlTable => "HTML",
@@ -281,11 +298,12 @@ public class MainViewModel : INotifyPropertyChanged
         {
             "ToCsv" => "CSV",
             "ToTsv" => "TSV",
+            "ToYaml" or "ToYamlObjects" or "ToYamlArrays" or "ToYamlArray" or "ToYamlList" or "KvToYaml" or "JsonToYaml" or "FormatYaml" or "TableToKeyValueYaml" or "ExtractSelectedToYaml" => "YAML",
             "SqlIn" or "SqlInMultiLine" or "ExtractSqlIn" => "SQL",
             "ToCSharpArray" or "ToCSharpList" or "EscapeCSharp" or "UnescapeCSharp" or "ExtractCSharpArray" => "C#",
             "ToTypeScriptArray" => "TypeScript",
             "ToPythonList" => "Python",
-            "ToJsonArray" or "KvToJson" or "FormatJson" or "JwtDecode" or "ExtractJsonMap" => "JSON",
+            "ToJsonArray" or "KvToJson" or "YamlToJson" or "FormatJson" or "JwtDecode" or "ExtractJsonMap" => "JSON",
             "FormatXml" => "XML",
             "ToMarkdownTable" => "Markdown",
             "ToHtmlTable" => "HTML",
@@ -298,6 +316,7 @@ public class MainViewModel : INotifyPropertyChanged
         if (string.IsNullOrWhiteSpace(text)) return "Plain Text";
         var trimmed = text.TrimStart();
         if (trimmed.StartsWith("{") || trimmed.StartsWith("[")) return "JSON";
+        if (trimmed.StartsWith("---") || (trimmed.StartsWith("- ") && (trimmed.Contains('\n') || trimmed.Contains('\r')))) return "YAML";
         if (trimmed.StartsWith("<!DOCTYPE", StringComparison.OrdinalIgnoreCase) ||
             trimmed.StartsWith("<html", StringComparison.OrdinalIgnoreCase) ||
             trimmed.StartsWith("<table", StringComparison.OrdinalIgnoreCase) ||
@@ -680,6 +699,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     // Commands
     public ICommand ClearInputCommand { get; private set; } = null!;
+    public ICommand LoadFileCommand { get; private set; } = null!;
     public ICommand PasteInputCommand { get; private set; } = null!;
     public ICommand PasteTableCommand { get; private set; } = null!;
     public ICommand CopyOutputCommand { get; private set; } = null!;
@@ -687,6 +707,46 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand ExecuteTransformCommand { get; private set; } = null!;
     public ICommand LoadSampleCommand { get; private set; } = null!;
     public ICommand ActionCommand { get; private set; } = null!;
+
+    /// <summary>
+    /// Optional delegate to provide a file path for opening files (used for testing or custom dialog providers).
+    /// </summary>
+    public Func<string?>? OpenFileDialogProvider { get; set; }
+
+    /// <summary>
+    /// Loads input text directly from a file on disk, formats structured data if applicable, and updates history.
+    /// </summary>
+    /// <param name="filePath">The path to the file to load.</param>
+    /// <returns>True if the file was loaded successfully; otherwise false.</returns>
+    public bool LoadFromFile(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return false;
+
+        try
+        {
+            if (!File.Exists(filePath))
+            {
+                StatusMessage = $"File not found: {filePath}";
+                return false;
+            }
+
+            string raw = File.ReadAllText(filePath);
+            string formatted = TextBeautifier.Beautify(raw);
+            InputText = formatted;
+
+            string fileName = Path.GetFileName(filePath);
+            long fileSize = new FileInfo(filePath).Length;
+            RecordHistory(InputText, $"File: {fileName}");
+            StatusMessage = $"Loaded file: {fileName} ({fileSize:N0} bytes)";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error loading file: {ex.Message}";
+            return false;
+        }
+    }
 
     // History Commands
     public ICommand HistoryBackCommand { get; private set; } = null!;
@@ -752,6 +812,37 @@ public class MainViewModel : INotifyPropertyChanged
     private void InitializeCommands()
     {
         ClearInputCommand = new RelayCommand(_ => InputText = string.Empty);
+        LoadFileCommand = new RelayCommand(p =>
+        {
+            string? filePath = p as string;
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                if (OpenFileDialogProvider != null)
+                {
+                    filePath = OpenFileDialogProvider();
+                }
+                else
+                {
+                    var dialog = new Microsoft.Win32.OpenFileDialog
+                    {
+                        Title = "Open Input File",
+                        Filter = "All Supported Files|*.txt;*.csv;*.tsv;*.tab;*.json;*.xml;*.html;*.htm;*.md;*.markdown;*.sql;*.log;*.dat;*.yaml;*.yml;*.ini;*.conf|Text Files (*.txt)|*.txt|Tabular Data (*.csv;*.tsv;*.tab)|*.csv;*.tsv;*.tab|JSON & XML Files (*.json;*.xml)|*.json;*.xml|Markdown (*.md;*.markdown)|*.md;*.markdown|HTML Files (*.html;*.htm)|*.html;*.htm|SQL Files (*.sql)|*.sql|All Files (*.*)|*.*",
+                        CheckFileExists = true,
+                        Multiselect = false
+                    };
+
+                    if (dialog.ShowDialog() == true)
+                    {
+                        filePath = dialog.FileName;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                LoadFromFile(filePath);
+            }
+        });
         PasteInputCommand = new RelayCommand(_ =>
         {
             try
@@ -980,6 +1071,7 @@ public class MainViewModel : INotifyPropertyChanged
                 "tsv" => "OrderId\tCustomer\tProduct\tQuantity\tPrice\n1001\tAcme Corp\tWidget A\t5\t19.99\n1002\tGlobex\tGadget Pro\t2\t49.99\n1003\tSoylent\tWidget A\t10\t19.99\n1004\tInitech\tService Plan\t1\t99.00",
                 "markdown" => "| ID | Server Name | IP Address | Environment | Status |\n|---|---|---|---|---|\n| 1 | web-prod-01 | 10.0.1.15 | Production | Online |\n| 2 | web-prod-02 | 10.0.1.16 | Production | Online |\n| 3 | db-prod-01 | 10.0.2.10 | Production | Online |\n| 4 | api-stage-01 | 10.0.3.5 | Staging | Maintenance |",
                 "json" => "[\n  {\"id\": 1, \"name\": \"Development\", \"active\": true},\n  {\"id\": 2, \"name\": \"Staging\", \"active\": true},\n  {\"id\": 3, \"name\": \"Production\", \"active\": false}\n]",
+                "yaml" => "- id: 1\n  name: Development\n  active: true\n  department: Engineering\n- id: 2\n  name: Staging\n  active: true\n  department: QA\n- id: 3\n  name: Production\n  active: false\n  department: Operations",
                 "delimited" => "apple, banana, cherry, date, elderberry, fig, grape",
                 "query" => "userId=42&view=summary&filter=active&pageSize=50&sortBy=createdAt&sortDir=desc",
                 _ => "Item 1\nItem 2\nItem 3"
@@ -1081,6 +1173,7 @@ public class MainViewModel : INotifyPropertyChanged
         bool isMultiLine = Analysis.NonEmptyLineCount > 1 || Analysis.LineCount > 1;
         bool isDelimitedSingle = Analysis.Format == DetectedFormat.DelimitedSingleLine;
         bool isCodeOrStructured = Analysis.Format == DetectedFormat.Json ||
+                                 Analysis.Format == DetectedFormat.Yaml ||
                                  Analysis.Format == DetectedFormat.SqlInClause ||
                                  Analysis.Format == DetectedFormat.KeyValuePairs ||
                                  IsCodeLikeContent(_inputText);
@@ -1109,7 +1202,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             SelectedSidebarTabIndex = 2; // Tabular
         }
-        else if (isCodeOrStructured && (Analysis.Format == DetectedFormat.Json || Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.KeyValuePairs))
+        else if (isCodeOrStructured && (Analysis.Format == DetectedFormat.Json || Analysis.Format == DetectedFormat.Yaml || Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.KeyValuePairs))
         {
             SelectedSidebarTabIndex = 3; // Code
         }
@@ -1130,7 +1223,9 @@ public class MainViewModel : INotifyPropertyChanged
 
         if ((trimmed.StartsWith('{') && trimmed.EndsWith('}')) ||
             (trimmed.StartsWith('[') && trimmed.EndsWith(']')) ||
-            (trimmed.StartsWith('<') && trimmed.EndsWith('>')))
+            (trimmed.StartsWith('<') && trimmed.EndsWith('>')) ||
+            trimmed.StartsWith("---") ||
+            (trimmed.StartsWith("- ") && (trimmed.Contains('\n') || trimmed.Contains('\r'))))
         {
             return true;
         }
@@ -1249,11 +1344,11 @@ public class MainViewModel : INotifyPropertyChanged
         }
         if (IsRealTimeTransform)
         {
-            ExecuteCurrentAction();
+            ExecuteCurrentAction(autoSendToInput: false);
         }
     }
 
-    public void ExecuteCurrentAction()
+    public void ExecuteCurrentAction(bool autoSendToInput = true)
     {
         if (string.IsNullOrEmpty(InputText))
         {
@@ -1290,6 +1385,8 @@ public class MainViewModel : INotifyPropertyChanged
                 "ToMarkdownTable" => ConvertTabular(t => TabularConverter.ToMarkdownTable(t)),
                 "ToCsv" => ConvertTabular(t => TabularConverter.ToCsv(t, ',')),
                 "ToTsv" => ConvertTabular(t => TabularConverter.ToTsv(t)),
+                "ToYaml" or "ToYamlObjects" => ConvertTabular(t => TabularConverter.ToYaml(t)),
+                "ToYamlArrays" => ConvertTabular(t => TabularConverter.ToYamlArrays(t)),
                 "ToJsonObjects" => ConvertTabular(t => TabularConverter.ToJsonArrayOfObjects(t)),
                 "ToJsonArrays" => ConvertTabular(t => TabularConverter.ToJsonArrayOfArrays(t)),
                 "ToSqlInserts" => ConvertTabular(t => TabularConverter.ToSqlInsertStatements(t, SqlTableName)),
@@ -1302,6 +1399,7 @@ public class MainViewModel : INotifyPropertyChanged
                 "ExtractSelectedToTsv" => ExtractSelectedColumnsAsTable(t => TabularConverter.ToTsv(t)),
                 "ExtractSelectedToMarkdown" => ExtractSelectedColumnsAsTable(t => TabularConverter.ToMarkdownTable(t)),
                 "ExtractSelectedToJson" => ExtractSelectedColumnsAsTable(t => TabularConverter.ToJsonArrayOfObjects(t)),
+                "ExtractSelectedToYaml" => ExtractSelectedColumnsAsTable(t => TabularConverter.ToYaml(t)),
                 "ExtractSelectedToLines" => ExtractSelectedColumnsAsLines(),
                 "ExtractSelectedToSqlIn" => ExtractSelectedColumnsAsSqlIn(),
                 "ExtractSelectedToCodeArray" => ExtractSelectedColumnsAsCodeArray(),
@@ -1315,6 +1413,7 @@ public class MainViewModel : INotifyPropertyChanged
                 "TransformSelectedPrefixSuffix" => TransformSelectedColumns(s => $"{TableColumnPrefix}{s}{TableColumnSuffix}"),
                 "TransformSelectedReplace" => TransformSelectedColumns(s => string.IsNullOrEmpty(TableColumnFind) ? s : s.Replace(TableColumnFind, TableColumnReplaceWith)),
                 "TableToKeyValueJson" => GenerateKeyValue(t => TabularConverter.ToKeyValueJson(t, GetKeyColIdx(), GetValColIdx())),
+                "TableToKeyValueYaml" => GenerateKeyValue(t => TabularConverter.ToKeyValueYaml(t, GetKeyColIdx(), GetValColIdx())),
                 "TableToKeyValueQuery" => GenerateKeyValue(t => TabularConverter.ToKeyValueQueryString(t, GetKeyColIdx(), GetValColIdx())),
 
                 // Developer & Code
@@ -1323,9 +1422,13 @@ public class MainViewModel : INotifyPropertyChanged
                 "ToTypeScriptArray" => DeveloperTransformers.ToTypeScriptArray(InputText),
                 "ToPythonList" => DeveloperTransformers.ToPythonList(InputText),
                 "ToJsonArray" => DeveloperTransformers.ToJsonArray(InputText),
+                "ToYamlArray" or "ToYamlList" => DeveloperTransformers.ToYamlArray(InputText),
                 "QueryStringToKv" => DeveloperTransformers.QueryStringToKeyValuePairs(InputText),
                 "KvToQueryString" => DeveloperTransformers.KeyValuePairsToQueryString(InputText),
                 "KvToJson" => DeveloperTransformers.KeyValuePairsToJson(InputText),
+                "KvToYaml" => DeveloperTransformers.KeyValuePairsToYaml(InputText),
+                "JsonToYaml" => DeveloperTransformers.JsonToYaml(InputText),
+                "YamlToJson" => DeveloperTransformers.YamlToJson(InputText),
 
                 // Case
                 "CamelCase" => CaseTransformers.ChangeCase(InputText, TextCasing.CamelCase),
@@ -1348,6 +1451,7 @@ public class MainViewModel : INotifyPropertyChanged
                 "UnescapeCSharp" => EncodingTransformers.UnescapeCSharpString(InputText),
                 "FormatJson" => EncodingTransformers.FormatJsonString(InputText),
                 "FormatXml" => EncodingTransformers.FormatXmlString(InputText),
+                "FormatYaml" => EncodingTransformers.FormatYamlString(InputText),
                 "Beautify" => TextBeautifier.Beautify(InputText),
                 "JwtDecode" => EncodingTransformers.JwtDecode(InputText),
 
@@ -1355,6 +1459,20 @@ public class MainViewModel : INotifyPropertyChanged
             };
 
             StatusMessage = $"Executed: {_currentAction}";
+
+            if (autoSendToInput && AutoSendOutputToInput && !string.IsNullOrEmpty(OutputText) && OutputText != InputText)
+            {
+                _isAutoSendingOutput = true;
+                try
+                {
+                    InputText = OutputText;
+                    RecordHistory(InputText, $"{_currentAction} → Input");
+                }
+                finally
+                {
+                    _isAutoSendingOutput = false;
+                }
+            }
         }
         catch (Exception ex)
         {

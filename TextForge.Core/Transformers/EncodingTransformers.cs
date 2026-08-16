@@ -107,6 +107,21 @@ public static class EncodingTransformers
         return TextBeautifier.BeautifyXml(text);
     }
 
+    public static string FormatYamlString(string? text)
+    {
+        return TextBeautifier.BeautifyYaml(text);
+    }
+
+    public static string JsonToYaml(string? text)
+    {
+        return DeveloperTransformers.JsonToYaml(text);
+    }
+
+    public static string YamlToJson(string? text, bool indented = true)
+    {
+        return DeveloperTransformers.YamlToJson(text, indented);
+    }
+
     private static string DecodeBase64Url(string input)
     {
         string output = input.Replace('-', '+').Replace('_', '/');

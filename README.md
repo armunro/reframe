@@ -14,6 +14,8 @@
   - [5. Encodings, Escaping & Formatting](#5-encodings-escaping--formatting)
   - [6. Real-Time Text Analysis](#6-real-time-text-analysis)
   - [7. Input History & Timeline](#7-input-history--timeline)
+  - [8. File Loading & Drag-and-Drop](#8-file-loading--drag-and-drop)
+  - [9. Productivity Toggles & Transformation Chaining](#9-productivity-toggles--transformation-chaining)
 - [Architecture & Solution Structure](#architecture--solution-structure)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
@@ -43,14 +45,15 @@
   - **TSV** (Tab-Separated Values)
   - **Markdown Tables** (formatted with aligned pipes and headers)
   - **HTML Tables** (`<table>`, `<tr>`, `<th>`, `<td>`)
-  - **JSON Array of Objects**
+  - **JSON Array of Objects** & JSON Array of Arrays
+  - **YAML Array of Objects** & YAML Sequences
   - **SQL INSERT Statements**
 - **Column Operations**:
   - Extract specific columns with custom prefixes, suffixes, or delimiters.
   - Transform single columns (find/replace, prefix/suffix).
   - Filter tabular rows by column value.
   - Sort tabular data by column with natural numeric support.
-  - Generate Key-Value maps from selected key and value columns (JSON or delimiter format).
+  - Generate Key-Value maps from selected key and value columns (JSON, YAML, or delimiter/URL format).
 - **Interactive Preview**: Live tabular data grid preview showing detected headers and structured rows.
 
 ### 3. Developer Tools & Code Generation
@@ -60,9 +63,11 @@
   - **TypeScript / JavaScript**: `const items = [...]`
   - **Python**: `items = [...]`
   - **JSON**: `["item1", "item2"]` or numeric array
-- **URL Query String & Key-Value Tools**:
-  - Convert URL Query Strings (`?key=value&foo=bar`) to Key-Value pairs or JSON objects.
-  - Convert Key-Value pairs to URL Query Strings or JSON.
+  - **YAML**: `- item1\n- item2` or numeric list
+- **URL Query String, JSON & YAML Key-Value Tools**:
+  - Convert URL Query Strings (`?key=value&foo=bar`) to Key-Value pairs, JSON objects, or YAML maps.
+  - Convert Key-Value pairs to URL Query Strings, JSON, or YAML.
+  - Convert between JSON and YAML with type-preserving roundtrips.
 - **Data Extractors**: One-click extraction of:
   - Email addresses
   - URLs and links
@@ -89,11 +94,12 @@ Easily convert text per-line or across entire blocks into:
 - **Base64 Encode / Decode**: Base64 encoding with missing padding auto-correction.
 - **JWT Decoder**: Inspect JSON Web Tokens with decoded, formatted Header and Payload JSON alongside token signatures.
 - **C# String Escaper**: Escape or unescape special characters (`\r`, `\n`, `\t`, `\"`, `\\`) for use in C# string literals.
-- **Beautifier / Formatter**: Indent and beautify JSON, XML, XHTML, and HTML.
+- **Beautifier / Formatter**: Indent and beautify JSON, XML, XHTML, HTML, and YAML.
+- **JSON ➔ YAML & YAML ➔ JSON**: Direct bidirectional conversion between JSON and YAML.
 
 ### 6. Real-Time Text Analysis
 TextForge dynamically analyzes the input text and reports:
-- Detected format (CSV, TSV, Markdown Table, HTML Table, JSON, SQL IN clause, Key-Value pairs, Multi-line List, Numbers, etc.)
+- Detected format (CSV, TSV, Markdown Table, HTML Table, JSON, YAML, SQL IN clause, Key-Value pairs, Multi-line List, Numbers, etc.)
 - Character count (total and excluding whitespace)
 - Line count and non-empty line count
 - Word count
@@ -104,6 +110,16 @@ TextForge dynamically analyzes the input text and reports:
 - Keeps a chronological history of inputs and applied operations.
 - Search and filter history entries.
 - One-click restore of previous inputs and configurations.
+
+### 8. File Loading & Drag-and-Drop
+- **File Dialog**: Open text, tabular data, JSON, XML, Markdown, HTML, SQL, and log files using `📂 Open` button or `Ctrl+O`.
+- **Drag-and-Drop**: Drag files directly from Windows File Explorer onto the TextForge window or editor pane to load them instantly.
+- **Auto-Formatting & History**: Automatically formats structured inputs upon load and records the loaded file in the history timeline.
+
+### 9. Productivity Toggles & Transformation Chaining
+- **⚡ Real-time Transform**: Computes outputs on the fly as you type or change transformation parameters.
+- **🔁 Auto Output ➔ Input**: When enabled in the status bar, automatically sends the transformed output back to the input pane after every operation, enabling seamless sequential transformation pipelines.
+- **↩ Word Wrap**: Toggles word wrap across input and output editors.
 
 ---
 
@@ -130,6 +146,7 @@ textforge/
 │   └── Themes/              # Theme styles and control templates
 │
 └── TextForge.Tests/         # Comprehensive Unit Tests (xUnit)
+    ├── FileLoadingTests.cs
     ├── HighlightingTests.cs
     ├── HtmlTableAndTabularTests.cs
     ├── InputHistoryTests.cs

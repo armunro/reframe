@@ -1,6 +1,9 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace TextForge.Core.Transformers;
 
@@ -103,6 +106,29 @@ public static class DeveloperTransformers
         return JsonSerializer.Serialize(listObj, options);
     }
 
+    public static string ToYamlArray(string? text)
+    {
+        var items = ExtractItems(text);
+        if (items.Count == 0) return "[]";
+
+        bool allInts = items.All(i => long.TryParse(i, out _));
+        bool allDoubles = !allInts && items.All(i => double.TryParse(i, System.Globalization.CultureInfo.InvariantCulture, out _));
+        bool allBools = !allInts && !allDoubles && items.All(i => bool.TryParse(i, out _));
+
+        object listObj;
+        if (allInts)
+            listObj = items.Select(long.Parse).ToList();
+        else if (allDoubles)
+            listObj = items.Select(i => double.Parse(i, System.Globalization.CultureInfo.InvariantCulture)).ToList();
+        else if (allBools)
+            listObj = items.Select(bool.Parse).ToList();
+        else
+            listObj = items;
+
+        var serializer = new SerializerBuilder().Build();
+        return serializer.Serialize(listObj).TrimEnd('\r', '\n');
+    }
+
     public static string QueryStringToKeyValuePairs(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return string.Empty;
@@ -189,6 +215,123 @@ public static class DeveloperTransformers
         };
 
         return JsonSerializer.Serialize(dict, options);
+    }
+
+    public static string KeyValuePairsToYaml(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return "{}";
+
+        var lines = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        var dict = new Dictionary<string, object?>();
+
+        foreach (var line in lines)
+        {
+            int idx = line.IndexOfAny(new[] { ':', '=' });
+            if (idx >= 0)
+            {
+                string key = line[..idx].Trim();
+                string val = line[(idx + 1)..].Trim();
+
+                if (long.TryParse(val, out long l))
+                    dict[key] = l;
+                else if (double.TryParse(val, System.Globalization.CultureInfo.InvariantCulture, out double d))
+                    dict[key] = d;
+                else if (bool.TryParse(val, out bool b))
+                    dict[key] = b;
+                else
+                    dict[key] = val;
+            }
+        }
+
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(NullNamingConvention.Instance)
+            .Build();
+
+        return serializer.Serialize(dict).TrimEnd('\r', '\n');
+    }
+
+    public static string JsonToYaml(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+        try
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yamlObject = deserializer.Deserialize(new StringReader(text.Trim()));
+            if (yamlObject == null) return string.Empty;
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(NullNamingConvention.Instance)
+                .Build();
+
+            return serializer.Serialize(yamlObject).TrimEnd('\r', '\n');
+        }
+        catch
+        {
+            return text;
+        }
+    }
+
+    public static string YamlToJson(string? text, bool indented = true)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+        try
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yamlObject = deserializer.Deserialize(new StringReader(text.Trim()));
+            if (yamlObject == null) return "{}";
+
+            var typedObject = ConvertYamlObjectToTyped(yamlObject);
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = indented,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            return JsonSerializer.Serialize(typedObject, options);
+        }
+        catch
+        {
+            return text;
+        }
+    }
+
+    private static object? ConvertYamlObjectToTyped(object? obj)
+    {
+        if (obj is null) return null;
+
+        if (obj is IDictionary dict)
+        {
+            var result = new Dictionary<string, object?>();
+            foreach (DictionaryEntry entry in dict)
+            {
+                string key = entry.Key?.ToString() ?? string.Empty;
+                result[key] = ConvertYamlObjectToTyped(entry.Value);
+            }
+            return result;
+        }
+
+        if (obj is IList list)
+        {
+            var result = new List<object?>();
+            foreach (var item in list)
+            {
+                result.Add(ConvertYamlObjectToTyped(item));
+            }
+            return result;
+        }
+
+        if (obj is string str)
+        {
+            if (long.TryParse(str, out long l)) return l;
+            if (double.TryParse(str, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double d)) return d;
+            if (bool.TryParse(str, out bool b)) return b;
+            return str;
+        }
+
+        return obj;
     }
 
     private static List<string> ExtractItems(string? text)

@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace TextForge.Core.Transformers;
 
 /// <summary>
-/// Provides beautification/formatting capabilities for structured text formats such as JSON, XML, XHTML/HTML, etc.
+/// Provides beautification/formatting capabilities for structured text formats such as JSON, XML, XHTML/HTML, YAML, etc.
 /// </summary>
 public static class TextBeautifier
 {
     /// <summary>
-    /// Checks whether the text matches a known structured format that can be beautified (e.g. JSON or XML).
+    /// Checks whether the text matches a known structured format that can be beautified (e.g. JSON, XML, or YAML).
     /// </summary>
     public static bool CanBeautify(string? text)
     {
@@ -48,11 +51,43 @@ public static class TextBeautifier
             }
         }
 
+        if (IsYaml(trimmed))
+        {
+            return true;
+        }
+
         return false;
     }
 
     /// <summary>
-    /// Attempts to beautify the text if it is in a format that supports beautification (e.g., JSON, XML).
+    /// Checks whether the text represents structured YAML (mapping or sequence).
+    /// </summary>
+    public static bool IsYaml(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        string trimmed = text.Trim();
+        if (trimmed.StartsWith('{') || trimmed.StartsWith('<')) return false;
+
+        bool hasYamlIndicator = trimmed.StartsWith("---") ||
+                                trimmed.StartsWith("- ") ||
+                                (trimmed.Contains(':') && (trimmed.Contains("\n") || trimmed.Contains("\r")));
+
+        if (!hasYamlIndicator) return false;
+
+        try
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var result = deserializer.Deserialize(new StringReader(trimmed));
+            return result is IDictionary || result is IList;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to beautify the text if it is in a format that supports beautification (e.g., JSON, XML, YAML).
     /// If beautification is not possible or the text is not a valid structured format, returns the original text.
     /// </summary>
     public static string Beautify(string? text)
@@ -79,6 +114,16 @@ public static class TextBeautifier
             if (!string.IsNullOrEmpty(beautifiedXml) && beautifiedXml != trimmed)
             {
                 return beautifiedXml;
+            }
+        }
+
+        // 3. YAML
+        if (IsYaml(trimmed))
+        {
+            string beautifiedYaml = BeautifyYaml(trimmed);
+            if (!string.IsNullOrEmpty(beautifiedYaml) && beautifiedYaml != trimmed)
+            {
+                return beautifiedYaml;
             }
         }
 
@@ -136,6 +181,31 @@ public static class TextBeautifier
                 doc.Save(xw);
             }
             return sb.ToString().TrimEnd();
+        }
+        catch
+        {
+            return text;
+        }
+    }
+
+    /// <summary>
+    /// Formats and indents YAML text.
+    /// </summary>
+    public static string BeautifyYaml(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+        try
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yamlObject = deserializer.Deserialize(new StringReader(text.Trim()));
+            if (yamlObject == null) return text;
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(NullNamingConvention.Instance)
+                .Build();
+
+            return serializer.Serialize(yamlObject).TrimEnd('\r', '\n');
         }
         catch
         {

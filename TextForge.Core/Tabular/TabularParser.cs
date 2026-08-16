@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using YamlDotNet.Serialization;
 
 namespace TextForge.Core.Tabular;
 
@@ -43,13 +44,17 @@ public static class TabularParser
         var jsonTable = TryParseJsonArray(text, assumeHeader);
         if (jsonTable != null) return jsonTable;
 
-        // 3. Check if Markdown table
+        // 3. Check if YAML array of objects or arrays
+        var yamlTable = TryParseYaml(text, assumeHeader);
+        if (yamlTable != null) return yamlTable;
+
+        // 4. Check if Markdown table
         if (MarkdownTableParser.IsMarkdownTable(text))
         {
             return MarkdownTableParser.Parse(text, assumeHeader);
         }
 
-        // 4. Auto-detect delimiter
+        // 5. Auto-detect delimiter
         char? bestDelimiter = DetectDelimiter(text);
         if (bestDelimiter == null) return null;
 
@@ -459,6 +464,111 @@ public static class TabularParser
         catch
         {
             // not valid JSON array
+        }
+
+        return null;
+    }
+
+    public static TabularData? TryParseYaml(string text, bool? assumeHeader = null)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        string trimmed = text.Trim();
+        if (trimmed.StartsWith('{') || trimmed.StartsWith('<')) return null;
+        if (!trimmed.StartsWith('-') && !trimmed.StartsWith("---") && !trimmed.StartsWith('[')) return null;
+
+        try
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var result = deserializer.Deserialize(new StringReader(trimmed));
+
+            if (result is IList<object> list && list.Count > 0)
+            {
+                // Case 1: List of dictionaries / maps
+                if (list.All(item => item is IDictionary<object, object>))
+                {
+                    var headers = new List<string>();
+                    foreach (var item in list)
+                    {
+                        if (item is IDictionary<object, object> dict)
+                        {
+                            foreach (var key in dict.Keys)
+                            {
+                                string keyStr = key?.ToString() ?? string.Empty;
+                                if (!headers.Contains(keyStr))
+                                {
+                                    headers.Add(keyStr);
+                                }
+                            }
+                        }
+                    }
+
+                    if (headers.Count == 0) return null;
+
+                    var table = new TabularData
+                    {
+                        HasHeaders = true,
+                        Columns = headers
+                    };
+
+                    foreach (var item in list)
+                    {
+                        var dict = (IDictionary<object, object>)item;
+                        var row = new List<string>();
+                        foreach (var header in headers)
+                        {
+                            object? matchingVal = null;
+                            foreach (var kv in dict)
+                            {
+                                if (string.Equals(kv.Key?.ToString(), header, StringComparison.Ordinal))
+                                {
+                                    matchingVal = kv.Value;
+                                    break;
+                                }
+                            }
+                            row.Add(matchingVal?.ToString() ?? string.Empty);
+                        }
+                        table.Rows.Add(row);
+                    }
+
+                    return table;
+                }
+                // Case 2: List of lists / sequences
+                else if (list.All(item => item is IList<object>))
+                {
+                    var allRows = new List<List<string>>();
+                    foreach (var item in list)
+                    {
+                        var row = ((IList<object>)item).Select(elem => elem?.ToString() ?? string.Empty).ToList();
+                        allRows.Add(row);
+                    }
+
+                    if (allRows.Count == 0) return null;
+
+                    bool hasHeaders = assumeHeader ?? DetectHasHeaders(allRows);
+                    var table = new TabularData
+                    {
+                        HasHeaders = hasHeaders
+                    };
+
+                    if (hasHeaders)
+                    {
+                        table.Columns = allRows[0];
+                        table.Rows = allRows.Skip(1).ToList();
+                    }
+                    else
+                    {
+                        int maxCols = allRows.Max(r => r.Count);
+                        table.Columns = Enumerable.Range(1, maxCols).Select(i => $"Column {i}").ToList();
+                        table.Rows = allRows;
+                    }
+
+                    return table;
+                }
+            }
+        }
+        catch
+        {
+            // Not valid YAML
         }
 
         return null;

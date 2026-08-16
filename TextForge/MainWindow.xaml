@@ -13,6 +13,9 @@
         Height="780" Width="1240"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
+        AllowDrop="True"
+        Drop="MainWindow_Drop"
+        DragOver="MainWindow_DragOver"
         Style="{StaticResource CatalystWindowStyle}">
 
     <Window.DataContext>
@@ -20,6 +23,7 @@
     </Window.DataContext>
 
     <Window.InputBindings>
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding LoadFileCommand}"/>
         <KeyBinding Key="I" Modifiers="Control+Shift" Command="{Binding SendToInputCommand}"/>
         <KeyBinding Key="I" Modifiers="Alt" Command="{Binding SendToInputCommand}"/>
         <KeyBinding Key="F4" Command="{Binding SendToInputCommand}"/>
@@ -288,7 +292,6 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- App Title & Logo -->
@@ -312,6 +315,7 @@
                     <Button Content="◀ Back" Command="{Binding HistoryBackCommand}" ToolTip="Restore previous input snapshot (Alt+Left)" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,4,0"/>
                     <Button Content="Forward ▶" Command="{Binding HistoryForwardCommand}" ToolTip="Restore next input snapshot (Alt+Right)" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,8,0"/>
                     <Button Content="📸 Snapshot" Command="{Binding CreateSnapshotCommand}" ToolTip="Bookmark current input in timeline" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,8,0"/>
+                    <Button Content="📂 Open" Command="{Binding LoadFileCommand}" ToolTip="Load input from file (Ctrl+O)" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,6,0"/>
                     <Button Content="📋 Paste" Command="{Binding PasteInputCommand}" Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,0,6,0"/>
                     <Button Content="💾 Copy Output" Command="{Binding CopyOutputCommand}" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,6,0"/>
                     <Button Content="🗑 Clear" Command="{Binding ClearInputCommand}" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,10,0"/>
@@ -325,16 +329,11 @@
                             <MenuItem Header="TSV Table Data (Excel)" Command="{Binding LoadSampleCommand}" CommandParameter="tsv" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="Markdown Table" Command="{Binding LoadSampleCommand}" CommandParameter="markdown" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="JSON Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="json" Foreground="#F0F0F0" Background="#2D2D30"/>
+                            <MenuItem Header="YAML Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="yaml" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="Delimited Single Line" Command="{Binding LoadSampleCommand}" CommandParameter="delimited" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="URL Query String" Command="{Binding LoadSampleCommand}" CommandParameter="query" Foreground="#F0F0F0" Background="#2D2D30"/>
                         </MenuItem>
                     </Menu>
-                </StackPanel>
-
-                <!-- Settings Toggles -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <CheckBox Content="⚡ Real-time Transform" IsChecked="{Binding IsRealTimeTransform, Mode=TwoWay}" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <CheckBox Content="↩ Word Wrap" IsChecked="{Binding IsWordWrap, Mode=TwoWay}" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,5,0"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -380,6 +379,7 @@
                                 <Button Content="◀" Command="{Binding HistoryBackCommand}" ToolTip="Previous Snapshot (Alt+Left)" Padding="5,2" FontSize="11" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,2,0"/>
                                 <Button Content="▶" Command="{Binding HistoryForwardCommand}" ToolTip="Next Snapshot (Alt+Right)" Padding="5,2" FontSize="11" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,4,0"/>
                                 <Button Content="📸" Command="{Binding CreateSnapshotCommand}" ToolTip="Save Current Snapshot" Padding="5,2" FontSize="11" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,4,0"/>
+                                <Button Content="📂 Open" Command="{Binding LoadFileCommand}" ToolTip="Load from file (Ctrl+O)" Padding="6,2" FontSize="11" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,4,0"/>
                                 <Button Content="Paste" Command="{Binding PasteInputCommand}" Padding="6,2" FontSize="11" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,4,0"/>
                                 <Button Content="Clear" Command="{Binding ClearInputCommand}" Padding="6,2" FontSize="11" Style="{StaticResource CatalystButtonStyle}"/>
                             </StackPanel>
@@ -604,6 +604,7 @@
                                             <Button Content="Extract Selected" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToLines" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
                                             <Button Content="→ CSV" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToCsv" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
                                             <Button Content="→ JSON" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToJson" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
+                                            <Button Content="→ YAML" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToYaml" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
                                             <Button Content="→ SQL IN" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToSqlIn" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}"/>
                                         </StackPanel>
                                     </Grid>
@@ -1032,7 +1033,14 @@
                                                 <Button Content="📊 TSV (Tab)" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToTsv" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="📝 Markdown Table" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToMarkdown" Style="{StaticResource ToolButtonStyle}"/>
                                             </UniformGrid>
-                                            <Button Content="📦 Extract Selected to JSON" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="📦 → JSON" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToJson" Style="{StaticResource ToolButtonStyle}" Margin="0,0,3,0"/>
+                                                <Button Grid.Column="1" Content="📜 → YAML" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                            </Grid>
                                         </StackPanel>
                                     </Expander>
 
@@ -1118,8 +1126,9 @@
                                                 <TextBlock Text="Val: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
                                                 <ComboBox Grid.Column="1" ItemsSource="{Binding DetectedColumns}" SelectedItem="{Binding SelectedValueColumn, Mode=TwoWay}" Style="{StaticResource CatalystComboBoxStyle}"/>
                                             </Grid>
-                                            <UniformGrid Columns="2">
+                                            <UniformGrid Columns="3">
                                                 <Button Content="📦 JSON Object" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueJson" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📜 YAML Map" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueYaml" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="🔗 URL Query" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueQuery" Style="{StaticResource ToolButtonStyle}"/>
                                             </UniformGrid>
                                         </StackPanel>
@@ -1133,7 +1142,9 @@
                                             <Button Content="📊 TSV (Tab)" Command="{Binding ActionCommand}" CommandParameter="ToTsv" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="🌐 HTML Table" Command="{Binding ActionCommand}" CommandParameter="ToHtmlTable" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="📦 JSON (Objects)" Command="{Binding ActionCommand}" CommandParameter="ToJsonObjects" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📜 YAML (Objects)" Command="{Binding ActionCommand}" CommandParameter="ToYaml" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="📦 JSON (Arrays)" Command="{Binding ActionCommand}" CommandParameter="ToJsonArrays" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📜 YAML (Arrays)" Command="{Binding ActionCommand}" CommandParameter="ToYamlArrays" Style="{StaticResource ToolButtonStyle}"/>
                                         </UniformGrid>
                                     </Expander>
 
@@ -1173,8 +1184,9 @@
                                                 <Button Content="💻 C# List" Command="{Binding ActionCommand}" CommandParameter="ToCSharpList" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="📜 TypeScript" Command="{Binding ActionCommand}" CommandParameter="ToTypeScriptArray" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="🐍 Python List" Command="{Binding ActionCommand}" CommandParameter="ToPythonList" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📦 JSON Array" Command="{Binding ActionCommand}" CommandParameter="ToJsonArray" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📜 YAML List" Command="{Binding ActionCommand}" CommandParameter="ToYamlArray" Style="{StaticResource ToolButtonStyle}"/>
                                             </UniformGrid>
-                                            <Button Content="📦 JSON Array: [ ... ]" Command="{Binding ActionCommand}" CommandParameter="ToJsonArray" Style="{StaticResource ToolButtonStyle}"/>
                                         </StackPanel>
                                     </Expander>
 
@@ -1183,8 +1195,9 @@
                                             <UniformGrid Columns="2">
                                                 <Button Content="🌐 Query → KV" Command="{Binding ActionCommand}" CommandParameter="QueryStringToKv" Style="{StaticResource ToolButtonStyle}"/>
                                                 <Button Content="🔗 KV → Query" Command="{Binding ActionCommand}" CommandParameter="KvToQueryString" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📦 KV → JSON" Command="{Binding ActionCommand}" CommandParameter="KvToJson" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📜 KV → YAML" Command="{Binding ActionCommand}" CommandParameter="KvToYaml" Style="{StaticResource ToolButtonStyle}"/>
                                             </UniformGrid>
-                                            <Button Content="📦 Key-Values → JSON Object" Command="{Binding ActionCommand}" CommandParameter="KvToJson" Style="{StaticResource ToolButtonStyle}"/>
                                         </StackPanel>
                                     </Expander>
                                 </StackPanel>
@@ -1219,8 +1232,11 @@
                                             <Button Content="💻 C# Escape" Command="{Binding ActionCommand}" CommandParameter="EscapeCSharp" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="💻 C# Unescape" Command="{Binding ActionCommand}" CommandParameter="UnescapeCSharp" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="✨ JSON Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="✨ YAML Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatYaml" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="✨ XML Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatXml" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 JSON ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="🔑 JWT Decode" Command="{Binding ActionCommand}" CommandParameter="JwtDecode" Style="{StaticResource ToolButtonStyle}"/>
                                         </UniformGrid>
                                     </Expander>
@@ -1238,9 +1254,15 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding StatusMessage}" Foreground="White" FontSize="11" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="1" Text="TextForge v1.0 | Ready" Foreground="#E0E0E0" FontSize="11" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
+                    <CheckBox Content="⚡ Real-time Transform" IsChecked="{Binding IsRealTimeTransform, Mode=TwoWay}" Foreground="White" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <CheckBox Content="🔁 Auto Output → Input" IsChecked="{Binding AutoSendOutputToInput, Mode=TwoWay}" Foreground="White" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <CheckBox Content="↩ Word Wrap" IsChecked="{Binding IsWordWrap, Mode=TwoWay}" Foreground="White" FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Grid.Column="2" Text="TextForge v1.0 | Ready" Foreground="#E0E0E0" FontSize="11" VerticalAlignment="Center"/>
             </Grid>
         </Border>
     </Grid>

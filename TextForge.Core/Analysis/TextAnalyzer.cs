@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using TextForge.Core.Tabular;
+using TextForge.Core.Transformers;
 
 namespace TextForge.Core.Analysis;
 
@@ -106,7 +107,22 @@ public static class TextAnalyzer
             }
         }
 
-        // 2. Markdown Table
+        // 3. YAML
+        if (TextBeautifier.IsYaml(rawText))
+        {
+            var yamlTable = TabularParser.TryParseYaml(rawText, hasHeaders);
+            if (yamlTable != null && yamlTable.Columns.Count > 0 && yamlTable.Rows.Count > 0)
+            {
+                return (DetectedFormat.Yaml, $"YAML Array of Objects ({yamlTable.Rows.Count} items, {yamlTable.Columns.Count} properties)", null, true, yamlTable.Columns.Count, yamlTable.Rows.Count, yamlTable.Columns, true);
+            }
+            if (trimmed.StartsWith('-'))
+            {
+                return (DetectedFormat.Yaml, $"YAML List ({nonEmptyLines.Count} items)", null, false, 0, 0, Array.Empty<string>(), false);
+            }
+            return (DetectedFormat.Yaml, "YAML Document", null, false, 0, 0, Array.Empty<string>(), true);
+        }
+
+        // 4. Markdown Table
         if (MarkdownTableParser.IsMarkdownTable(rawText))
         {
             var table = MarkdownTableParser.Parse(rawText, hasHeaders);

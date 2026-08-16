@@ -12,6 +12,7 @@ public enum DetectedFormat
     MarkdownTable,
     HtmlTable,
     Json,
+    Yaml,
     SqlInClause,
     KeyValuePairs,
     Base64,

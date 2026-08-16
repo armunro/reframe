@@ -211,4 +211,28 @@ public partial class MainWindow : Window
             // Fallback to standard paste behavior
         }
     }
+
+    private void MainWindow_DragOver(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+    }
+
+    private void MainWindow_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
+            {
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.LoadFromFile(files[0]);
+                    e.Handled = true;
+                }
+            }
+        }
+    }
 }

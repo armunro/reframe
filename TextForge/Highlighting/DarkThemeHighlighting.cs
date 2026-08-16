@@ -22,6 +22,7 @@ public static class DarkThemeHighlighting
         "CSV",
         "TSV",
         "JSON",
+        "YAML",
         "SQL",
         "C#",
         "JavaScript",
@@ -65,6 +66,10 @@ public static class DarkThemeHighlighting
             {
                 definition = CreateDelimitedDefinition("TSV", new[] { ".tsv", ".tab" }, '\t');
             }
+            else if (canonical.Equals("YAML", StringComparison.OrdinalIgnoreCase))
+            {
+                definition = CreateYamlDefinition();
+            }
             else
             {
                 var baseDefinition = HighlightingManager.Instance.GetDefinition(canonical)
@@ -92,6 +97,7 @@ public static class DarkThemeHighlighting
             "csv" => "CSV",
             "tsv" or "tab" => "TSV",
             "json" => "Json",
+            "yaml" or "yml" => "YAML",
             "c#" or "csharp" or "cs" => "C#",
             "sql" or "tsql" => "TSQL",
             "javascript" or "js" => "JavaScript",
@@ -178,6 +184,86 @@ public static class DarkThemeHighlighting
             <Word>NaN</Word>
             <Word>None</Word>
             <Word>NONE</Word>
+        </Keywords>
+    </RuleSet>
+</SyntaxDefinition>";
+
+        using var stringReader = new StringReader(xshd);
+        using var xmlReader = XmlReader.Create(stringReader);
+        return HighlightingLoader.Load(xmlReader, HighlightingManager.Instance);
+    }
+
+    private static IHighlightingDefinition CreateYamlDefinition()
+    {
+        string xshd = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<SyntaxDefinition name=""YAML"" extensions="".yaml;.yml"" xmlns=""http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008"">
+    <Color name=""Comment"" foreground=""#6A9955"" fontStyle=""italic"" />
+    <Color name=""QuotedString"" foreground=""#CE9178"" />
+    <Color name=""Key"" foreground=""#9CDCFE"" />
+    <Color name=""Delimiter"" foreground=""#569CD6"" fontWeight=""bold"" />
+    <Color name=""Number"" foreground=""#B5CEA8"" />
+    <Color name=""BooleanOrNull"" foreground=""#C586C0"" fontWeight=""bold"" />
+    <Color name=""Directive"" foreground=""#808080"" />
+
+    <RuleSet>
+        <!-- Comments -->
+        <Span color=""Comment"" begin=""#"" end=""$"" />
+
+        <!-- Double quoted strings -->
+        <Span color=""QuotedString"">
+            <Begin>&quot;</Begin>
+            <End>&quot;</End>
+            <RuleSet>
+                <Span begin=""\\&quot;"" />
+                <Span begin=""\\\\"" />
+            </RuleSet>
+        </Span>
+
+        <!-- Single quoted strings -->
+        <Span color=""QuotedString"">
+            <Begin>'</Begin>
+            <End>'</End>
+            <RuleSet>
+                <Span begin=""''"" />
+            </RuleSet>
+        </Span>
+
+        <!-- Document headers and separators -->
+        <Rule color=""Directive"">
+            ^(?:---|(\.\.\.))(?=\s|$)
+        </Rule>
+
+        <!-- Mapping Keys: key before colon -->
+        <Rule color=""Key"">
+            (?:^[ \t]*|[ \t]*-?[ \t]+)(?:[\w\.\-]+)(?=\s*:)
+        </Rule>
+
+        <!-- Colons / Delimiters -->
+        <Rule color=""Delimiter"">
+            [:\-\[\]\{\},]
+        </Rule>
+
+        <!-- Numbers (integer, float, hex, scientific) -->
+        <Rule color=""Number"">
+            (?&lt;=[\s:\-\[\{]|^)[+-]?(?:0x[\da-fA-F]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?=\s*[,\]\}\r\n]|$)
+        </Rule>
+
+        <!-- Booleans, Nulls, Special Constants -->
+        <Keywords color=""BooleanOrNull"">
+            <Word>true</Word>
+            <Word>false</Word>
+            <Word>TRUE</Word>
+            <Word>FALSE</Word>
+            <Word>True</Word>
+            <Word>False</Word>
+            <Word>yes</Word>
+            <Word>no</Word>
+            <Word>YES</Word>
+            <Word>NO</Word>
+            <Word>null</Word>
+            <Word>NULL</Word>
+            <Word>Null</Word>
+            <Word>~</Word>
         </Keywords>
     </RuleSet>
 </SyntaxDefinition>";
