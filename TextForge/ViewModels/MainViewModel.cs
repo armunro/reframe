@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using TextForge.Core.Analysis;
 using TextForge.Core.History;
+using TextForge.Core.Structured;
 using TextForge.Core.Tabular;
 using TextForge.Core.Transformers;
 using TextForge.Highlighting;
@@ -97,6 +98,17 @@ public class MainViewModel : INotifyPropertyChanged
     private string _tableColumnReplaceWith = "";
     private string _tableFilterQuery = "";
     private SortOrder _tableSortOrder = SortOrder.NaturalNumericAsc;
+
+    // Structured Data Options
+    private ObservableCollection<StructuredDataNode> _structuredNodes = new();
+    private StructuredDataNode? _selectedStructuredNode;
+    private string _structuredFilterQuery = "";
+    private string _structuredFilterKeyList = "";
+    private string _structuredQueryPath = "";
+    private string _structuredFormatDescription = "None";
+    private string _structuredStatusText = "No structured data";
+    private bool _hasStructuredData = false;
+    private int _structuredNodeCount = 0;
 
     // History & Timeline Management
     private readonly InputHistoryManager _historyManager = new();
@@ -423,6 +435,20 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private bool _isStructuredTabHighlighted;
+    public bool IsStructuredTabHighlighted
+    {
+        get => _isStructuredTabHighlighted;
+        private set
+        {
+            if (_isStructuredTabHighlighted != value)
+            {
+                _isStructuredTabHighlighted = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private bool _isCodeTabHighlighted;
     public bool IsCodeTabHighlighted
     {
@@ -660,6 +686,122 @@ public class MainViewModel : INotifyPropertyChanged
     public int RegexCaptureGroup { get => _regexCaptureGroup; set { _regexCaptureGroup = value; OnPropertyChanged(); TriggerRealTime("RegexExtract"); } }
 
     public string SqlTableName { get => _sqlTableName; set { _sqlTableName = value; OnPropertyChanged(); TriggerRealTime("ToSqlInserts"); } }
+
+    // Structured Data Properties
+    public ObservableCollection<StructuredDataNode> StructuredNodes => _structuredNodes;
+
+    public StructuredDataNode? SelectedStructuredNode
+    {
+        get => _selectedStructuredNode;
+        set
+        {
+            if (_selectedStructuredNode != value)
+            {
+                _selectedStructuredNode = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string StructuredFilterQuery
+    {
+        get => _structuredFilterQuery;
+        set
+        {
+            if (_structuredFilterQuery != value)
+            {
+                _structuredFilterQuery = value;
+                OnPropertyChanged();
+                ApplyStructuredFilter();
+            }
+        }
+    }
+
+    public string StructuredFilterKeyList
+    {
+        get => _structuredFilterKeyList;
+        set
+        {
+            if (_structuredFilterKeyList != value)
+            {
+                _structuredFilterKeyList = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string StructuredQueryPath
+    {
+        get => _structuredQueryPath;
+        set
+        {
+            if (_structuredQueryPath != value)
+            {
+                _structuredQueryPath = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string StructuredFormatDescription
+    {
+        get => _structuredFormatDescription;
+        private set
+        {
+            if (_structuredFormatDescription != value)
+            {
+                _structuredFormatDescription = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string StructuredStatusText
+    {
+        get => _structuredStatusText;
+        private set
+        {
+            if (_structuredStatusText != value)
+            {
+                _structuredStatusText = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool HasStructuredData
+    {
+        get => _hasStructuredData;
+        private set
+        {
+            if (_hasStructuredData != value)
+            {
+                _hasStructuredData = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int StructuredNodeCount
+    {
+        get => _structuredNodeCount;
+        private set
+        {
+            if (_structuredNodeCount != value)
+            {
+                _structuredNodeCount = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Structured Data Commands
+    public ICommand ExpandAllStructuredNodesCommand { get; private set; } = null!;
+    public ICommand CollapseAllStructuredNodesCommand { get; private set; } = null!;
+    public ICommand CopyStructuredPathCommand { get; private set; } = null!;
+    public ICommand CopyStructuredValueCommand { get; private set; } = null!;
+    public ICommand CopyStructuredSubtreeCommand { get; private set; } = null!;
+    public ICommand ExtractSelectedStructuredNodeCommand { get; private set; } = null!;
 
     // History Properties
     public InputHistoryManager HistoryManager => _historyManager;
@@ -1060,6 +1202,52 @@ public class MainViewModel : INotifyPropertyChanged
             StatusMessage = "Column selection inverted";
         });
 
+        // Structured Data Commands
+        ExpandAllStructuredNodesCommand = new RelayCommand(_ => ExpandAllStructuredNodes());
+        CollapseAllStructuredNodesCommand = new RelayCommand(_ => CollapseAllStructuredNodes());
+        CopyStructuredPathCommand = new RelayCommand(_ =>
+        {
+            if (SelectedStructuredNode != null && !string.IsNullOrEmpty(SelectedStructuredNode.Path))
+            {
+                try { Clipboard.SetText(SelectedStructuredNode.Path); } catch {}
+                StatusMessage = $"Copied path: {SelectedStructuredNode.Path}";
+            }
+            else
+            {
+                StatusMessage = "No structured node selected to copy path";
+            }
+        });
+        CopyStructuredValueCommand = new RelayCommand(_ =>
+        {
+            if (SelectedStructuredNode != null)
+            {
+                string val = SelectedStructuredNode.Value ?? SelectedStructuredNode.DisplayValue;
+                try { Clipboard.SetText(val); } catch {}
+                StatusMessage = "Copied node value to clipboard";
+            }
+            else
+            {
+                StatusMessage = "No structured node selected to copy value";
+            }
+        });
+        CopyStructuredSubtreeCommand = new RelayCommand(_ =>
+        {
+            if (SelectedStructuredNode != null)
+            {
+                string val = SelectedStructuredNode.DisplayValue;
+                try { Clipboard.SetText(val); } catch {}
+                StatusMessage = "Copied subtree to clipboard";
+            }
+        });
+        ExtractSelectedStructuredNodeCommand = new RelayCommand(_ =>
+        {
+            if (SelectedStructuredNode != null)
+            {
+                OutputText = SelectedStructuredNode.Value ?? SelectedStructuredNode.DisplayValue;
+                StatusMessage = $"Extracted node: {SelectedStructuredNode.Name}";
+            }
+        });
+
         LoadSampleCommand = new RelayCommand(p =>
         {
             string sampleType = p?.ToString() ?? "numbers";
@@ -1070,8 +1258,10 @@ public class MainViewModel : INotifyPropertyChanged
                 "csv" => "Id,Name,Role,Salary,Department\n1,Alice,Architect,120000,Engineering\n2,Bob,Developer,95000,Engineering\n3,Charlie,Designer,85000,Product\n4,Diana,Manager,110000,Sales\n5,Evan,DevOps,105000,Engineering",
                 "tsv" => "OrderId\tCustomer\tProduct\tQuantity\tPrice\n1001\tAcme Corp\tWidget A\t5\t19.99\n1002\tGlobex\tGadget Pro\t2\t49.99\n1003\tSoylent\tWidget A\t10\t19.99\n1004\tInitech\tService Plan\t1\t99.00",
                 "markdown" => "| ID | Server Name | IP Address | Environment | Status |\n|---|---|---|---|---|\n| 1 | web-prod-01 | 10.0.1.15 | Production | Online |\n| 2 | web-prod-02 | 10.0.1.16 | Production | Online |\n| 3 | db-prod-01 | 10.0.2.10 | Production | Online |\n| 4 | api-stage-01 | 10.0.3.5 | Staging | Maintenance |",
-                "json" => "[\n  {\"id\": 1, \"name\": \"Development\", \"active\": true},\n  {\"id\": 2, \"name\": \"Staging\", \"active\": true},\n  {\"id\": 3, \"name\": \"Production\", \"active\": false}\n]",
+                "json" or "structured_json" => "{\n  \"store\": {\n    \"name\": \"City Bookstore\",\n    \"isOpen\": true,\n    \"founded\": 1998,\n    \"location\": {\n      \"city\": \"Seattle\",\n      \"state\": \"WA\",\n      \"zip\": \"98101\"\n    },\n    \"books\": [\n      {\n        \"id\": 1,\n        \"title\": \"Designing Data-Intensive Applications\",\n        \"author\": \"Martin Kleppmann\",\n        \"price\": 39.99,\n        \"inStock\": true,\n        \"tags\": [\"database\", \"distributed systems\", \"architecture\"]\n      },\n      {\n        \"id\": 2,\n        \"title\": \"Clean Architecture\",\n        \"author\": \"Robert C. Martin\",\n        \"price\": 32.50,\n        \"inStock\": false,\n        \"tags\": [\"software design\", \"best practices\"]\n      }\n    ]\n  }\n}",
                 "yaml" => "- id: 1\n  name: Development\n  active: true\n  department: Engineering\n- id: 2\n  name: Staging\n  active: true\n  department: QA\n- id: 3\n  name: Production\n  active: false\n  department: Operations",
+                "structured_yaml" => "server:\n  host: api.textforge.dev\n  port: 8443\n  ssl:\n    enabled: true\n    certificate: /etc/ssl/certs/forge.crt\ndatabase:\n  provider: postgresql\n  connectionString: Server=db.internal;Port=5432;Database=textforge;User Id=app;\n  pool:\n    min: 5\n    max: 50\nfeatures:\n  - realTimeTransform\n  - syntaxHighlighting\n  - tabularView\n  - structuredTreeView\nendpoints:\n  - path: /api/v1/transform\n    rateLimit: 1000\n    authRequired: true\n  - path: /api/v1/health\n    rateLimit: 100\n    authRequired: false",
+                "xml" or "structured_xml" => "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<catalog>\n  <book id=\"bk101\">\n    <author>Gambardella, Matthew</author>\n    <title>XML Developer's Guide</title>\n    <genre>Computer</genre>\n    <price>44.95</price>\n    <publish_date>2000-10-01</publish_date>\n    <description>An in-depth look at creating applications with XML.</description>\n  </book>\n  <book id=\"bk102\">\n    <author>Ralls, Kim</author>\n    <title>Midnight Rain</title>\n    <genre>Fantasy</genre>\n    <price>5.95</price>\n    <publish_date>2000-12-16</publish_date>\n    <description>A former architect battles corporate zombies.</description>\n  </book>\n  <book id=\"bk103\">\n    <author>Corets, Eva</author>\n    <title>Maeve Ascendant</title>\n    <genre>Fantasy</genre>\n    <price>5.95</price>\n    <publish_date>2000-11-17</publish_date>\n    <description>After the collapse of a nanotechnology society the young survivors lay the foundation for a new society.</description>\n  </book>\n</catalog>",
                 "delimited" => "apple, banana, cherry, date, elderberry, fig, grape",
                 "query" => "userId=42&view=summary&filter=active&pageSize=50&sortBy=createdAt&sortDir=desc",
                 _ => "Item 1\nItem 2\nItem 3"
@@ -1086,6 +1276,60 @@ public class MainViewModel : INotifyPropertyChanged
             _currentAction = action;
             ExecuteCurrentAction();
         });
+    }
+
+    public void ExpandAllStructuredNodes()
+    {
+        foreach (var node in _structuredNodes)
+        {
+            node.ExpandAll();
+        }
+        StatusMessage = "Expanded all structured tree nodes";
+    }
+
+    public void CollapseAllStructuredNodes()
+    {
+        foreach (var node in _structuredNodes)
+        {
+            node.CollapseAll();
+        }
+        StatusMessage = "Collapsed all structured tree nodes";
+    }
+
+    public void ApplyStructuredFilter()
+    {
+        foreach (var node in _structuredNodes)
+        {
+            node.ApplyFilter(_structuredFilterQuery);
+        }
+    }
+
+    private void AnalyzeStructuredData()
+    {
+        var parseResult = StructuredDataParser.Parse(_inputText);
+        _structuredNodes.Clear();
+        if (parseResult.Success && parseResult.RootNodes.Count > 0)
+        {
+            foreach (var node in parseResult.RootNodes)
+            {
+                _structuredNodes.Add(node);
+            }
+            HasStructuredData = true;
+            StructuredFormatDescription = parseResult.Format;
+            StructuredNodeCount = parseResult.TotalNodeCount;
+            StructuredStatusText = $"{parseResult.Format} ({parseResult.TotalNodeCount} nodes)";
+            if (!string.IsNullOrWhiteSpace(StructuredFilterQuery))
+            {
+                ApplyStructuredFilter();
+            }
+        }
+        else
+        {
+            HasStructuredData = false;
+            StructuredFormatDescription = "None";
+            StructuredNodeCount = 0;
+            StructuredStatusText = "No structured data detected";
+        }
     }
 
     private void AnalyzeInput()
@@ -1145,13 +1389,19 @@ public class MainViewModel : INotifyPropertyChanged
         Analysis = TextAnalyzer.Analyze(_inputText, _currentTable?.HasHeaders);
         OnPropertyChanged(nameof(HasTabularData));
 
-        if (!HasTabularData)
+        AnalyzeStructuredData();
+
+        if (HasTabularData)
         {
-            SelectedCenterTabIndex = 1; // Analysis & Stats
+            SelectedCenterTabIndex = 0; // Table Grid View
+        }
+        else if (HasStructuredData)
+        {
+            SelectedCenterTabIndex = 1; // Structured Tree View
         }
         else
         {
-            SelectedCenterTabIndex = 0; // Table Grid View
+            SelectedCenterTabIndex = 2; // Analysis & Stats
         }
 
         UpdateTabHighlights();
@@ -1164,6 +1414,7 @@ public class MainViewModel : INotifyPropertyChanged
             IsPresetsTabHighlighted = false;
             IsLinesTabHighlighted = false;
             IsTabularTabHighlighted = false;
+            IsStructuredTabHighlighted = false;
             IsCodeTabHighlighted = false;
             IsCaseEncTabHighlighted = false;
             return;
@@ -1172,39 +1423,48 @@ public class MainViewModel : INotifyPropertyChanged
         bool isTabular = Analysis.IsTabular;
         bool isMultiLine = Analysis.NonEmptyLineCount > 1 || Analysis.LineCount > 1;
         bool isDelimitedSingle = Analysis.Format == DetectedFormat.DelimitedSingleLine;
-        bool isCodeOrStructured = Analysis.Format == DetectedFormat.Json ||
-                                 Analysis.Format == DetectedFormat.Yaml ||
-                                 Analysis.Format == DetectedFormat.SqlInClause ||
-                                 Analysis.Format == DetectedFormat.KeyValuePairs ||
-                                 IsCodeLikeContent(_inputText);
-        bool isSingleLineOrToken = Analysis.NonEmptyLineCount <= 1 && !isTabular && !isDelimitedSingle;
+        bool isStructured = Analysis.Format == DetectedFormat.Json ||
+                            Analysis.Format == DetectedFormat.Yaml ||
+                            Analysis.Format == DetectedFormat.Xml ||
+                            _hasStructuredData;
+        bool isCode = Analysis.Format == DetectedFormat.SqlInClause ||
+                      Analysis.Format == DetectedFormat.KeyValuePairs ||
+                      IsCodeLikeContent(_inputText);
+        bool isSingleLineOrToken = Analysis.NonEmptyLineCount <= 1 && !isTabular && !isDelimitedSingle && !isStructured;
 
         // 1. Tabular Tab
         IsTabularTabHighlighted = isTabular;
 
         // 2. Lines Tab (relevant for any multiline text, delimited lines, or lists of items)
-        IsLinesTabHighlighted = !isTabular && (isMultiLine || isDelimitedSingle);
+        IsLinesTabHighlighted = !isTabular && !isStructured && (isMultiLine || isDelimitedSingle);
 
-        // 3. Code Tab (relevant for JSON, SQL clauses, key-values, query strings, code-like content)
-        IsCodeTabHighlighted = isCodeOrStructured;
+        // 3. Structured Tab (relevant for JSON, YAML, XML)
+        IsStructuredTabHighlighted = isStructured;
 
-        // 4. Case / Enc Tab (relevant for single line text, words/tokens, base64, url-encoded, beautifiable formats)
+        // 4. Code Tab (relevant for SQL clauses, key-values, query strings, code-like content)
+        IsCodeTabHighlighted = isCode || isStructured;
+
+        // 5. Case / Enc Tab (relevant for single line text, words/tokens, base64, url-encoded, beautifiable formats)
         IsCaseEncTabHighlighted = isSingleLineOrToken ||
                                   Analysis.Format == DetectedFormat.Base64 ||
                                   Analysis.Format == DetectedFormat.UrlEncoded ||
                                   TextBeautifier.CanBeautify(_inputText);
 
-        // 5. Presets Tab (useful for all non-empty text, especially multiline, delimited, or tabular extractions)
-        IsPresetsTabHighlighted = isMultiLine || isDelimitedSingle || isTabular;
+        // 6. Presets Tab (useful for all non-empty text, especially multiline, delimited, or tabular extractions)
+        IsPresetsTabHighlighted = isMultiLine || isDelimitedSingle || isTabular || isStructured;
 
         // Auto-select the most relevant sidebar tab
         if (isTabular)
         {
             SelectedSidebarTabIndex = 2; // Tabular
         }
-        else if (isCodeOrStructured && (Analysis.Format == DetectedFormat.Json || Analysis.Format == DetectedFormat.Yaml || Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.KeyValuePairs))
+        else if (isStructured)
         {
-            SelectedSidebarTabIndex = 3; // Code
+            SelectedSidebarTabIndex = 3; // Structured
+        }
+        else if (isCode && (Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.KeyValuePairs))
+        {
+            SelectedSidebarTabIndex = 4; // Code
         }
         else if (isMultiLine || isDelimitedSingle)
         {
@@ -1212,7 +1472,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
         else if (isSingleLineOrToken)
         {
-            SelectedSidebarTabIndex = 4; // Case / Enc
+            SelectedSidebarTabIndex = 5; // Case / Enc
         }
     }
 
@@ -1440,7 +1700,7 @@ public class MainViewModel : INotifyPropertyChanged
                 "UpperCase" => CaseTransformers.ChangeCase(InputText, TextCasing.UpperCase),
                 "LowerCase" => CaseTransformers.ChangeCase(InputText, TextCasing.LowerCase),
 
-                // Encodings
+                // Encodings & Formatting
                 "UrlEncode" => EncodingTransformers.UrlEncode(InputText),
                 "UrlDecode" => EncodingTransformers.UrlDecode(InputText),
                 "Base64Encode" => EncodingTransformers.Base64Encode(InputText),
@@ -1449,11 +1709,43 @@ public class MainViewModel : INotifyPropertyChanged
                 "HtmlDecode" => EncodingTransformers.HtmlDecode(InputText),
                 "EscapeCSharp" => EncodingTransformers.EscapeCSharpString(InputText),
                 "UnescapeCSharp" => EncodingTransformers.UnescapeCSharpString(InputText),
-                "FormatJson" => EncodingTransformers.FormatJsonString(InputText),
-                "FormatXml" => EncodingTransformers.FormatXmlString(InputText),
-                "FormatYaml" => EncodingTransformers.FormatYamlString(InputText),
+                "FormatJson" or "BeautifyJson" => EncodingTransformers.FormatJsonString(InputText),
+                "FormatXml" or "BeautifyXml" => EncodingTransformers.FormatXmlString(InputText),
+                "FormatYaml" or "BeautifyYaml" => EncodingTransformers.FormatYamlString(InputText),
+                "MinifyJson" => EncodingTransformers.MinifyJson(InputText),
+                "MinifyXml" => EncodingTransformers.MinifyXml(InputText),
                 "Beautify" => TextBeautifier.Beautify(InputText),
                 "JwtDecode" => EncodingTransformers.JwtDecode(InputText),
+
+                // Structured Data Conversions & Operations
+                "XmlToJson" => EncodingTransformers.XmlToJson(InputText),
+                "JsonToXml" => EncodingTransformers.JsonToXml(InputText),
+                "XmlToYaml" => EncodingTransformers.XmlToYaml(InputText),
+                "YamlToXml" => EncodingTransformers.YamlToXml(InputText),
+                "FlattenStructured" => EncodingTransformers.FlattenStructured(InputText),
+                "FlattenToFlatJson" => EncodingTransformers.FlattenToFlatJson(InputText),
+                "UnflattenStructured" or "UnflattenToJson" => EncodingTransformers.UnflattenStructured(InputText, "JSON"),
+                "UnflattenToYaml" => EncodingTransformers.UnflattenStructured(InputText, "YAML"),
+                "SortStructuredKeys" or "SortStructuredKeysAsc" => EncodingTransformers.SortStructuredKeys(InputText, false),
+                "SortStructuredKeysDesc" => EncodingTransformers.SortStructuredKeys(InputText, true),
+                "ExtractStructuredPaths" => EncodingTransformers.ExtractStructuredPaths(InputText),
+                "ExtractStructuredKeys" => EncodingTransformers.ExtractStructuredKeys(InputText),
+                "ExtractStructuredValues" => EncodingTransformers.ExtractStructuredValues(InputText),
+                "StructuredCamelCase" => EncodingTransformers.ConvertStructuredKeysCase(InputText, TextCasing.CamelCase),
+                "StructuredPascalCase" => EncodingTransformers.ConvertStructuredKeysCase(InputText, TextCasing.PascalCase),
+                "StructuredSnakeCase" => EncodingTransformers.ConvertStructuredKeysCase(InputText, TextCasing.SnakeCase),
+                "StructuredKebabCase" => EncodingTransformers.ConvertStructuredKeysCase(InputText, TextCasing.KebabCase),
+                "StructuredConstantCase" => EncodingTransformers.ConvertStructuredKeysCase(InputText, TextCasing.ConstantCase),
+                "PickStructuredKeys" => EncodingTransformers.PickStructuredKeys(InputText, StructuredFilterKeyList),
+                "OmitStructuredKeys" => EncodingTransformers.OmitStructuredKeys(InputText, StructuredFilterKeyList),
+                "RemoveNullsAndEmpty" => EncodingTransformers.RemoveNullsAndEmpty(InputText),
+                "QueryStructuredPath" => EncodingTransformers.QueryStructuredPath(InputText, StructuredQueryPath),
+                "StructuredToCsv" => EncodingTransformers.StructuredToCsv(InputText, ','),
+                "StructuredToTsv" => EncodingTransformers.StructuredToTsv(InputText),
+                "StructuredToMarkdown" => EncodingTransformers.StructuredToMarkdown(InputText),
+                "ToTypeScriptInterfaces" => EncodingTransformers.ToTypeScriptInterfaces(InputText),
+                "ToCSharpClasses" => EncodingTransformers.ToCSharpClasses(InputText),
+                "ToJsonSchema" => EncodingTransformers.ToJsonSchema(InputText),
 
                 _ => InputText
             };

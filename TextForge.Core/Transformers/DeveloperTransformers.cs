@@ -298,6 +298,31 @@ public static class DeveloperTransformers
         }
     }
 
+    public static string XmlToJson(string? text, bool indented = true) => Structured.StructuredTransformers.XmlToJson(text, indented);
+    public static string JsonToXml(string? text, string rootElementName = "root", bool indented = true) => Structured.StructuredTransformers.JsonToXml(text, rootElementName, indented);
+    public static string XmlToYaml(string? text) => Structured.StructuredTransformers.XmlToYaml(text);
+    public static string YamlToXml(string? text, string rootElementName = "root", bool indented = true) => Structured.StructuredTransformers.YamlToXml(text, rootElementName, indented);
+    public static string MinifyJson(string? text) => Structured.StructuredTransformers.MinifyJson(text);
+    public static string MinifyXml(string? text) => Structured.StructuredTransformers.MinifyXml(text);
+    public static string FlattenStructured(string? text, string separator = ".") => Structured.StructuredTransformers.Flatten(text, separator);
+    public static string FlattenToFlatJson(string? text, string separator = ".") => Structured.StructuredTransformers.FlattenToFlatJson(text, separator);
+    public static string UnflattenStructured(string? text, string format = "JSON") => Structured.StructuredTransformers.Unflatten(text, format);
+    public static string SortStructuredKeys(string? text, bool descending = false) => Structured.StructuredTransformers.SortKeys(text, descending);
+    public static string ExtractStructuredPaths(string? text) => Structured.StructuredTransformers.ExtractPaths(text);
+    public static string ExtractStructuredKeys(string? text) => Structured.StructuredTransformers.ExtractKeys(text);
+    public static string ExtractStructuredValues(string? text) => Structured.StructuredTransformers.ExtractValues(text);
+    public static string ConvertStructuredKeysCase(string? text, TextCasing casing) => Structured.StructuredTransformers.ConvertKeysCase(text, casing);
+    public static string PickStructuredKeys(string? text, string? keyList) => Structured.StructuredTransformers.PickKeys(text, keyList);
+    public static string OmitStructuredKeys(string? text, string? keyList) => Structured.StructuredTransformers.OmitKeys(text, keyList);
+    public static string RemoveNullsAndEmpty(string? text) => Structured.StructuredTransformers.RemoveNullsAndEmpty(text);
+    public static string QueryStructuredPath(string? text, string? query) => Structured.StructuredTransformers.QueryPath(text, query);
+    public static string StructuredToCsv(string? text, char delimiter = ',') => Structured.StructuredTransformers.ToCsv(text, delimiter);
+    public static string StructuredToTsv(string? text) => Structured.StructuredTransformers.ToTsv(text);
+    public static string StructuredToMarkdown(string? text) => Structured.StructuredTransformers.ToMarkdownTable(text);
+    public static string ToTypeScriptInterfaces(string? text, string rootName = "Root") => Structured.StructuredTransformers.ToTypeScriptInterfaces(text, rootName);
+    public static string ToCSharpClasses(string? text, string rootName = "Root") => Structured.StructuredTransformers.ToCSharpClasses(text, rootName);
+    public static string ToJsonSchema(string? text, string title = "Schema") => Structured.StructuredTransformers.ToJsonSchema(text, title);
+
     private static object? ConvertYamlObjectToTyped(object? obj)
     {
         if (obj is null) return null;

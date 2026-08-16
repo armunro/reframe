@@ -59,7 +59,7 @@ public class TabHighlightingTests
         Assert.True(vm.IsPresetsTabHighlighted);
         Assert.False(vm.IsTabularTabHighlighted);
         Assert.Equal(1, vm.SelectedSidebarTabIndex); // Lines Tab index
-        Assert.Equal(1, vm.SelectedCenterTabIndex);  // Analysis & Stats index
+        Assert.Equal(2, vm.SelectedCenterTabIndex);  // Analysis & Stats index (tab index 2 after Table Grid View and Structured Tree View)
     }
 
     [Fact]
@@ -86,14 +86,35 @@ public class TabHighlightingTests
     }
 
     [Fact]
-    public void CodeInput_JsonObject_HighlightsCodeAndCaseTabs_AndSelectsCodeTab()
+    public void CodeInput_JsonObject_HighlightsCodeAndStructuredTabs_AndSelectsStructuredTab()
     {
         var vm = new MainViewModel();
         vm.InputText = "{\n  \"userId\": 1,\n  \"title\": \"delectus aut autem\"\n}";
 
+        Assert.True(vm.IsStructuredTabHighlighted);
         Assert.True(vm.IsCodeTabHighlighted);
         Assert.True(vm.IsCaseEncTabHighlighted); // JSON beautify / format is available
-        Assert.Equal(3, vm.SelectedSidebarTabIndex); // Code Tab index
+        Assert.Equal(3, vm.SelectedSidebarTabIndex); // Structured Tab index
+    }
+
+    [Fact]
+    public void CodeInput_Yaml_HighlightsStructuredTab_AndSelectsStructuredTab()
+    {
+        var vm = new MainViewModel();
+        vm.InputText = "user:\n  id: 101\n  name: Alice\n  active: true";
+
+        Assert.True(vm.IsStructuredTabHighlighted);
+        Assert.Equal(3, vm.SelectedSidebarTabIndex); // Structured Tab index
+    }
+
+    [Fact]
+    public void CodeInput_Xml_HighlightsStructuredTab_AndSelectsStructuredTab()
+    {
+        var vm = new MainViewModel();
+        vm.InputText = "<user id=\"101\"><name>Alice</name></user>";
+
+        Assert.True(vm.IsStructuredTabHighlighted);
+        Assert.Equal(3, vm.SelectedSidebarTabIndex); // Structured Tab index
     }
 
     [Fact]
@@ -103,7 +124,7 @@ public class TabHighlightingTests
         vm.InputText = "IN (1001, 1002, 1003, 1004)";
 
         Assert.True(vm.IsCodeTabHighlighted);
-        Assert.Equal(3, vm.SelectedSidebarTabIndex);
+        Assert.Equal(4, vm.SelectedSidebarTabIndex);
     }
 
     [Fact]
@@ -113,7 +134,7 @@ public class TabHighlightingTests
         vm.InputText = "host=localhost\nport=5432\ndatabase=mydb\nuser=postgres";
 
         Assert.True(vm.IsCodeTabHighlighted);
-        Assert.Equal(3, vm.SelectedSidebarTabIndex);
+        Assert.Equal(4, vm.SelectedSidebarTabIndex);
     }
 
     [Fact]
@@ -124,7 +145,7 @@ public class TabHighlightingTests
 
         Assert.True(vm.IsCaseEncTabHighlighted);
         Assert.False(vm.IsTabularTabHighlighted);
-        Assert.Equal(4, vm.SelectedSidebarTabIndex); // Case / Enc Tab index
+        Assert.Equal(5, vm.SelectedSidebarTabIndex); // Case / Enc Tab index
     }
 
     [Fact]
@@ -134,7 +155,7 @@ public class TabHighlightingTests
         vm.InputText = "SGVsbG8gV29ybGQh";
 
         Assert.True(vm.IsCaseEncTabHighlighted);
-        Assert.Equal(4, vm.SelectedSidebarTabIndex);
+        Assert.Equal(5, vm.SelectedSidebarTabIndex);
     }
 
     [Fact]
@@ -146,6 +167,7 @@ public class TabHighlightingTests
         Assert.False(vm.IsPresetsTabHighlighted);
         Assert.False(vm.IsLinesTabHighlighted);
         Assert.False(vm.IsTabularTabHighlighted);
+        Assert.False(vm.IsStructuredTabHighlighted);
         Assert.False(vm.IsCodeTabHighlighted);
         Assert.False(vm.IsCaseEncTabHighlighted);
     }

@@ -32,6 +32,8 @@
     </Window.InputBindings>
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <conv:BooleanToTextWrappingConverter x:Key="BoolToWrapConv"/>
         <!-- Custom Mono Font for Developer Text Boxes -->
         <FontFamily x:Key="EditorFontFamily">Cascadia Code, Consolas, Courier New, monospace</FontFamily>
@@ -329,7 +331,8 @@
                             <MenuItem Header="TSV Table Data (Excel)" Command="{Binding LoadSampleCommand}" CommandParameter="tsv" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="Markdown Table" Command="{Binding LoadSampleCommand}" CommandParameter="markdown" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="JSON Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="json" Foreground="#F0F0F0" Background="#2D2D30"/>
-                            <MenuItem Header="YAML Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="yaml" Foreground="#F0F0F0" Background="#2D2D30"/>
+                            <MenuItem Header="YAML Configuration Document" Command="{Binding LoadSampleCommand}" CommandParameter="yaml" Foreground="#F0F0F0" Background="#2D2D30"/>
+                            <MenuItem Header="XML Catalog Document" Command="{Binding LoadSampleCommand}" CommandParameter="xml" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="Delimited Single Line" Command="{Binding LoadSampleCommand}" CommandParameter="delimited" Foreground="#F0F0F0" Background="#2D2D30"/>
                             <MenuItem Header="URL Query String" Command="{Binding LoadSampleCommand}" CommandParameter="query" Foreground="#F0F0F0" Background="#2D2D30"/>
                         </MenuItem>
@@ -623,7 +626,102 @@
                             </Grid>
                         </TabItem>
 
-                        <!-- Tab 2: Detailed Text Analysis -->
+                        <!-- Tab 2: Structured Tree View (JSON, YAML, XML) -->
+                        <TabItem Header="Structured Tree View">
+                            <Grid Background="#1E1E1E">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Structured Quick Actions Toolbar -->
+                                <Border Grid.Row="0" Background="#282828" Padding="8,4" BorderBrush="#3F3F3F" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding StructuredStatusText, StringFormat='Tree: {0}'}" Foreground="#4EC9B0" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                            <TextBox Text="{Binding StructuredFilterQuery, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="22" FontSize="11" Style="{StaticResource CatalystTextBoxStyle}" Tag="🔍 Filter tree..."/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Content="➕ Expand" Command="{Binding ExpandAllStructuredNodesCommand}" ToolTip="Expand all nodes" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
+                                            <Button Content="➖ Collapse" Command="{Binding CollapseAllStructuredNodesCommand}" ToolTip="Collapse all nodes" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,6,0"/>
+                                            <Button Content="📋 Path" Command="{Binding CopyStructuredPathCommand}" ToolTip="Copy JSONPath / XPath of selected node" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
+                                            <Button Content="📋 Value" Command="{Binding CopyStructuredValueCommand}" ToolTip="Copy value of selected node" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,6,0"/>
+                                            <Button Content="→ JSON" Command="{Binding ActionCommand}" CommandParameter="BeautifyJson" ToolTip="Format to JSON" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
+                                            <Button Content="→ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" ToolTip="Convert to YAML" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
+                                            <Button Content="→ XML" Command="{Binding ActionCommand}" CommandParameter="JsonToXml" ToolTip="Convert to XML" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}" Margin="0,0,3,0"/>
+                                            <Button Content="→ Flat" Command="{Binding ActionCommand}" CommandParameter="FlattenStructured" ToolTip="Flatten to dot-notation paths" Padding="5,2" FontSize="10" Style="{StaticResource CatalystButtonStyle}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Tree View / Empty State Container -->
+                                <Grid Grid.Row="1">
+                                    <!-- Structured TreeView -->
+                                    <TreeView x:Name="StructuredTreeView"
+                                              ItemsSource="{Binding StructuredNodes}"
+                                              Background="#1E1E1E"
+                                              BorderThickness="0"
+                                              Padding="4"
+                                              VirtualizingStackPanel.IsVirtualizing="True"
+                                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                              Visibility="{Binding HasStructuredData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TreeView.ItemContainerStyle>
+                                            <Style TargetType="{x:Type TreeViewItem}">
+                                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                <Setter Property="Foreground" Value="#CCCCCC"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="Padding" Value="2,1"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="#094771"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TreeView.ItemContainerStyle>
+                                        <TreeView.ItemTemplate>
+                                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                                <StackPanel Orientation="Horizontal" Margin="0,1" ToolTip="{Binding Path}">
+                                                    <!-- Type Badge -->
+                                                    <Border Background="#2A2D2E" BorderBrush="#3F3F3F" BorderThickness="1" CornerRadius="3" Padding="3,0" Margin="0,0,5,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding TypeBadge}" Foreground="{Binding TypeColorHex}" FontSize="9" FontFamily="Consolas" FontWeight="Bold"/>
+                                                    </Border>
+                                                    <!-- Node Name (Key / Element / Attribute) -->
+                                                    <TextBlock Text="{Binding Name}" Foreground="#9CDCFE" FontFamily="Consolas" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                    <!-- Colon Separator -->
+                                                    <TextBlock Text=":" Foreground="#808080" FontFamily="Consolas" Margin="2,0,4,0" VerticalAlignment="Center"/>
+                                                    <!-- Node Value / Summary -->
+                                                    <TextBlock Text="{Binding DisplayValue}" Foreground="#CE9178" FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                            </HierarchicalDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                    </TreeView>
+
+                                    <!-- Placeholder when No Structured Data -->
+                                    <Border Visibility="{Binding HasStructuredData, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Background="#1E1E1E"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch">
+                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="🌳 Structured Data Viewer" FontSize="14" FontWeight="Bold" Foreground="#4EC9B0" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                            <TextBlock Text="No structured JSON, YAML, or XML data detected in input." Foreground="#888888" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Button Content="📄 Load Sample JSON" Command="{Binding LoadSampleCommand}" CommandParameter="json" Style="{StaticResource CatalystButtonStyle}" Padding="8,4" FontSize="11" Margin="0,0,6,0"/>
+                                                <Button Content="📜 Load Sample YAML" Command="{Binding LoadSampleCommand}" CommandParameter="yaml" Style="{StaticResource CatalystButtonStyle}" Padding="8,4" FontSize="11" Margin="0,0,6,0"/>
+                                                <Button Content="📑 Load Sample XML" Command="{Binding LoadSampleCommand}" CommandParameter="xml" Style="{StaticResource CatalystButtonStyle}" Padding="8,4" FontSize="11"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- Tab 3: Detailed Text Analysis -->
                         <TabItem Header="Analysis &amp; Stats">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="15">
                                 <StackPanel>
@@ -1166,7 +1264,108 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <!-- TAB 4: CODE & FORMATS -->
+                        <!-- TAB 4: STRUCTURED DATA (JSON / YAML / XML) -->
+                        <TabItem Header="🌳 Structured" Tag="{Binding IsStructuredTabHighlighted}" Style="{StaticResource SidebarTabItemStyle}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                                <StackPanel>
+                                    <!-- Format Conversions -->
+                                    <Expander Header="Format Conversions" controls:SectionState.Key="Structured_FormatConversions" Style="{StaticResource SectionExpanderStyle}">
+                                        <UniformGrid Columns="2">
+                                            <Button Content="🔄 JSON ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 XML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="XmlToJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 JSON ➔ XML" Command="{Binding ActionCommand}" CommandParameter="JsonToXml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 XML ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="XmlToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 YAML ➔ XML" Command="{Binding ActionCommand}" CommandParameter="YamlToXml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📊 → CSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToCsv" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📊 → TSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToTsv" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📝 → Markdown Table" Command="{Binding ActionCommand}" CommandParameter="StructuredToMarkdown" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}"/>
+                                        </UniformGrid>
+                                    </Expander>
+
+                                    <!-- Key Casing & Renaming -->
+                                    <Expander Header="Key Casing &amp; Renaming" controls:SectionState.Key="Structured_KeyCasing" Style="{StaticResource SectionExpanderStyle}">
+                                        <UniformGrid Columns="2">
+                                            <Button Content="🐪 camelCase Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredCamelCase" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📐 PascalCase Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredPascalCase" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🐍 snake_case Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredSnakeCase" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🍢 kebab-case Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredKebabCase" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔠 UPPER_CASE Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredConstantCase" Style="{StaticResource ToolButtonStyle}"/>
+                                        </UniformGrid>
+                                    </Expander>
+
+                                    <!-- Key & Field Filtering -->
+                                    <Expander Header="Key &amp; Field Filtering" controls:SectionState.Key="Structured_KeyFiltering" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,3">
+                                                <TextBox Text="{Binding StructuredFilterKeyList, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CatalystTextBoxStyle}" Tag="Keys (e.g. id, name, email)..."/>
+                                            </Grid>
+                                            <UniformGrid Columns="2">
+                                                <Button Content="🎯 Pick / Keep Keys" Command="{Binding ActionCommand}" CommandParameter="PickStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🚫 Omit / Remove Keys" Command="{Binding ActionCommand}" CommandParameter="OmitStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
+                                            </UniformGrid>
+                                            <Button Content="🧹 Strip Nulls &amp; Empty" Command="{Binding ActionCommand}" CommandParameter="RemoveNullsAndEmpty" Style="{StaticResource ToolButtonStyle}" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- Query & Value Extraction -->
+                                    <Expander Header="Query &amp; Value Extraction" controls:SectionState.Key="Structured_QueryExtraction" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding StructuredQueryPath, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CatalystTextBoxStyle}" Tag="Path / Key (e.g. $.users, name)..."/>
+                                                <Button Grid.Column="1" Content="🔍 Query" Command="{Binding ActionCommand}" CommandParameter="QueryStructuredPath" Style="{StaticResource ToolButtonStyle}" Margin="3,0,0,0"/>
+                                            </Grid>
+                                            <UniformGrid Columns="2">
+                                                <Button Content="🗺️ Extract All Paths" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredPaths" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🔑 Extract All Keys" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📋 Extract All Values" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredValues" Style="{StaticResource ToolButtonStyle}"/>
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- Deep Sort & Flatten -->
+                                    <Expander Header="Deep Sort &amp; Flatten" controls:SectionState.Key="Structured_SortFlatten" Style="{StaticResource SectionExpanderStyle}">
+                                        <UniformGrid Columns="2">
+                                            <Button Content="🔤 Sort Keys (A-Z)" Command="{Binding ActionCommand}" CommandParameter="SortStructuredKeysAsc" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔤 Sort Keys (Z-A)" Command="{Binding ActionCommand}" CommandParameter="SortStructuredKeysDesc" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🌿 Flatten to Paths" Command="{Binding ActionCommand}" CommandParameter="FlattenStructured" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📦 Flatten to Flat JSON" Command="{Binding ActionCommand}" CommandParameter="FlattenToFlatJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🌳 Unflatten to JSON" Command="{Binding ActionCommand}" CommandParameter="UnflattenToJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📜 Unflatten to YAML" Command="{Binding ActionCommand}" CommandParameter="UnflattenToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                        </UniformGrid>
+                                    </Expander>
+
+                                    <!-- Formatting & Minification -->
+                                    <Expander Header="Formatting &amp; Minify" controls:SectionState.Key="Structured_FormatMinify" Style="{StaticResource SectionExpanderStyle}">
+                                        <UniformGrid Columns="2">
+                                            <Button Content="✨ Beautify JSON" Command="{Binding ActionCommand}" CommandParameter="BeautifyJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="✨ Beautify YAML" Command="{Binding ActionCommand}" CommandParameter="BeautifyYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="✨ Beautify XML" Command="{Binding ActionCommand}" CommandParameter="BeautifyXml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📦 Minify JSON" Command="{Binding ActionCommand}" CommandParameter="MinifyJson" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📑 Minify XML" Command="{Binding ActionCommand}" CommandParameter="MinifyXml" Style="{StaticResource ToolButtonStyle}"/>
+                                        </UniformGrid>
+                                    </Expander>
+
+                                    <!-- Code & Schema Generation -->
+                                    <Expander Header="Code &amp; Schema Generation" controls:SectionState.Key="Structured_CodeSchemaGen" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <UniformGrid Columns="2">
+                                                <Button Content="📜 TypeScript Interfaces" Command="{Binding ActionCommand}" CommandParameter="ToTypeScriptInterfaces" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="💻 C# POCO Classes" Command="{Binding ActionCommand}" CommandParameter="ToCSharpClasses" Style="{StaticResource ToolButtonStyle}"/>
+                                            </UniformGrid>
+                                            <Button Content="📋 Generate JSON Schema" Command="{Binding ActionCommand}" CommandParameter="ToJsonSchema" Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                    </Expander>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <!-- TAB 5: CODE & FORMATS -->
                         <TabItem Header="💻 Code" Tag="{Binding IsCodeTabHighlighted}" Style="{StaticResource SidebarTabItemStyle}">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
                                 <StackPanel>
@@ -1204,7 +1403,7 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <!-- TAB 5: CASE & ENCODING -->
+                        <!-- TAB 6: CASE & ENCODING -->
                         <TabItem Header="🔤 Case / Enc" Tag="{Binding IsCaseEncTabHighlighted}" Style="{StaticResource SidebarTabItemStyle}">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
                                 <StackPanel>

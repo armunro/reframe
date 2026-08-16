@@ -9,13 +9,14 @@
 - [Features](#features)
   - [1. Line Operations](#1-line-operations)
   - [2. Tabular Data & Table Conversions](#2-tabular-data--table-conversions)
-  - [3. Developer Tools & Code Generation](#3-developer-tools--code-generation)
-  - [4. Case Conversions](#4-case-conversions)
-  - [5. Encodings, Escaping & Formatting](#5-encodings-escaping--formatting)
-  - [6. Real-Time Text Analysis](#6-real-time-text-analysis)
-  - [7. Input History & Timeline](#7-input-history--timeline)
-  - [8. File Loading & Drag-and-Drop](#8-file-loading--drag-and-drop)
-  - [9. Productivity Toggles & Transformation Chaining](#9-productivity-toggles--transformation-chaining)
+  - [3. Structured Data, Conversions & Tree Viewer](#3-structured-data-conversions--tree-viewer)
+  - [4. Developer Tools & Code Generation](#4-developer-tools--code-generation)
+  - [5. Case Conversions](#5-case-conversions)
+  - [6. Encodings, Escaping & Formatting](#6-encodings-escaping--formatting)
+  - [7. Real-Time Text Analysis](#7-real-time-text-analysis)
+  - [8. Input History & Timeline](#8-input-history--timeline)
+  - [9. File Loading & Drag-and-Drop](#9-file-loading--drag-and-drop)
+  - [10. Productivity Toggles & Transformation Chaining](#10-productivity-toggles--transformation-chaining)
 - [Architecture & Solution Structure](#architecture--solution-structure)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
@@ -56,7 +57,45 @@
   - Generate Key-Value maps from selected key and value columns (JSON, YAML, or delimiter/URL format).
 - **Interactive Preview**: Live tabular data grid preview showing detected headers and structured rows.
 
-### 3. Developer Tools & Code Generation
+### 3. Structured Data, Conversions & Tree Viewer
+- **Dedicated Structured Transformations Sidebar Tab**:
+  - Automatically highlights when JSON, YAML, or XML documents are detected.
+  - Organized expanders for format conversions, key casing, key/field filtering, querying/extraction, deep sorting, flattening, minification, and code/schema generation.
+- **Interactive Structured Tree Viewer**:
+  - Automatically parses JSON, YAML, and XML documents into an interactive, syntax-highlighted hierarchical Tree View.
+  - Visual type badges for Objects (`{ }`), Arrays (`[ ]`), XML Elements (`< >`), Attributes (`@`), Strings (`str`), Numbers (`num`), Booleans (`bool`), and Nulls (`null`).
+  - Real-time instant search filter across node keys, values, and paths.
+  - One-click Expand All, Collapse All, and quick copy of JSONPath/XPath, node values, or node subtrees.
+- **Format Interoperability**:
+  - **XML ➔ JSON** & **JSON ➔ XML** (preserves attributes with `@attr` notation and handles child arrays).
+  - **XML ➔ YAML** & **YAML ➔ XML**.
+  - **JSON ➔ YAML** & **YAML ➔ JSON** with type preservation.
+  - **Structured ➔ Tabular**: Convert JSON/YAML/XML datasets directly into CSV, TSV, or Markdown tables.
+- **Key Casing & Renaming**:
+  - Recursively transform all object keys/property names across JSON, YAML, or XML to `camelCase`, `PascalCase`, `snake_case`, `kebab-case`, or `CONSTANT_CASE`.
+- **Key & Field Filtering**:
+  - **Pick / Keep Keys**: Keep only specified keys across nested objects.
+  - **Omit / Remove Keys**: Strip specified sensitive or unnecessary keys.
+  - **Remove Nulls & Empty**: Recursively remove `null` values, empty strings, and empty objects/arrays.
+- **Querying & Value Extraction**:
+  - **JSONPath & XPath Query**: Query expressions (e.g., `$.users[*].name`, `firstName`, `/catalog/book/title`).
+  - **Extract All Paths**: Extract all distinct JSONPaths or XPaths.
+  - **Extract All Keys**: Extract unique property / element names.
+  - **Extract All Values**: Extract all scalar values into a line list.
+- **Flattening & Unflattening**:
+  - **Flatten to Paths**: Flatten nested structures into dot-notation / bracket-index key-value paths (`user.address.city = "Seattle"`).
+  - **Flatten to Flat JSON**: Flatten nested structures into a flat JSON object with dot-notation keys (`{"user.address.city": "Seattle"}`).
+  - **Unflatten to Structure**: Reconstruct nested JSON / YAML objects from dot-notation or path key-value lines.
+- **Deep Structure Operations**:
+  - **Deep Key Sorting**: Recursively sort object / mapping keys alphabetically ascending (A-Z) or descending (Z-A).
+  - **Minify JSON & XML**: Strip whitespace and newlines for compact storage / payload transfer.
+  - **Beautify & Format**: Multi-format beautification and indentation for JSON, YAML, and XML.
+- **Code & Schema Generation**:
+  - **TypeScript Interfaces**: Infer and generate typed TypeScript interfaces (`export interface ...`) from JSON/YAML.
+  - **C# POCO Classes**: Infer and generate typed C# classes with properties (`public class ...`).
+  - **JSON Schema**: Generate valid draft-07 JSON Schemas with typed properties and required field lists.
+
+### 4. Developer Tools & Code Generation
 - **SQL `IN (...)` Clause**: Convert lists of numbers, strings, or IDs into formatted single-line or multi-line SQL `IN ('a', 'b', 'c')` clauses with SQL string escaping.
 - **Code Array / Collection Generators**:
   - **C#**: `string[]`, `int[]`, `double[]`, `List<T>`
@@ -75,7 +114,7 @@
   - Numbers and hex values
   - GUIDs / UUIDs
 
-### 4. Case Conversions
+### 5. Case Conversions
 Easily convert text per-line or across entire blocks into:
 - `camelCase`
 - `PascalCase`
@@ -88,7 +127,7 @@ Easily convert text per-line or across entire blocks into:
 - `dot.case`
 - `path/case`
 
-### 5. Encodings, Escaping & Formatting
+### 6. Encodings, Escaping & Formatting
 - **URL Encode / Decode**: Standard percent-encoding and decoding.
 - **HTML Encode / Decode**: HTML entity encoding and decoding.
 - **Base64 Encode / Decode**: Base64 encoding with missing padding auto-correction.
@@ -97,7 +136,7 @@ Easily convert text per-line or across entire blocks into:
 - **Beautifier / Formatter**: Indent and beautify JSON, XML, XHTML, HTML, and YAML.
 - **JSON ➔ YAML & YAML ➔ JSON**: Direct bidirectional conversion between JSON and YAML.
 
-### 6. Real-Time Text Analysis
+### 7. Real-Time Text Analysis
 TextForge dynamically analyzes the input text and reports:
 - Detected format (CSV, TSV, Markdown Table, HTML Table, JSON, YAML, SQL IN clause, Key-Value pairs, Multi-line List, Numbers, etc.)
 - Character count (total and excluding whitespace)
@@ -106,17 +145,17 @@ TextForge dynamically analyzes the input text and reports:
 - Distinct lines & duplicate count
 - Detected delimiter, column count, and row count for tabular formats
 
-### 7. Input History & Timeline
+### 8. Input History & Timeline
 - Keeps a chronological history of inputs and applied operations.
 - Search and filter history entries.
 - One-click restore of previous inputs and configurations.
 
-### 8. File Loading & Drag-and-Drop
+### 9. File Loading & Drag-and-Drop
 - **File Dialog**: Open text, tabular data, JSON, XML, Markdown, HTML, SQL, and log files using `📂 Open` button or `Ctrl+O`.
 - **Drag-and-Drop**: Drag files directly from Windows File Explorer onto the TextForge window or editor pane to load them instantly.
 - **Auto-Formatting & History**: Automatically formats structured inputs upon load and records the loaded file in the history timeline.
 
-### 9. Productivity Toggles & Transformation Chaining
+### 10. Productivity Toggles & Transformation Chaining
 - **⚡ Real-time Transform**: Computes outputs on the fly as you type or change transformation parameters.
 - **🔁 Auto Output ➔ Input**: When enabled in the status bar, automatically sends the transformed output back to the input pane after every operation, enabling seamless sequential transformation pipelines.
 - **↩ Word Wrap**: Toggles word wrap across input and output editors.

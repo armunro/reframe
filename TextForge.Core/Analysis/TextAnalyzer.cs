@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using TextForge.Core.Tabular;
 using TextForge.Core.Transformers;
 
@@ -78,6 +79,25 @@ public static class TextAnalyzer
             if (htmlTable.Columns.Count > 0 && (htmlTable.Rows.Count > 0 || htmlTable.Columns.Count > 1))
             {
                 return (DetectedFormat.HtmlTable, $"HTML Table ({htmlTable.Rows.Count} rows, {htmlTable.Columns.Count} cols)", null, true, htmlTable.Columns.Count, htmlTable.Rows.Count, htmlTable.Columns, htmlTable.HasHeaders);
+            }
+        }
+
+        // 1b. XML Document
+        if (trimmed.StartsWith('<') && trimmed.EndsWith('>'))
+        {
+            try
+            {
+                var xdoc = XDocument.Parse(trimmed);
+                if (xdoc.Root != null)
+                {
+                    int elementCount = xdoc.Descendants().Count();
+                    string rootTag = xdoc.Root.Name.LocalName;
+                    return (DetectedFormat.Xml, $"XML Document (<{rootTag}>, {elementCount} elements)", null, false, 0, 0, Array.Empty<string>(), true);
+                }
+            }
+            catch
+            {
+                // Not well-formed XML, continue detection
             }
         }
 
