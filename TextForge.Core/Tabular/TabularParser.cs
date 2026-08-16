@@ -9,6 +9,8 @@ public static class TabularParser
 {
     private static readonly char[] CandidateDelimiters = { '\t', ',', ';', '|' };
 
+    public static ITabularParser Instance { get; set; } = TabularParserService.Instance;
+
     private static readonly HashSet<string> CommonHeaderKeywords = new(StringComparer.OrdinalIgnoreCase)
     {
         "id", "identifier", "key", "pk", "fk", "code", "sku", "pin", "tenant", "guid", "uuid", "hash",
@@ -29,58 +31,7 @@ public static class TabularParser
 
     public static TabularData? DetectAndParse(string? text, bool? assumeHeader = null, IEnumerable<string>? surrogateHeaders = null)
     {
-        if (string.IsNullOrWhiteSpace(text)) return null;
-
-        TabularData? table = null;
-
-        // 1. Check if HTML table
-        if (HtmlTableParser.IsHtmlTable(text))
-        {
-            var htmlTable = HtmlTableParser.Parse(text, assumeHeader);
-            if (htmlTable.Columns.Count > 0)
-            {
-                table = htmlTable;
-            }
-        }
-
-        // 2. Check if JSON array of objects or arrays
-        if (table == null)
-        {
-            table = TryParseJsonArray(text, assumeHeader);
-        }
-
-        // 3. Check if YAML array of objects or arrays
-        if (table == null)
-        {
-            table = TryParseYaml(text, assumeHeader);
-        }
-
-        // 4. Check if Markdown table
-        if (table == null && MarkdownTableParser.IsMarkdownTable(text))
-        {
-            table = MarkdownTableParser.Parse(text, assumeHeader);
-        }
-
-        // 5. Auto-detect delimiter
-        if (table == null)
-        {
-            char? bestDelimiter = DetectDelimiter(text);
-            if (bestDelimiter != null)
-            {
-                table = Parse(text, bestDelimiter.Value, assumeHeader);
-            }
-        }
-
-        if (table != null && surrogateHeaders != null)
-        {
-            var list = surrogateHeaders.ToList();
-            if (list.Count > 0)
-            {
-                table.OverrideHeaders(list);
-            }
-        }
-
-        return table;
+        return Instance.Parse(text, assumeHeader, surrogateHeaders);
     }
 
     public static TabularData Parse(string? text, char delimiter, bool? assumeHeader = null, IEnumerable<string>? surrogateHeaders = null)

@@ -1,0 +1,26 @@
+﻿using TextForge.Core.Transformers;
+
+namespace TextForge.Core.Tabular;
+
+public class YamlTabularParser : ITabularParser
+{
+    public static YamlTabularParser Instance { get; } = new();
+
+    public bool CanParse(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        return TextBeautifier.IsYaml(text);
+    }
+
+    public TabularData? Parse(string? text, bool? assumeHeader = null, IEnumerable<string>? surrogateHeaders = null)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        var table = TabularParser.TryParseYaml(text, assumeHeader);
+        if (table != null && surrogateHeaders != null)
+        {
+            var list = surrogateHeaders.ToList();
+            if (list.Count > 0) table.OverrideHeaders(list);
+        }
+        return table;
+    }
+}

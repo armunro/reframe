@@ -181,6 +181,7 @@ textforge/
 │   ├── Controls/            # Custom controls (BindableTextEditor with AvalonEdit)
 │   ├── Converters/          # WPF Value Converters
 │   ├── Highlighting/        # AvalonEdit syntax highlighting definitions (dark theme)
+│   ├── Themes/              # Theme styles and control templates (SharedTheme.xaml)
 │   ├── ViewModels/          # MainViewModel & RelayCommand MVVM implementation
 │   ├── MainWindow.xaml      # Main user interface layout and styling
 │   └── App.xaml             # Application startup and resource definitions
@@ -191,9 +192,6 @@ textforge/
 │   ├── State/               # UI section state persistence
 │   ├── Tabular/             # CSV, TSV, Markdown, and HTML table parsers & converters
 │   └── Transformers/        # Line, Case, Developer, Encoding, and Beautifier transformers
-│
-├── Catalyst.WPF/            # Reusable WPF UI Components & Theme Helpers
-│   └── Themes/              # Theme styles and control templates
 │
 └── TextForge.Tests/         # Comprehensive Unit Tests (xUnit)
     ├── FileLoadingTests.cs

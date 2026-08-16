@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextForge", "TextForge\Text
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextForge.Tests", "TextForge.Tests\TextForge.Tests.csproj", "{941AF410-09E6-42D2-AA9F-5CB43C15BC4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalyst.WPF", "Catalyst.WPF\Catalyst.WPF.csproj", "{8F5BAAC3-4DB9-4E80-B47B-1FE6354CD1FE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{941AF410-09E6-42D2-AA9F-5CB43C15BC4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{941AF410-09E6-42D2-AA9F-5CB43C15BC4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{941AF410-09E6-42D2-AA9F-5CB43C15BC4B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8F5BAAC3-4DB9-4E80-B47B-1FE6354CD1FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F5BAAC3-4DB9-4E80-B47B-1FE6354CD1FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F5BAAC3-4DB9-4E80-B47B-1FE6354CD1FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F5BAAC3-4DB9-4E80-B47B-1FE6354CD1FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
