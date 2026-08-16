@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>TextForge</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TextForge.Core\TextForge.Core.csproj" />
+        <ProjectReference Include="..\Catalyst.WPF\Catalyst.WPF.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+    </ItemGroup>
+
+</Project>

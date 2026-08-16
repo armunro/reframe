@@ -1,0 +1,47 @@
+﻿# .gitignore
+# User specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.lut
+
+# Project specific config files
+**/config.yaml
+**/projects.yaml
+**/Rules/*.yaml
+**/Rules/*.yml
+**/Notes/*.md
+**/appsettings*.json
+**/launchSettings.json
+*.DotSettings.user
+auth_record_flightplan.bin
+
+# icons
+icons/
+
+# Frontend node_modules and build artifacts
+node_modules/
+
+FlightPlan/wwwroot/

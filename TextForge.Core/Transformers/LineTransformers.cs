@@ -1,0 +1,509 @@
+﻿using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace TextForge.Core.Transformers;
+
+public enum QuoteStyle
+{
+    None,
+    SingleQuotes,      // 'item'
+    DoubleQuotes,      // "item"
+    Backticks,         // `item`
+    SquareBrackets,    // [item]
+    Parentheses,       // (item)
+    CurlyBraces,       // {item}
+    Custom             // prefix + item + suffix
+}
+
+public enum SortOrder
+{
+    AlphabeticalAsc,
+    AlphabeticalDesc,
+    CaseInsensitiveAsc,
+    CaseInsensitiveDesc,
+    NaturalNumericAsc,
+    NaturalNumericDesc,
+    LengthAsc,
+    LengthDesc,
+    Reverse
+}
+
+public enum DeduplicateMode
+{
+    Distinct,
+    DuplicatesOnly,
+    CountOccurrences
+}
+
+public static class LineTransformers
+{
+    public static string QuoteLines(
+        string? text,
+        QuoteStyle style = QuoteStyle.SingleQuotes,
+        string customPrefix = "",
+        string customSuffix = "",
+        bool skipEmpty = true,
+        bool escapeInnerQuotes = true)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var (prefix, suffix) = GetQuotePrefixSuffix(style, customPrefix, customSuffix);
+        var lines = SplitIntoLines(text);
+        var sb = new StringBuilder();
+
+        for (int i = 0; i < lines.Count; i++)
+        {
+            string line = lines[i];
+            if (skipEmpty && string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            string processed = line;
+            if (escapeInnerQuotes)
+            {
+                if (style == QuoteStyle.SingleQuotes)
+                    processed = processed.Replace("'", "''");
+                else if (style == QuoteStyle.DoubleQuotes)
+                    processed = processed.Replace("\"", "\\\"");
+                else if (style == QuoteStyle.Backticks)
+                    processed = processed.Replace("`", "\\`");
+            }
+
+            sb.AppendLine($"{prefix}{processed}{suffix}");
+        }
+
+        return sb.ToString().TrimEnd('\r', '\n');
+    }
+
+    public static string JoinLines(
+        string? text,
+        string delimiter = ", ",
+        QuoteStyle itemQuote = QuoteStyle.None,
+        string itemPrefix = "",
+        string itemSuffix = "",
+        string overallPrefix = "",
+        string overallSuffix = "",
+        bool skipEmpty = true)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var (quotePre, quoteSuf) = GetQuotePrefixSuffix(itemQuote, itemPrefix, itemSuffix);
+        var lines = SplitIntoLines(text);
+        var items = new List<string>();
+
+        foreach (var line in lines)
+        {
+            string trimmed = line.Trim();
+            if (skipEmpty && string.IsNullOrWhiteSpace(trimmed)) continue;
+
+            items.Add($"{quotePre}{trimmed}{quoteSuf}");
+        }
+
+        string joined = string.Join(delimiter, items);
+        return $"{overallPrefix}{joined}{overallSuffix}";
+    }
+
+    public static string SplitLine(
+        string? text,
+        string? delimiter = null,
+        bool isRegex = false,
+        bool trimItems = true,
+        bool removeEmpty = true)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        string[] items;
+        if (string.IsNullOrEmpty(delimiter))
+        {
+            // Auto-detect delimiter
+            var d = Analysis.TextAnalyzer.Analyze(text).DetectedDelimiter;
+            if (d.HasValue)
+            {
+                items = text.Split(d.Value);
+            }
+            else
+            {
+                // Fallback to comma or whitespace
+                items = Regex.Split(text, @"[,\t;]+");
+            }
+        }
+        else if (isRegex)
+        {
+            items = Regex.Split(text, delimiter);
+        }
+        else
+        {
+            items = text.Split(new[] { delimiter }, StringSplitOptions.None);
+        }
+
+        var result = new List<string>();
+        foreach (var item in items)
+        {
+            string val = trimItems ? item.Trim() : item;
+            if (removeEmpty && string.IsNullOrWhiteSpace(val)) continue;
+            result.Add(val);
+        }
+
+        return string.Join(Environment.NewLine, result);
+    }
+
+    public static string TrimLines(
+        string? text,
+        bool trimStart = true,
+        bool trimEnd = true,
+        bool removeEmptyLines = true,
+        bool collapseWhitespace = false)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var lines = SplitIntoLines(text);
+        var result = new List<string>();
+
+        foreach (var line in lines)
+        {
+            string processed = line;
+            if (collapseWhitespace)
+            {
+                processed = Regex.Replace(processed, @"\s+", " ");
+            }
+            if (trimStart && trimEnd)
+            {
+                processed = processed.Trim();
+            }
+            else if (trimStart)
+            {
+                processed = processed.TrimStart();
+            }
+            else if (trimEnd)
+            {
+                processed = processed.TrimEnd();
+            }
+
+            if (removeEmptyLines && string.IsNullOrWhiteSpace(processed))
+            {
+                continue;
+            }
+
+            result.Add(processed);
+        }
+
+        return string.Join(Environment.NewLine, result);
+    }
+
+    public static string SortLines(string? text, SortOrder order = SortOrder.AlphabeticalAsc)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var lines = SplitIntoLines(text);
+
+        IEnumerable<string> sorted = order switch
+        {
+            SortOrder.AlphabeticalAsc => lines.OrderBy(l => l, StringComparer.Ordinal),
+            SortOrder.AlphabeticalDesc => lines.OrderByDescending(l => l, StringComparer.Ordinal),
+            SortOrder.CaseInsensitiveAsc => lines.OrderBy(l => l, StringComparer.OrdinalIgnoreCase),
+            SortOrder.CaseInsensitiveDesc => lines.OrderByDescending(l => l, StringComparer.OrdinalIgnoreCase),
+            SortOrder.NaturalNumericAsc => lines.OrderBy(l => l, new NaturalStringComparer()),
+            SortOrder.NaturalNumericDesc => lines.OrderByDescending(l => l, new NaturalStringComparer()),
+            SortOrder.LengthAsc => lines.OrderBy(l => l.Length).ThenBy(l => l, StringComparer.OrdinalIgnoreCase),
+            SortOrder.LengthDesc => lines.OrderByDescending(l => l.Length).ThenBy(l => l, StringComparer.OrdinalIgnoreCase),
+            SortOrder.Reverse => lines.AsEnumerable().Reverse(),
+            _ => lines
+        };
+
+        return string.Join(Environment.NewLine, sorted);
+    }
+
+    public static string DeduplicateLines(
+        string? text,
+        DeduplicateMode mode = DeduplicateMode.Distinct,
+        bool caseSensitive = false)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var lines = SplitIntoLines(text);
+        var comparer = caseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
+        if (mode == DeduplicateMode.Distinct)
+        {
+            return string.Join(Environment.NewLine, lines.Distinct(comparer));
+        }
+
+        var groups = lines.GroupBy(l => l, comparer).ToList();
+
+        if (mode == DeduplicateMode.DuplicatesOnly)
+        {
+            var duplicates = groups.Where(g => g.Count() > 1).Select(g => g.Key);
+            return string.Join(Environment.NewLine, duplicates);
+        }
+
+        if (mode == DeduplicateMode.CountOccurrences)
+        {
+            var counts = groups.OrderByDescending(g => g.Count())
+                               .Select(g => $"{g.Count(),4}x  {g.Key}");
+            return string.Join(Environment.NewLine, counts);
+        }
+
+        return text;
+    }
+
+    public static string FilterLines(
+        string? text,
+        string filterQuery,
+        bool isRegex = false,
+        bool keepMatching = true,
+        bool caseSensitive = false)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+        if (string.IsNullOrEmpty(filterQuery)) return text;
+
+        var lines = SplitIntoLines(text);
+        Regex? regex = null;
+        if (isRegex)
+        {
+            var options = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+            regex = new Regex(filterQuery, options);
+        }
+
+        var filtered = lines.Where(line =>
+        {
+            bool matches;
+            if (isRegex && regex != null)
+            {
+                matches = regex.IsMatch(line);
+            }
+            else
+            {
+                var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                matches = line.Contains(filterQuery, comparison);
+            }
+
+            return keepMatching ? matches : !matches;
+        });
+
+        return string.Join(Environment.NewLine, filtered);
+    }
+
+    public static string ReplaceInLines(
+        string? text,
+        string find,
+        string replaceWith = "",
+        bool isRegex = false,
+        bool caseSensitive = false,
+        bool skipEmpty = false)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+        if (string.IsNullOrEmpty(find)) return text;
+
+        var lines = SplitIntoLines(text);
+        var result = new List<string>();
+
+        Regex? regex = null;
+        if (isRegex)
+        {
+            var options = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+            regex = new Regex(find, options);
+        }
+
+        string replacement = replaceWith ?? string.Empty;
+
+        foreach (var line in lines)
+        {
+            if (skipEmpty && string.IsNullOrWhiteSpace(line))
+            {
+                result.Add(line);
+                continue;
+            }
+
+            if (isRegex && regex != null)
+            {
+                result.Add(regex.Replace(line, replacement));
+            }
+            else
+            {
+                var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                result.Add(line.Replace(find, replacement, comparison));
+            }
+        }
+
+        return string.Join(Environment.NewLine, result);
+    }
+
+    public static string AddPrefixSuffix(
+        string? text,
+        string prefix = "",
+        string suffix = "",
+        bool skipEmpty = true,
+        bool prefixSkipFirst = false,
+        bool prefixSkipLast = false,
+        bool suffixSkipFirst = false,
+        bool suffixSkipLast = false)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var lines = SplitIntoLines(text);
+        var result = new List<string>();
+
+        int firstEligibleIndex = -1;
+        int lastEligibleIndex = -1;
+
+        if (skipEmpty)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    if (firstEligibleIndex == -1) firstEligibleIndex = i;
+                    lastEligibleIndex = i;
+                }
+            }
+        }
+        else
+        {
+            if (lines.Count > 0)
+            {
+                firstEligibleIndex = 0;
+                lastEligibleIndex = lines.Count - 1;
+            }
+        }
+
+        for (int i = 0; i < lines.Count; i++)
+        {
+            string line = lines[i];
+            if (skipEmpty && string.IsNullOrWhiteSpace(line))
+            {
+                result.Add(line);
+            }
+            else
+            {
+                bool isFirst = (i == firstEligibleIndex);
+                bool isLast = (i == lastEligibleIndex);
+
+                string curPrefix = (prefixSkipFirst && isFirst) || (prefixSkipLast && isLast) ? string.Empty : prefix;
+                string curSuffix = (suffixSkipFirst && isFirst) || (suffixSkipLast && isLast) ? string.Empty : suffix;
+
+                result.Add($"{curPrefix}{line}{curSuffix}");
+            }
+        }
+
+        return string.Join(Environment.NewLine, result);
+    }
+
+    public static string NumberLines(string? text, string format = "{n}. ", int startNumber = 1, bool skipEmpty = true)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        var lines = SplitIntoLines(text);
+        var result = new List<string>();
+        int current = startNumber;
+
+        foreach (var line in lines)
+        {
+            if (skipEmpty && string.IsNullOrWhiteSpace(line))
+            {
+                result.Add(line);
+            }
+            else
+            {
+                string numPrefix = format
+                    .Replace("{n}", current.ToString(CultureInfo.InvariantCulture))
+                    .Replace("{0n}", current.ToString("D2", CultureInfo.InvariantCulture))
+                    .Replace("{00n}", current.ToString("D3", CultureInfo.InvariantCulture));
+
+                result.Add($"{numPrefix}{line}");
+                current++;
+            }
+        }
+
+        return string.Join(Environment.NewLine, result);
+    }
+
+    public static string ExtractRegex(string? text, string regexPattern, int captureGroup = 0)
+    {
+        if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(regexPattern)) return string.Empty;
+
+        var regex = new Regex(regexPattern, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+        var matches = regex.Matches(text);
+        var results = new List<string>();
+
+        foreach (Match match in matches)
+        {
+            if (captureGroup >= 0 && captureGroup < match.Groups.Count)
+            {
+                results.Add(match.Groups[captureGroup].Value);
+            }
+            else
+            {
+                results.Add(match.Value);
+            }
+        }
+
+        return string.Join(Environment.NewLine, results);
+    }
+
+    private static (string Prefix, string Suffix) GetQuotePrefixSuffix(QuoteStyle style, string customPrefix, string customSuffix)
+    {
+        return style switch
+        {
+            QuoteStyle.SingleQuotes => ("'", "'"),
+            QuoteStyle.DoubleQuotes => ("\"", "\""),
+            QuoteStyle.Backticks => ("`", "`"),
+            QuoteStyle.SquareBrackets => ("[", "]"),
+            QuoteStyle.Parentheses => ("(", ")"),
+            QuoteStyle.CurlyBraces => ("{", "}"),
+            QuoteStyle.Custom => (customPrefix, customSuffix),
+            _ => (string.Empty, string.Empty)
+        };
+    }
+
+    private static List<string> SplitIntoLines(string text)
+    {
+        return text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
+    }
+}
+
+public class NaturalStringComparer : IComparer<string>
+{
+    public int Compare(string? x, string? y)
+    {
+        if (x == null && y == null) return 0;
+        if (x == null) return -1;
+        if (y == null) return 1;
+
+        int ix = 0, iy = 0;
+        while (ix < x.Length && iy < y.Length)
+        {
+            if (char.IsDigit(x[ix]) && char.IsDigit(y[iy]))
+            {
+                int startX = ix;
+                while (ix < x.Length && char.IsDigit(x[ix])) ix++;
+                string numStrX = x.Substring(startX, ix - startX);
+
+                int startY = iy;
+                while (iy < y.Length && char.IsDigit(y[iy])) iy++;
+                string numStrY = y.Substring(startY, iy - startY);
+
+                if (long.TryParse(numStrX, out long numX) && long.TryParse(numStrY, out long numY))
+                {
+                    int numComp = numX.CompareTo(numY);
+                    if (numComp != 0) return numComp;
+                }
+                else
+                {
+                    int strComp = string.Compare(numStrX, numStrY, StringComparison.Ordinal);
+                    if (strComp != 0) return strComp;
+                }
+            }
+            else
+            {
+                int chComp = char.ToUpperInvariant(x[ix]).CompareTo(char.ToUpperInvariant(y[iy]));
+                if (chComp != 0) return chComp;
+                ix++;
+                iy++;
+            }
+        }
+
+        return x.Length.CompareTo(y.Length);
+    }
+}
