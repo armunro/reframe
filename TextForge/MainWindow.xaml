@@ -308,12 +308,6 @@
                     <ui:Button Appearance="Secondary" Command="{Binding LoadFileCommand}" ToolTip="Load input from file (Ctrl+O)" Margin="0,0,6,0" Padding="8,4" Icon="{ui:SymbolIcon Symbol=FolderOpen24}">
                         <TextBlock Text="Open" FontSize="11"/>
                     </ui:Button>
-                    <ui:Button Appearance="Primary" Command="{Binding PasteInputCommand}" Margin="0,0,6,0" Padding="10,4" Icon="{ui:SymbolIcon Symbol=ClipboardPaste24}">
-                        <TextBlock Text="Paste &amp; Format" FontSize="11" FontWeight="SemiBold"/>
-                    </ui:Button>
-                    <ui:Button Appearance="Success" Command="{Binding CopyOutputCommand}" Margin="0,0,6,0" Padding="10,4" Icon="{ui:SymbolIcon Symbol=Copy24}">
-                        <TextBlock Text="Copy Output" FontSize="11"/>
-                    </ui:Button>
                     <ui:Button Appearance="Secondary" Command="{Binding ClearInputCommand}" Margin="0,0,10,0" Padding="8,4" Icon="{ui:SymbolIcon Symbol=Delete24}">
                         <TextBlock Text="Clear" FontSize="11"/>
                     </ui:Button>
@@ -321,20 +315,23 @@
 
                 <!-- Sample Data Menu -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Menu Background="Transparent" VerticalAlignment="Center">
-                        <MenuItem Header="💡 Samples" Foreground="#E0E0E0" Background="#2A2A2A" BorderBrush="#3F3F3F" BorderThickness="1" Padding="10,5">
-                            <MenuItem Header="HTML Table (Confluence / Web)" Command="{Binding LoadSampleCommand}" CommandParameter="html" Foreground="#4EC9B0"/>
-                            <MenuItem Header="Numbers List (SQL IN)" Command="{Binding LoadSampleCommand}" CommandParameter="numbers"/>
-                            <MenuItem Header="CSV Table Data" Command="{Binding LoadSampleCommand}" CommandParameter="csv"/>
-                            <MenuItem Header="TSV Table Data (Excel)" Command="{Binding LoadSampleCommand}" CommandParameter="tsv"/>
-                            <MenuItem Header="Markdown Table" Command="{Binding LoadSampleCommand}" CommandParameter="markdown"/>
-                            <MenuItem Header="JSON Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="json"/>
-                            <MenuItem Header="YAML Configuration Document" Command="{Binding LoadSampleCommand}" CommandParameter="yaml"/>
-                            <MenuItem Header="XML Catalog Document" Command="{Binding LoadSampleCommand}" CommandParameter="xml"/>
-                            <MenuItem Header="Delimited Single Line" Command="{Binding LoadSampleCommand}" CommandParameter="delimited"/>
-                            <MenuItem Header="URL Query String" Command="{Binding LoadSampleCommand}" CommandParameter="query"/>
-                        </MenuItem>
-                    </Menu>
+                    <ui:DropDownButton Appearance="Secondary" Padding="8,4" Icon="{ui:SymbolIcon Symbol=Lightbulb24}">
+                        <TextBlock Text="Samples" FontSize="11"/>
+                        <ui:DropDownButton.Flyout>
+                            <ContextMenu Background="#252528" BorderBrush="#383838" BorderThickness="1">
+                                <MenuItem Header="HTML Table (Confluence / Web)" Command="{Binding LoadSampleCommand}" CommandParameter="html" Foreground="#4EC9B0"/>
+                                <MenuItem Header="Numbers List (SQL IN)" Command="{Binding LoadSampleCommand}" CommandParameter="numbers"/>
+                                <MenuItem Header="CSV Table Data" Command="{Binding LoadSampleCommand}" CommandParameter="csv"/>
+                                <MenuItem Header="TSV Table Data (Excel)" Command="{Binding LoadSampleCommand}" CommandParameter="tsv"/>
+                                <MenuItem Header="Markdown Table" Command="{Binding LoadSampleCommand}" CommandParameter="markdown"/>
+                                <MenuItem Header="JSON Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="json"/>
+                                <MenuItem Header="YAML Configuration Document" Command="{Binding LoadSampleCommand}" CommandParameter="yaml"/>
+                                <MenuItem Header="XML Catalog Document" Command="{Binding LoadSampleCommand}" CommandParameter="xml"/>
+                                <MenuItem Header="Delimited Single Line" Command="{Binding LoadSampleCommand}" CommandParameter="delimited"/>
+                                <MenuItem Header="URL Query String" Command="{Binding LoadSampleCommand}" CommandParameter="query"/>
+                            </ContextMenu>
+                        </ui:DropDownButton.Flyout>
+                    </ui:DropDownButton>
                 </StackPanel>
             </Grid>
         </Border>
@@ -576,40 +573,14 @@
 
                                 <!-- Grid Quick Actions Toolbar -->
                                 <Border Grid.Row="0" Background="#202020" Padding="8,4" BorderBrush="#333333" BorderThickness="0,0,0,1">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Analysis.FormatDescription, StringFormat='Grid: {0}'}" Foreground="#4EC9B0" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <ui:ToggleSwitch Content="Header Row"
-                                                             IsChecked="{Binding HasHeaders, Mode=TwoWay}"
-                                                             FontSize="11"
-                                                             VerticalAlignment="Center"
-                                                             Margin="0,0,10,0"
-                                                             ToolTip="When checked, the first row of tabular data is used for column headers. When unchecked, all rows are treated as data."/>
-                                            <ui:TextBox Text="{Binding SurrogateHeaders, UpdateSourceTrigger=PropertyChanged}"
-                                                        PlaceholderText="Surrogate headers..."
-                                                        ClearButtonEnabled="True"
-                                                        Width="160" FontSize="12"
-                                                        ToolTip="Surrogate / override column headers (comma or delimited)"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToLines" Padding="6,2" Margin="0,0,3,0">
-                                                <TextBlock Text="Extract Selected" FontSize="10"/>
-                                            </ui:Button>
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToCsv" Padding="6,2" Margin="0,0,3,0">
-                                                <TextBlock Text="→ CSV" FontSize="10"/>
-                                            </ui:Button>
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToJson" Padding="6,2" Margin="0,0,3,0">
-                                                <TextBlock Text="→ JSON" FontSize="10"/>
-                                            </ui:Button>
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToSql" Padding="6,2">
-                                                <TextBlock Text="→ SQL IN" FontSize="10"/>
-                                            </ui:Button>
-                                        </StackPanel>
-                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Analysis.FormatDescription, StringFormat='Grid: {0}'}" Foreground="#4EC9B0" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <ui:ToggleSwitch Content="Header Row"
+                                                         IsChecked="{Binding HasHeaders, Mode=TwoWay}"
+                                                         FontSize="11"
+                                                         VerticalAlignment="Center"
+                                                         ToolTip="When checked, the first row of tabular data is used for column headers. When unchecked, all rows are treated as data."/>
+                                    </StackPanel>
                                 </Border>
 
                                 <!-- Interactive DataGrid -->
@@ -1112,6 +1083,30 @@
                                     <!-- Column Selection & Extraction -->
                                     <Expander Header="Column Selection &amp; Extract" IsExpanded="True" controls:SectionState.Key="Tabular_ColumnSelectionExtract" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
+                                            <!-- Surrogate / Override Headers -->
+                                            <TextBlock Text="Surrogate / Override Headers:" Foreground="#AAAAAA" FontSize="10" Margin="0,0,0,3"/>
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ui:TextBox Grid.Column="0"
+                                                            Text="{Binding SurrogateHeaders, UpdateSourceTrigger=PropertyChanged}"
+                                                            PlaceholderText="Surrogate headers (comma separated)..."
+                                                            ClearButtonEnabled="True"
+                                                            FontSize="11"
+                                                            ToolTip="Surrogate / override column headers (comma or delimited)"/>
+                                                <ui:Button Grid.Column="1"
+                                                           Appearance="Secondary"
+                                                           Command="{Binding ActionCommand}"
+                                                           CommandParameter="GenerateSurrogateHeaders"
+                                                           ToolTip="Auto-generate Col1, Col2, ... headers"
+                                                           Padding="6,2"
+                                                           Margin="4,0,0,0">
+                                                    <TextBlock Text="Auto" FontSize="10"/>
+                                                </ui:Button>
+                                            </Grid>
+
                                             <!-- Column Selector Panel -->
                                             <Border Background="#202020" BorderBrush="#333333" BorderThickness="1" CornerRadius="4" Margin="0,0,0,6">
                                                 <Grid>
@@ -1153,7 +1148,7 @@
                                                                 <Setter Property="Margin" Value="0,1"/>
                                                                 <Setter Property="MinHeight" Value="0"/>
                                                                 <Setter Property="Background" Value="Transparent"/>
-                                                                <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                                                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                                                                 <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
