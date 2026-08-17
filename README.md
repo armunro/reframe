@@ -1,5 +1,7 @@
 # TextForge
 
+![TextForge Screenshot](Docs/Screenshot1.png)
+
 **TextForge** is a fast, modern desktop developer utility and text manipulation workbench built with **.NET 9** and **WPF**. It provides a comprehensive suite of real-time text transformation, tabular data conversion, code generation, string escaping/decoding, and text analysis tools in a responsive dark-themed interface.
 
 ---
