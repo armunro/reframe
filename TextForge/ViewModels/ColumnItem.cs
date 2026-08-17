@@ -19,9 +19,13 @@ public class ColumnItem : INotifyPropertyChanged
             {
                 _index = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));
+                OnPropertyChanged(nameof(DisplayText));
             }
         }
     }
+
+    public int DisplayIndex => _index + 1;
 
     public string Name
     {
@@ -32,6 +36,7 @@ public class ColumnItem : INotifyPropertyChanged
             {
                 _name = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayText));
             }
         }
     }
@@ -45,9 +50,13 @@ public class ColumnItem : INotifyPropertyChanged
             {
                 _sampleValue = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayText));
+                OnPropertyChanged(nameof(HasSampleValue));
             }
         }
     }
+
+    public bool HasSampleValue => !string.IsNullOrWhiteSpace(_sampleValue);
 
     public bool IsSelected
     {

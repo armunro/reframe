@@ -260,6 +260,7 @@ dotnet test TextForge.Tests/TextForge.Tests.csproj
 ## Tech Stack & Libraries
 
 - **Framework**: [.NET 9.0](https://dotnet.microsoft.com/) / WPF (Windows Presentation Foundation)
+- **UI Library**: [WPF-UI](https://github.com/lepoco/wpfui) for modern Windows 11 Fluent design, Mica backdrop, custom TitleBar, and Fluent controls
 - **Editor Control**: [AvalonEdit](https://github.com/icsharpcode/AvalonEdit) for syntax-highlighted code and text editing
 - **Testing**: [xUnit](https://xunit.net/) & `Microsoft.NET.Test.Sdk`
 - **Pattern**: MVVM (Model-View-ViewModel) with XAML data binding

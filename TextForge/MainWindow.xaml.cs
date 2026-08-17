@@ -6,10 +6,11 @@ using System.Windows.Input;
 using TextForge.Core.Tabular;
 using TextForge.Core.Transformers;
 using TextForge.ViewModels;
+using Wpf.Ui.Controls;
 
 namespace TextForge;
 
-public partial class MainWindow : Window
+public partial class MainWindow : FluentWindow
 {
     public MainWindow()
     {
