@@ -1,0 +1,77 @@
+﻿name: Release Build and Publish
+
+on:
+  push:
+    branches:
+      - 'release/**'
+      - 'release/*'
+      - 'release-*'
+      - 'releases/**'
+      - 'releases/*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build, Test, and Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Determine Version
+        id: version_step
+        shell: pwsh
+        run: |
+          $branch = "${{ github.ref_name }}"
+          $ver = $branch -replace '^releases?/', '' -replace '^releases?-', ''
+          if (-not $ver -or $ver -eq $branch) {
+            $ver = "v${{ github.run_number }}"
+          } elseif (-not ($ver.StartsWith("v") -or $ver.StartsWith("V"))) {
+            $ver = "v$ver"
+          }
+          Write-Host "Calculated version: $ver"
+          echo "RELEASE_VERSION=$ver" >> $env:GITHUB_ENV
+
+      - name: Restore dependencies
+        run: dotnet restore textforge.sln
+
+      - name: Build Solution
+        run: dotnet build textforge.sln -c Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test textforge.sln -c Release --no-build --verbosity normal
+
+      - name: Publish WPF App (win-x64 self-contained)
+        run: |
+          dotnet publish TextForge/TextForge.csproj -c Release -r win-x64 --self-contained true -o ./publish/win-x64
+
+      - name: Package Release Assets
+        shell: pwsh
+        run: |
+          $zipName = "TextForge-${{ env.RELEASE_VERSION }}-win-x64.zip"
+          Compress-Archive -Path ./publish/win-x64/* -DestinationPath "./$zipName"
+          Write-Host "Created $zipName"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: Release ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            TextForge-*-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
