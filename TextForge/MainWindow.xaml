@@ -263,15 +263,8 @@
                      ShowMaximize="True"
                      ShowMinimize="True"
                      ShowClose="True"
-                     Padding="8,4">
-            <ui:TitleBar.Header>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
-                    <ui:Badge Content="{Binding DetectedFormatBadge}"
-                              Appearance="Primary"
-                              VerticalAlignment="Center"/>
-                </StackPanel>
-            </ui:TitleBar.Header>
-        </ui:TitleBar>
+                     Height="30"
+                     Padding="8,4"/>
 
         <!-- Top Header & Toolbar -->
         <Border Grid.Row="1" Background="#18FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" Padding="12,6">
@@ -285,7 +278,6 @@
                 <!-- Brand / Logo & Detected Format -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
                     <ui:SymbolIcon Symbol="Code24" FontSize="18" Foreground="#007ACC" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="TextForge" FontWeight="SemiBold" FontSize="15" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,12,0"/>
                     <Border Background="#20007ACC" BorderBrush="#40007ACC" BorderThickness="1" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Format: " Foreground="#888888" FontSize="11" VerticalAlignment="Center"/>
@@ -371,7 +363,7 @@
                                 <TextBlock Text="Syntax:" Foreground="#888888" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                           SelectedItem="{Binding SelectedInputSyntax, UpdateSourceTrigger=PropertyChanged}"
-                                          Width="95" Height="24" FontSize="10" VerticalAlignment="Center"/>
+                                          Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
                                 <ui:Button Appearance="Transparent" Command="{Binding HistoryBackCommand}" ToolTip="Previous Snapshot (Alt+Left)" Padding="6,2" FontSize="11" Margin="0,0,2,0" Icon="{ui:SymbolIcon Symbol=ArrowLeft24}"/>
@@ -840,7 +832,7 @@
                                     <TextBlock Text="Syntax:" Foreground="#888888" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                     <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                               SelectedItem="{Binding SelectedOutputSyntax, UpdateSourceTrigger=PropertyChanged}"
-                                              Width="95" Height="24" FontSize="10" VerticalAlignment="Center"/>
+                                              Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                                     <ui:Button Appearance="Success" Command="{Binding SendToInputCommand}" IsEnabled="{Binding CanSendOutputToInput}" ToolTip="Send output directly to input editor (Ctrl+Shift+I / Alt+I / F4)" Padding="12,3" Margin="0,0,6,0" Icon="{ui:SymbolIcon Symbol=ArrowUp24}">
@@ -1562,7 +1554,6 @@
                     <ui:ToggleSwitch Content="🔁 Auto Output → Input" IsChecked="{Binding AutoSendOutputToInput, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <ui:ToggleSwitch Content="↩ Word Wrap" IsChecked="{Binding IsWordWrap, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
-                <TextBlock Grid.Column="2" Text="TextForge • Modern Fluent UI" Foreground="#888888" FontSize="11" VerticalAlignment="Center"/>
             </Grid>
         </Border>
     </Grid>
