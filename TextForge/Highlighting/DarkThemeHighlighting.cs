@@ -120,21 +120,22 @@ public static class DarkThemeHighlighting
         string delimiterEscaped = delimiter == '\t' ? @"\t" : @",";
         string delimiterDisplay = delimiter == '\t' ? @"\t" : @",";
 
-        // XSHD definition for CSV / TSV with rich dark-theme colors:
+        // XSHD definition for CSV / TSV with rich dark navy theme colors:
         // - Quoted strings (warm orange #CE9178)
-        // - Delimiters (bold light blue / cyan #569CD6)
-        // - Numbers / numeric cells (soft green #B5CEA8)
-        // - Booleans / null keywords (purple #C586C0)
+        // - Delimiters (bold slate blue #668BC4)
+        // - Numbers / numeric cells (soft sage green #B5CEA8)
+        // - Booleans / null keywords (purple #A78BFA)
         // - Date / timestamps (teal #4EC9B0)
-        // - Default unquoted field text (foreground #D4D4D4)
+        // - Comments (slate gray #5C6682)
+        // - Default unquoted field text (crisp foreground #DCE1EB)
         string xshd = $@"<?xml version=""1.0"" encoding=""utf-8""?>
 <SyntaxDefinition name=""{name}"" extensions=""{string.Join(";", extensions)}"" xmlns=""http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008"">
-    <Color name=""Delimiter"" foreground=""#569CD6"" fontWeight=""bold"" />
+    <Color name=""Delimiter"" foreground=""#668BC4"" fontWeight=""bold"" />
     <Color name=""QuotedString"" foreground=""#CE9178"" />
     <Color name=""Number"" foreground=""#B5CEA8"" />
-    <Color name=""BooleanOrNull"" foreground=""#C586C0"" fontWeight=""bold"" />
+    <Color name=""BooleanOrNull"" foreground=""#A78BFA"" fontWeight=""bold"" />
     <Color name=""DateTime"" foreground=""#4EC9B0"" />
-    <Color name=""HeaderComment"" foreground=""#6A9955"" fontStyle=""italic"" />
+    <Color name=""HeaderComment"" foreground=""#5C6682"" fontStyle=""italic"" />
 
     <RuleSet>
         <!-- Comments (lines starting with # or //) -->
@@ -197,13 +198,13 @@ public static class DarkThemeHighlighting
     {
         string xshd = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <SyntaxDefinition name=""YAML"" extensions="".yaml;.yml"" xmlns=""http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008"">
-    <Color name=""Comment"" foreground=""#6A9955"" fontStyle=""italic"" />
+    <Color name=""Comment"" foreground=""#5C6682"" fontStyle=""italic"" />
     <Color name=""QuotedString"" foreground=""#CE9178"" />
-    <Color name=""Key"" foreground=""#9CDCFE"" />
-    <Color name=""Delimiter"" foreground=""#569CD6"" fontWeight=""bold"" />
+    <Color name=""Key"" foreground=""#7DCFFF"" />
+    <Color name=""Delimiter"" foreground=""#668BC4"" fontWeight=""bold"" />
     <Color name=""Number"" foreground=""#B5CEA8"" />
-    <Color name=""BooleanOrNull"" foreground=""#C586C0"" fontWeight=""bold"" />
-    <Color name=""Directive"" foreground=""#808080"" />
+    <Color name=""BooleanOrNull"" foreground=""#A78BFA"" fontWeight=""bold"" />
+    <Color name=""Directive"" foreground=""#6B7CA8"" />
 
     <RuleSet>
         <!-- Comments -->
@@ -275,17 +276,17 @@ public static class DarkThemeHighlighting
 
     private static IHighlightingDefinition ApplyDarkThemeColors(IHighlightingDefinition definition)
     {
-        // Dark theme color palette (modern VS Code / Rider dark style)
-        var keywordBrush = new SimpleHighlightingBrush(Color.FromRgb(0x56, 0x9C, 0xD6));       // #569CD6 Blue
-        var controlFlowBrush = new SimpleHighlightingBrush(Color.FromRgb(0xC5, 0x86, 0xC0));   // #C586C0 Purple
+        // Desaturated dark navy theme color palette (Calm Slate Blue rgb(30, 32, 48) style)
+        var keywordBrush = new SimpleHighlightingBrush(Color.FromRgb(0x66, 0x8B, 0xC4));       // #668BC4 Slate Blue
+        var controlFlowBrush = new SimpleHighlightingBrush(Color.FromRgb(0xA7, 0x8B, 0xFA));   // #A78BFA Soft Lavender
         var stringBrush = new SimpleHighlightingBrush(Color.FromRgb(0xCE, 0x91, 0x78));        // #CE9178 Warm Orange
-        var commentBrush = new SimpleHighlightingBrush(Color.FromRgb(0x6A, 0x99, 0x55));       // #6A9955 Green
-        var numberBrush = new SimpleHighlightingBrush(Color.FromRgb(0xB5, 0xCE, 0xA8));        // #B5CEA8 Soft Green
+        var commentBrush = new SimpleHighlightingBrush(Color.FromRgb(0x5C, 0x66, 0x82));       // #5C6682 Slate Gray
+        var numberBrush = new SimpleHighlightingBrush(Color.FromRgb(0xB5, 0xCE, 0xA8));        // #B5CEA8 Soft Sage Green
         var typeBrush = new SimpleHighlightingBrush(Color.FromRgb(0x4E, 0xC9, 0xB0));          // #4EC9B0 Teal
-        var methodBrush = new SimpleHighlightingBrush(Color.FromRgb(0xDC, 0xDC, 0xAA));        // #DCDCAA Yellow
-        var propertyBrush = new SimpleHighlightingBrush(Color.FromRgb(0x9C, 0xDC, 0xFE));      // #9CDCFE Light Blue
-        var punctuationBrush = new SimpleHighlightingBrush(Color.FromRgb(0xD4, 0xD4, 0xD4));   // #D4D4D4 Default Foreground
-        var preprocessorBrush = new SimpleHighlightingBrush(Color.FromRgb(0x9B, 0x9B, 0x9B));  // #9B9B9B Gray
+        var methodBrush = new SimpleHighlightingBrush(Color.FromRgb(0xDC, 0xDC, 0xAA));        // #DCDCAA Soft Gold / Yellow
+        var propertyBrush = new SimpleHighlightingBrush(Color.FromRgb(0x7D, 0xCF, 0xFF));      // #7DCFFF Light Cyan Blue
+        var punctuationBrush = new SimpleHighlightingBrush(Color.FromRgb(0xDC, 0xE1, 0xEB));   // #DCE1EB Crisp Slate Foreground
+        var preprocessorBrush = new SimpleHighlightingBrush(Color.FromRgb(0x6B, 0x7C, 0xA8));  // #6B7CA8 Muted Slate
         var linkBrush = new SimpleHighlightingBrush(Color.FromRgb(0x4E, 0xA6, 0xEA));          // #4EA6EA Bright Sky Blue / Link
 
         foreach (var color in definition.NamedHighlightingColors)
@@ -300,10 +301,6 @@ public static class DarkThemeHighlighting
             {
                 color.Foreground = linkBrush;
             }
-            else if (name.Contains("string") || name.Contains("char") || name.Contains("value"))
-            {
-                color.Foreground = stringBrush;
-            }
             else if (name.Contains("control") || name.Contains("goto") || name.Contains("keyword1"))
             {
                 color.Foreground = controlFlowBrush;
@@ -315,6 +312,10 @@ public static class DarkThemeHighlighting
             else if (name.Contains("type") || name.Contains("class") || name.Contains("interface") || name.Contains("struct"))
             {
                 color.Foreground = typeBrush;
+            }
+            else if (name.Contains("string") || name.Contains("char"))
+            {
+                color.Foreground = stringBrush;
             }
             else if (name.Contains("method") || name.Contains("function") || name.Contains("call"))
             {

@@ -70,4 +70,40 @@ public class HighlightingTests
         Assert.Equal(0xA6, color.Value.G);
         Assert.Equal(0xEA, color.Value.B);
     }
+
+    [Fact]
+    public void GetDefinition_CSharp_HasDarkNavyKeywordColor()
+    {
+        var definition = DarkThemeHighlighting.GetDefinition("C#");
+        Assert.NotNull(definition);
+
+        var keywordColor = definition.NamedHighlightingColors.FirstOrDefault(c => c.Name.Equals("Keywords", System.StringComparison.OrdinalIgnoreCase) || c.Name.Contains("Keyword", System.StringComparison.OrdinalIgnoreCase));
+        Assert.NotNull(keywordColor);
+        Assert.NotNull(keywordColor.Foreground);
+
+        var color = keywordColor.Foreground.GetColor(null);
+        Assert.True(color.HasValue);
+        // #668BC4: R=102 (0x66), G=139 (0x8B), B=196 (0xC4)
+        Assert.Equal(0x66, color.Value.R);
+        Assert.Equal(0x8B, color.Value.G);
+        Assert.Equal(0xC4, color.Value.B);
+    }
+
+    [Fact]
+    public void GetDefinition_Csv_HasDarkNavyDelimiterColor()
+    {
+        var definition = DarkThemeHighlighting.GetDefinition("CSV");
+        Assert.NotNull(definition);
+
+        var delimiterColor = definition.NamedHighlightingColors.FirstOrDefault(c => c.Name.Equals("Delimiter", System.StringComparison.OrdinalIgnoreCase));
+        Assert.NotNull(delimiterColor);
+        Assert.NotNull(delimiterColor.Foreground);
+
+        var color = delimiterColor.Foreground.GetColor(null);
+        Assert.True(color.HasValue);
+        // #668BC4: R=102 (0x66), G=139 (0x8B), B=196 (0xC4)
+        Assert.Equal(0x66, color.Value.R);
+        Assert.Equal(0x8B, color.Value.G);
+        Assert.Equal(0xC4, color.Value.B);
+    }
 }

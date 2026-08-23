@@ -31,25 +31,25 @@ public class BindableTextEditor : TextEditor
 
     public BindableTextEditor()
     {
-        // Setup Dark Theme Defaults
-        Background = new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x1E));
-        Foreground = new SolidColorBrush(Color.FromRgb(0xD4, 0xD4, 0xD4));
-        LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x85, 0x85, 0x85));
+        // Setup Dark Navy Theme Defaults rgb(30, 32, 48)
+        Background = new SolidColorBrush(Color.FromRgb(0x1E, 0x20, 0x30));
+        Foreground = new SolidColorBrush(Color.FromRgb(0xDC, 0xE1, 0xEB));
+        LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x52, 0x58, 0x66));
         ShowLineNumbers = true;
         FontFamily = new FontFamily("Consolas, Cascadia Code, JetBrains Mono, Courier New, monospace");
         FontSize = 13;
         BorderThickness = new Thickness(0);
         Padding = new Thickness(8);
 
-        // Configure TextArea colors for Dark Theme
+        // Configure TextArea colors for Dark Navy Theme
         if (TextArea != null)
         {
-            TextArea.SelectionBrush = new SolidColorBrush(Color.FromArgb(0x66, 0x26, 0x4F, 0x78));
+            TextArea.SelectionBrush = new SolidColorBrush(Color.FromArgb(0x66, 0x46, 0x5E, 0x8A));
             TextArea.SelectionBorder = null;
             TextArea.SelectionForeground = null;
             if (TextArea.Caret != null)
             {
-                TextArea.Caret.CaretBrush = new SolidColorBrush(Color.FromRgb(0xD4, 0xD4, 0xD4));
+                TextArea.Caret.CaretBrush = new SolidColorBrush(Color.FromRgb(0xDC, 0xE1, 0xEB));
             }
             if (TextArea.TextView != null)
             {

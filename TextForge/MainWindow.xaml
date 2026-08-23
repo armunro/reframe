@@ -14,7 +14,8 @@
         Height="820" Width="1300"
         MinHeight="620" MinWidth="960"
         WindowStartupLocation="CenterScreen"
-        WindowBackdropType="Mica"
+        WindowBackdropType="None"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
         ExtendsContentIntoTitleBar="True"
         AllowDrop="True"
         Drop="MainWindow_Drop"
@@ -37,226 +38,9 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <conv:BooleanToTextWrappingConverter x:Key="BoolToWrapConv"/>
-        
-        <!-- Custom Mono Font for Developer Text Boxes -->
-        <FontFamily x:Key="EditorFontFamily">Cascadia Code, Consolas, Courier New, monospace</FontFamily>
-
-        <!-- Send to Input Green Accent Button Style -->
-        <Style x:Key="SendToInputButtonStyle" TargetType="ui:Button">
-            <Setter Property="Appearance" Value="Success"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Padding" Value="14,5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <!-- Section Expander Style -->
-        <Style x:Key="SectionExpanderStyle" TargetType="Expander">
-            <Setter Property="IsExpanded" Value="False"/>
-            <Setter Property="Foreground" Value="#9CDCFE"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Margin" Value="0,2,0,5"/>
-            <Setter Property="Padding" Value="8,8,8,6"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Expander">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderThickness="0"
-                                SnapsToDevicePixels="True">
-                            <DockPanel>
-                                <ToggleButton x:Name="HeaderSite"
-                                              DockPanel.Dock="Top"
-                                              Content="{TemplateBinding Header}"
-                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
-                                              Foreground="{TemplateBinding Foreground}"
-                                              FontWeight="{TemplateBinding FontWeight}"
-                                              FontSize="{TemplateBinding FontSize}"
-                                              IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
-                                    <ToggleButton.Template>
-                                        <ControlTemplate TargetType="ToggleButton">
-                                            <Border x:Name="headerBorder"
-                                                    Background="#252528"
-                                                    BorderBrush="#383838"
-                                                    BorderThickness="1"
-                                                    CornerRadius="5"
-                                                    Padding="9,6"
-                                                    Cursor="Hand"
-                                                    SnapsToDevicePixels="True">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <ContentPresenter Grid.Column="0"
-                                                                      VerticalAlignment="Center"
-                                                                      RecognizesAccessKey="True"/>
-                                                    <Path x:Name="arrow"
-                                                          Grid.Column="1"
-                                                          HorizontalAlignment="Right"
-                                                          VerticalAlignment="Center"
-                                                          Margin="6,0,2,0"
-                                                          Data="M 0 0 L 4 4 L 8 0 Z"
-                                                          Fill="#007ACC"
-                                                          RenderTransformOrigin="0.5,0.5">
-                                                        <Path.RenderTransform>
-                                                            <RotateTransform Angle="-90"/>
-                                                        </Path.RenderTransform>
-                                                    </Path>
-                                                </Grid>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsChecked" Value="True">
-                                                    <Setter TargetName="arrow" Property="RenderTransform">
-                                                        <Setter.Value>
-                                                            <RotateTransform Angle="0"/>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                    <Setter TargetName="arrow" Property="Fill" Value="#4EC9B0"/>
-                                                    <Setter TargetName="headerBorder" Property="Background" Value="#2A2A2E"/>
-                                                    <Setter TargetName="headerBorder" Property="BorderBrush" Value="#4A4A4A"/>
-                                                    <Setter TargetName="headerBorder" Property="CornerRadius" Value="5,5,0,0"/>
-                                                </Trigger>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="headerBorder" Property="Background" Value="#323238"/>
-                                                    <Setter TargetName="headerBorder" Property="BorderBrush" Value="#007ACC"/>
-                                                    <Setter TargetName="arrow" Property="Fill" Value="#569CD6"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </ToggleButton.Template>
-                                </ToggleButton>
-                                <Border x:Name="ExpandSiteBorder"
-                                        DockPanel.Dock="Bottom"
-                                        Background="#1D1D21"
-                                        BorderBrush="#383838"
-                                        BorderThickness="1,0,1,1"
-                                        CornerRadius="0,0,5,5"
-                                        Margin="0,-1,0,0"
-                                        Padding="{TemplateBinding Padding}"
-                                        Visibility="Collapsed">
-                                    <ContentPresenter x:Name="ExpandSite"
-                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                      Focusable="False"/>
-                                </Border>
-                            </DockPanel>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsExpanded" Value="True">
-                                <Setter TargetName="ExpandSiteBorder" Property="Visibility" Value="Visible"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#777777"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Tool Button Style -->
-        <Style x:Key="ToolButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#2A2A2D"/>
-            <Setter Property="Foreground" Value="#E0E0E0"/>
-            <Setter Property="BorderBrush" Value="#3F3F42"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="1,2"/>
-            <Setter Property="Padding" Value="8,5"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="btnBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="#35353A"/>
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#007ACC"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="#1E1E22"/>
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#005A9E"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="btnBorder" Property="Opacity" Value="0.5"/>
-                                <Setter Property="Foreground" Value="#777777"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Primary Action Button Style -->
-        <Style x:Key="PrimaryToolButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#005A9E"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#0078D4"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="1,2"/>
-            <Setter Property="Padding" Value="8,5"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="btnBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="#0078D4"/>
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#106EBE"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="#004C87"/>
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#003D6B"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="btnBorder" Property="Opacity" Value="0.5"/>
-                                <Setter Property="Foreground" Value="#AAAAAA"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- TabItem Style with explicit Disabled Appearance -->
-        <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Opacity" Value="0.35"/>
-                    <Setter Property="Foreground" Value="#707070"/>
-                    <Setter Property="Cursor" Value="No"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </ui:FluentWindow.Resources>
 
-    <Grid>
+    <Grid Background="{DynamicResource ApplicationBackgroundBrush}">
         <Grid.RowDefinitions>
             <!-- TitleBar -->
             <RowDefinition Height="Auto"/>
@@ -278,7 +62,7 @@
                      Padding="8,4"/>
 
         <!-- Top Header & Toolbar -->
-        <Border Grid.Row="1" Background="#18FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" Padding="12,6">
+        <Border Grid.Row="1" Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="12,6">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -288,11 +72,11 @@
 
                 <!-- Brand / Logo & Detected Format -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
-                    <ui:SymbolIcon Symbol="Code24" FontSize="18" Foreground="#007ACC" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <ui:SymbolIcon Symbol="Code24" FontSize="18" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <Border Background="#20007ACC" BorderBrush="#40007ACC" BorderThickness="1" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Format: " Foreground="#888888" FontSize="11" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding DetectedFormatBadge}" Foreground="#4EC9B0" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="Format: " Foreground="{DynamicResource MutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding DetectedFormatBadge}" Foreground="{DynamicResource AccentSuccessBrush}" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -321,8 +105,8 @@
                     <ui:DropDownButton Appearance="Secondary" Padding="8,4" Icon="{ui:SymbolIcon Symbol=Lightbulb24}">
                         <TextBlock Text="Samples" FontSize="11"/>
                         <ui:DropDownButton.Flyout>
-                            <ContextMenu Background="#252528" BorderBrush="#383838" BorderThickness="1">
-                                <MenuItem Header="HTML Table (Confluence / Web)" Command="{Binding LoadSampleCommand}" CommandParameter="html" Foreground="#4EC9B0"/>
+                            <ContextMenu Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
+                                <MenuItem Header="HTML Table (Confluence / Web)" Command="{Binding LoadSampleCommand}" CommandParameter="html" Foreground="{DynamicResource AccentSuccessBrush}"/>
                                 <MenuItem Header="Numbers List (SQL IN)" Command="{Binding LoadSampleCommand}" CommandParameter="numbers"/>
                                 <MenuItem Header="CSV Table Data" Command="{Binding LoadSampleCommand}" CommandParameter="csv"/>
                                 <MenuItem Header="TSV Table Data (Excel)" Command="{Binding LoadSampleCommand}" CommandParameter="tsv"/>
@@ -353,7 +137,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: INPUT PANE -->
-            <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#25FFFFFF" BorderThickness="1" CornerRadius="8">
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -362,7 +146,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Pane Header -->
-                    <Border Grid.Row="0" Background="#15FFFFFF" Padding="10,6" BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
+                    <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="10,6" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -370,8 +154,8 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="INPUT" FontWeight="Bold" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="Syntax:" Foreground="#888888" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="INPUT" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Syntax:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                           SelectedItem="{Binding SelectedInputSyntax, UpdateSourceTrigger=PropertyChanged}"
                                           Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
@@ -394,7 +178,7 @@
                     </Border>
 
                     <!-- Input Editor / History Tabs -->
-                    <TabControl Grid.Row="1" BorderThickness="0" Background="Transparent" Padding="0">
+                    <TabControl Grid.Row="1">
                         <!-- Tab 1: Editor -->
                         <TabItem Header="Editor">
                             <controls:BindableTextEditor x:Name="InputEditor"
@@ -403,13 +187,13 @@
                                                          WordWrap="{Binding IsWordWrap}"
                                                          FontFamily="{StaticResource EditorFontFamily}"
                                                          FontSize="13"
-                                                         Background="#181818"
-                                                         Foreground="#D4D4D4"/>
+                                                         Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                         Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                         </TabItem>
 
                         <!-- Tab 2: Timeline & History -->
                         <TabItem Header="{Binding HistoryTabHeader}">
-                            <Grid Background="#181818">
+                            <Grid Background="{DynamicResource SurfaceBackgroundBrush}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="1*" MinHeight="80"/>
                                     <RowDefinition Height="4"/>
@@ -424,7 +208,7 @@
                                     </Grid.RowDefinitions>
 
                                     <!-- Filter / Search History Toolbar -->
-                                    <Border Grid.Row="0" Background="#202020" Padding="6,4" BorderBrush="#333333" BorderThickness="0,0,0,1">
+                                    <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="6,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -444,12 +228,12 @@
                                     <ListBox Grid.Row="1"
                                              ItemsSource="{Binding HistoryItems}"
                                              SelectedItem="{Binding SelectedHistoryItem, Mode=TwoWay}"
-                                             Background="#181818"
+                                             Background="{DynamicResource SurfaceBackgroundBrush}"
                                              BorderThickness="0"
                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="#222222" BorderBrush="#333333" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="0,2">
+                                                <Border Background="{DynamicResource SurfaceCardBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="0,2">
                                                     <Grid>
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
@@ -464,14 +248,14 @@
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" Foreground="#4EC9B0" FontWeight="SemiBold" FontSize="10" Margin="0,0,6,0"/>
-                                                            <TextBlock Grid.Column="1" Text="{Binding Source}" Foreground="#9CDCFE" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" Foreground="{DynamicResource AccentSuccessBrush}" FontWeight="SemiBold" FontSize="10" Margin="0,0,6,0"/>
+                                                            <TextBlock Grid.Column="1" Text="{Binding Source}" Foreground="{DynamicResource AccentInfoBrush}" FontSize="10" TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Grid.Column="2" Text="📸" Visibility="{Binding IsSnapshot, Converter={StaticResource BooleanToVisibilityConverter}}" FontSize="10"/>
                                                         </Grid>
 
                                                         <!-- Snippet Preview -->
-                                                        <Border Grid.Row="1" Background="#141414" CornerRadius="2" Padding="5,3" Margin="0,0,0,4">
-                                                            <TextBlock Text="{Binding Preview}" FontFamily="{StaticResource EditorFontFamily}" Foreground="#AAAAAA" FontSize="10" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxHeight="45"/>
+                                                        <Border Grid.Row="1" Background="{DynamicResource SurfaceDarkBackgroundBrush}" CornerRadius="2" Padding="5,3" Margin="0,0,0,4">
+                                                            <TextBlock Text="{Binding Preview}" FontFamily="{StaticResource EditorFontFamily}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxHeight="45"/>
                                                         </Border>
 
                                                         <!-- Footer Line & Actions -->
@@ -480,7 +264,7 @@
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="{Binding SizeDisplay}" Foreground="#888888" FontSize="10" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding SizeDisplay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center"/>
                                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                                                 <ui:Button Appearance="Primary" Command="{Binding DataContext.RestoreHistoryCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Padding="6,1" FontSize="10" Margin="0,0,3,0">
                                                                     <TextBlock Text="↺ Restore" FontSize="10"/>
@@ -499,25 +283,25 @@
                                     </ListBox>
                                 </Grid>
 
-                                <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="#282828"/>
+                                <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource ControlStrokeColorDefaultBrush}"/>
 
                                 <!-- Bottom: Full text preview of selected history snapshot -->
-                                <Border Grid.Row="2" Background="#181818" Padding="6">
+                                <Border Grid.Row="2" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="6">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
 
-                                        <Border Grid.Row="0" Background="#222222" Padding="6,4" CornerRadius="4" Margin="0,0,0,4">
+                                        <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="6,4" CornerRadius="4" Margin="0,0,0,4">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <TextBlock Text="Selected Snapshot Preview" FontWeight="Bold" Foreground="#CCCCCC" FontSize="11" Margin="0,0,8,0"/>
-                                                    <TextBlock Text="{Binding SelectedHistoryItem.SizeDisplay}" Foreground="#888888" FontSize="10" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Selected Snapshot Preview" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="{Binding SelectedHistoryItem.SizeDisplay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <ui:Button Grid.Column="1" Appearance="Primary" Command="{Binding RestoreHistoryCommand}" CommandParameter="{Binding SelectedHistoryItem}" Padding="8,2">
                                                     <TextBlock Text="↺ Restore to Input" FontSize="10"/>
@@ -530,9 +314,9 @@
                                                  IsReadOnly="True"
                                                  FontFamily="{StaticResource EditorFontFamily}"
                                                  FontSize="12"
-                                                 Background="#141414"
-                                                 Foreground="#D4D4D4"
-                                                 BorderBrush="#333333"
+                                                 Background="{DynamicResource SurfaceDarkBackgroundBrush}"
+                                                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                                                  BorderThickness="1"
                                                  Padding="6"
                                                  VerticalScrollBarVisibility="Auto"
@@ -544,8 +328,8 @@
                     </TabControl>
 
                     <!-- Input Footer / Stats -->
-                    <Border Grid.Row="2" Background="#15FFFFFF" Padding="10,4" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0" CornerRadius="0,0,8,8">
-                        <TextBlock Text="{Binding InputStats}" Foreground="#888888" FontSize="11"/>
+                    <Border Grid.Row="2" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="10,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,8,8">
+                        <TextBlock Text="{Binding InputStats}" Foreground="{DynamicResource MutedTextBrush}" FontSize="11"/>
                     </Border>
                 </Grid>
             </Border>
@@ -564,20 +348,20 @@
                 </Grid.RowDefinitions>
 
                 <!-- TOP: TABLE GRID VIEW & ANALYSIS -->
-                <Border Grid.Row="0" Background="#12FFFFFF" BorderBrush="#25FFFFFF" BorderThickness="1" CornerRadius="8">
-                    <TabControl SelectedIndex="{Binding SelectedCenterTabIndex, Mode=TwoWay}" BorderThickness="0" Background="Transparent" Padding="0">
+                <Border Grid.Row="0" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <TabControl SelectedIndex="{Binding SelectedCenterTabIndex, Mode=TwoWay}">
                         <!-- Tab 1: Tabular Grid View -->
                         <TabItem Header="Table Grid View" IsEnabled="{Binding HasTabularData}" ToolTipService.ShowOnDisabled="True" ToolTip="Table view is available when input contains tabular data">
-                            <Grid Background="#181818">
+                            <Grid Background="{DynamicResource SurfaceBackgroundBrush}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
                                 <!-- Grid Quick Actions Toolbar -->
-                                <Border Grid.Row="0" Background="#202020" Padding="8,4" BorderBrush="#333333" BorderThickness="0,0,0,1">
+                                <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Analysis.FormatDescription, StringFormat='Grid: {0}'}" Foreground="#4EC9B0" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <TextBlock Text="{Binding Analysis.FormatDescription, StringFormat='Grid: {0}'}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
                                         <ui:ToggleSwitch Content="Header Row"
                                                          IsChecked="{Binding HasHeaders, Mode=TwoWay}"
                                                          FontSize="11"
@@ -601,30 +385,30 @@
                                           IsReadOnly="True"
                                           Sorting="PreviewDataGrid_Sorting"
                                           BorderThickness="0"
-                                          Background="#181818"
-                                          Foreground="#F0F0F0"
-                                          RowBackground="#181818"
-                                          AlternatingRowBackground="#202020"/>
+                                          Background="{DynamicResource SurfaceBackgroundBrush}"
+                                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                          RowBackground="{DynamicResource SurfaceBackgroundBrush}"
+                                          AlternatingRowBackground="{DynamicResource SurfaceHeaderBackgroundBrush}"/>
                             </Grid>
                         </TabItem>
 
                         <!-- Tab 2: Structured Tree View (JSON / YAML / XML) -->
                         <TabItem Header="Structured Tree View" IsEnabled="{Binding HasStructuredData}" ToolTipService.ShowOnDisabled="True" ToolTip="Structured tree view is available when input contains JSON, YAML, or XML">
-                            <Grid Background="#181818">
+                            <Grid Background="{DynamicResource SurfaceBackgroundBrush}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
                                 <!-- Tree Quick Actions Toolbar -->
-                                <Border Grid.Row="0" Background="#202020" Padding="8,4" BorderBrush="#333333" BorderThickness="0,0,0,1">
+                                <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding StructuredStatusText, StringFormat='Tree: {0}'}" Foreground="#4EC9B0" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding StructuredStatusText, StringFormat='Tree: {0}'}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                             <ui:TextBox Text="{Binding StructuredFilterQuery, UpdateSourceTrigger=PropertyChanged}"
                                                         PlaceholderText="🔍 Filter tree..."
                                                         ClearButtonEnabled="True"
@@ -664,7 +448,7 @@
                                     <!-- Structured TreeView -->
                                     <TreeView x:Name="StructuredTreeView"
                                               ItemsSource="{Binding StructuredNodes}"
-                                              Background="#181818"
+                                              Background="{DynamicResource SurfaceBackgroundBrush}"
                                               BorderThickness="0"
                                               Padding="4"
                                               VirtualizingStackPanel.IsVirtualizing="True"
@@ -675,12 +459,12 @@
                                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                                                 <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
                                                 <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                                <Setter Property="Foreground" Value="#CCCCCC"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 <Setter Property="FontSize" Value="12"/>
                                                 <Setter Property="Padding" Value="2,1"/>
                                                 <Style.Triggers>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter Property="Background" Value="#094771"/>
+                                                        <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -689,15 +473,15 @@
                                             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                                                 <StackPanel Orientation="Horizontal" Margin="0,1" ToolTip="{Binding Path}">
                                                     <!-- Type Badge -->
-                                                    <Border Background="#2A2D2E" BorderBrush="#3F3F3F" BorderThickness="1" CornerRadius="3" Padding="3,0" Margin="0,0,5,0" VerticalAlignment="Center">
+                                                    <Border Background="{DynamicResource SurfaceHeaderBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="3" Padding="3,0" Margin="0,0,5,0" VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding TypeBadge}" Foreground="{Binding TypeColorHex}" FontSize="9" FontFamily="Consolas" FontWeight="Bold"/>
                                                     </Border>
                                                     <!-- Node Name (Key / Element / Attribute) -->
-                                                    <TextBlock Text="{Binding Name}" Foreground="#9CDCFE" FontFamily="Consolas" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource AccentInfoBrush}" FontFamily="Consolas" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                     <!-- Colon Separator -->
-                                                    <TextBlock Text=":" Foreground="#808080" FontFamily="Consolas" Margin="2,0,4,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text=":" Foreground="{DynamicResource MutedTextBrush}" FontFamily="Consolas" Margin="2,0,4,0" VerticalAlignment="Center"/>
                                                     <!-- Node Value / Summary -->
-                                                    <TextBlock Text="{Binding DisplayValue}" Foreground="#CE9178" FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding DisplayValue}" Foreground="{DynamicResource AccentWarningBrush}" FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                                 </StackPanel>
                                             </HierarchicalDataTemplate>
                                         </TreeView.ItemTemplate>
@@ -705,13 +489,13 @@
 
                                     <!-- Placeholder when No Structured Data -->
                                     <Border Visibility="{Binding HasStructuredData, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Background="#181818"
+                                            Background="{DynamicResource SurfaceBackgroundBrush}"
                                             HorizontalAlignment="Stretch"
                                             VerticalAlignment="Stretch">
                                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <ui:SymbolIcon Symbol="TextBulletListTree24" FontSize="36" Foreground="#4EC9B0" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                            <TextBlock Text="Structured Data Viewer" FontSize="15" FontWeight="Bold" Foreground="#4EC9B0" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                                            <TextBlock Text="No structured JSON, YAML, or XML data detected in input." Foreground="#888888" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,14"/>
+                                            <ui:SymbolIcon Symbol="TextBulletListTree24" FontSize="36" Foreground="{DynamicResource AccentSuccessBrush}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Structured Data Viewer" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                            <TextBlock Text="No structured JSON, YAML, or XML data detected in input." Foreground="{DynamicResource MutedTextBrush}" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,14"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                 <ui:Button Appearance="Secondary" Command="{Binding LoadSampleCommand}" CommandParameter="json" Padding="10,4" Margin="0,0,6,0">
                                                     <TextBlock Text="📄 Load Sample JSON" FontSize="11"/>
@@ -733,7 +517,7 @@
                         <TabItem Header="Analysis &amp; Stats">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="15">
                                 <StackPanel>
-                                    <TextBlock Text="Document Statistics" FontWeight="Bold" FontSize="14" Foreground="#007ACC" Margin="0,0,0,10"/>
+                                    <TextBlock Text="Document Statistics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,0,10"/>
                                     <Grid Margin="0,0,0,15">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="180"/>
@@ -751,35 +535,35 @@
                                             <RowDefinition Height="24"/>
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Detected Structure:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Analysis.FormatDescription}" Foreground="#4EC9B0" FontWeight="Bold"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Detected Structure:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Analysis.FormatDescription}" Foreground="{DynamicResource AccentSuccessBrush}" FontWeight="Bold"/>
 
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Total Characters:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Analysis.CharacterCount}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Total Characters:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Analysis.CharacterCount}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Chars (without spaces):" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Analysis.CharacterCountNoSpaces}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Chars (without spaces):" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Analysis.CharacterCountNoSpaces}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Total Lines:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Analysis.LineCount}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Total Lines:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Analysis.LineCount}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Non-Empty Lines:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Analysis.NonEmptyLineCount}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Non-Empty Lines:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Analysis.NonEmptyLineCount}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Word Count:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Analysis.WordCount}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Word Count:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Analysis.WordCount}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Estimated LLM Tokens:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Analysis.EstimatedTokens}" Foreground="#4EC9B0"/>
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Estimated LLM Tokens:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Analysis.EstimatedTokens}" Foreground="{DynamicResource AccentSuccessBrush}"/>
 
-                                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Avg Line Length:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Analysis.AverageLineLength, StringFormat='{}{0:F1} chars'}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Avg Line Length:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Analysis.AverageLineLength, StringFormat='{}{0:F1} chars'}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Est. Memory Size:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding Analysis.EstimatedByteSizeDisplay}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Est. Memory Size:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding Analysis.EstimatedByteSizeDisplay}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                     </Grid>
 
-                                    <TextBlock Text="Structure &amp; Delimiter Metrics" FontWeight="Bold" FontSize="14" Foreground="#007ACC" Margin="0,10,0,10"/>
+                                    <TextBlock Text="Data &amp; Delimiter Metrics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,0,10"/>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="180"/>
@@ -794,23 +578,23 @@
                                             <RowDefinition Height="24"/>
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Detected Delimiter:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Analysis.DetectedDelimiterDisplay}" Foreground="#4EC9B0" FontWeight="Bold"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Detected Delimiter:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Analysis.DetectedDelimiterDisplay}" Foreground="{DynamicResource AccentSuccessBrush}" FontWeight="Bold"/>
 
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Detected Columns:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Analysis.ColumnCount}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Detected Columns:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Analysis.ColumnCount}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Data Rows:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Analysis.RowCount}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Data Rows:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Analysis.RowCount}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Structured Nesting Depth:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Analysis.MaxStructuredDepth}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Structured Nesting Depth:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Analysis.MaxStructuredDepth}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Brackets / Quotes Balanced:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Analysis.IsBalancedStructured}" Foreground="#FFFFFF"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Brackets / Quotes Balanced:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Analysis.IsBalancedStructured}" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Encoding Hint:" Foreground="#AAAAAA"/>
-                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Analysis.EncodingHint}" Foreground="#4EC9B0"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Encoding Hint:" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Analysis.EncodingHint}" Foreground="{DynamicResource AccentSuccessBrush}"/>
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
@@ -822,7 +606,7 @@
                 <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent"/>
 
                 <!-- BOTTOM: DEDICATED TEXT OUTPUT PANE -->
-                <Border Grid.Row="2" Background="#12FFFFFF" BorderBrush="#25FFFFFF" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -831,7 +615,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- Output Pane Header -->
-                        <Border Grid.Row="0" Background="#15FFFFFF" Padding="10,6" BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
+                        <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="10,6" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -839,8 +623,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="OUTPUT" FontWeight="Bold" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Syntax:" Foreground="#888888" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="OUTPUT" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Syntax:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                     <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                               SelectedItem="{Binding SelectedOutputSyntax, UpdateSourceTrigger=PropertyChanged}"
                                               Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
@@ -867,12 +651,12 @@
                                                      WordWrap="{Binding IsWordWrap}"
                                                      FontFamily="{StaticResource EditorFontFamily}"
                                                      FontSize="13"
-                                                     Background="#181818"
-                                                     Foreground="#D4D4D4"/>
+                                                     Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                     Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
                         <!-- Output Footer / Stats -->
-                        <Border Grid.Row="2" Background="#15FFFFFF" Padding="10,4" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0" CornerRadius="0,0,8,8">
-                            <TextBlock Text="{Binding OutputStats}" Foreground="#888888" FontSize="11"/>
+                        <Border Grid.Row="2" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="10,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,8,8">
+                            <TextBlock Text="{Binding OutputStats}" Foreground="{DynamicResource MutedTextBrush}" FontSize="11"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -882,7 +666,7 @@
             <GridSplitter Grid.Column="3" Width="6" HorizontalAlignment="Center" Background="Transparent"/>
 
             <!-- RIGHT: TOOLS / TRANSFORM OPTIONS SIDEBAR -->
-            <Border Grid.Column="4" Background="#12FFFFFF" BorderBrush="#25FFFFFF" BorderThickness="1" CornerRadius="8">
+            <Border Grid.Column="4" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -890,18 +674,18 @@
                     </Grid.RowDefinitions>
 
                     <!-- Sidebar Header -->
-                    <Border Grid.Row="0" Background="#15FFFFFF" Padding="10,6" BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
-                        <TextBlock Text="TRANSFORM OPTIONS" FontWeight="Bold" Foreground="#CCCCCC" FontSize="11"/>
+                    <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="10,6" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
+                        <TextBlock Text="TRANSFORM OPTIONS" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11"/>
                     </Border>
 
                     <!-- Sidebar Category Tabs -->
-                    <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedSidebarTabIndex, Mode=TwoWay}" BorderThickness="0" Background="Transparent" Padding="0">
+                    <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedSidebarTabIndex, Mode=TwoWay}">
                         <!-- TAB 1: LINE OPERATIONS -->
                         <TabItem>
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="📐 Lines" FontSize="11" VerticalAlignment="Center"/>
-                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSuccessBrush}" Margin="5,0,0,0" VerticalAlignment="Center"
                                              Visibility="{Binding IsLinesTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
@@ -1111,19 +895,19 @@
                                             </Grid>
 
                                             <!-- Column Selector Panel -->
-                                            <Border Background="#202020" BorderBrush="#333333" BorderThickness="1" CornerRadius="4" Margin="0,0,0,6">
+                                            <Border Background="{DynamicResource SurfaceCardBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,6">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="*"/>
                                                     </Grid.RowDefinitions>
-                                                    <Border Grid.Row="0" Background="#262626" Padding="6,4" BorderBrush="#333333" BorderThickness="0,0,0,1" CornerRadius="4,4,0,0">
+                                                    <Border Grid.Row="0" Background="{DynamicResource ControlFillColorSecondaryBrush}" Padding="6,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="4,4,0,0">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="Columns" FontWeight="Bold" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="Columns" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center"/>
                                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                                                 <ui:Button Appearance="Transparent" Command="{Binding SelectAllColumnsCommand}" Padding="5,2" Margin="0,0,2,0">
                                                                     <TextBlock Text="All" FontSize="9"/>
@@ -1163,10 +947,10 @@
                                                                             </Border>
                                                                             <ControlTemplate.Triggers>
                                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                                    <Setter Property="Background" TargetName="Bd" Value="#2A2A2A"/>
+                                                                                    <Setter Property="Background" TargetName="Bd" Value="{DynamicResource ControlStrongFillColorDefaultBrush}"/>
                                                                                 </Trigger>
                                                                                 <Trigger Property="IsSelected" Value="True">
-                                                                                    <Setter Property="Background" TargetName="Bd" Value="#333333"/>
+                                                                                    <Setter Property="Background" TargetName="Bd" Value="{DynamicResource ControlFillColorSecondaryBrush}"/>
                                                                                 </Trigger>
                                                                             </ControlTemplate.Triggers>
                                                                         </ControlTemplate>
@@ -1181,10 +965,10 @@
                                                                           ToolTip="{Binding DisplayText}"
                                                                           VerticalContentAlignment="Center">
                                                                     <StackPanel Orientation="Horizontal" Margin="3,0,0,0" VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding DisplayIndex, StringFormat='[{0}] '}" Foreground="#888888" FontSize="10" VerticalAlignment="Center"/>
-                                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="#E0E0E0" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="130" VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding DisplayIndex, StringFormat='[{0}] '}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="130" VerticalAlignment="Center"/>
                                                                         <TextBlock Text="{Binding SampleValue, StringFormat=' ({0})'}"
-                                                                                   Foreground="#777777"
+                                                                                   Foreground="{DynamicResource DimTextBrush}"
                                                                                    FontSize="9.5"
                                                                                    TextTrimming="CharacterEllipsis"
                                                                                    MaxWidth="130"
@@ -1552,14 +1336,14 @@
         </Grid>
 
         <!-- Bottom Status Bar -->
-        <Border Grid.Row="3" Background="#18FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0" Padding="12,4">
+        <Border Grid.Row="3" Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,4">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding StatusMessage}" Foreground="#D4D4D4" FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
                     <ui:ToggleSwitch Content="⚡ Real-time Transform" IsChecked="{Binding IsRealTimeTransform, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <ui:ToggleSwitch Content="🔁 Auto Output → Input" IsChecked="{Binding AutoSendOutputToInput, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
