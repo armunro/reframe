@@ -51,6 +51,10 @@ public class BindableTextEditor : TextEditor
             {
                 TextArea.Caret.CaretBrush = new SolidColorBrush(Color.FromRgb(0xD4, 0xD4, 0xD4));
             }
+            if (TextArea.TextView != null)
+            {
+                TextArea.TextView.LinkTextForegroundBrush = new SolidColorBrush(Color.FromRgb(0x4E, 0xA6, 0xEA));
+            }
         }
 
         TextChanged += OnEditorTextChanged;

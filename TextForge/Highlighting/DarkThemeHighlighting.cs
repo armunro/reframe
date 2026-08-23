@@ -286,6 +286,7 @@ public static class DarkThemeHighlighting
         var propertyBrush = new SimpleHighlightingBrush(Color.FromRgb(0x9C, 0xDC, 0xFE));      // #9CDCFE Light Blue
         var punctuationBrush = new SimpleHighlightingBrush(Color.FromRgb(0xD4, 0xD4, 0xD4));   // #D4D4D4 Default Foreground
         var preprocessorBrush = new SimpleHighlightingBrush(Color.FromRgb(0x9B, 0x9B, 0x9B));  // #9B9B9B Gray
+        var linkBrush = new SimpleHighlightingBrush(Color.FromRgb(0x4E, 0xA6, 0xEA));          // #4EA6EA Bright Sky Blue / Link
 
         foreach (var color in definition.NamedHighlightingColors)
         {
@@ -294,6 +295,10 @@ public static class DarkThemeHighlighting
             if (name.Contains("comment") || name.Contains("doc"))
             {
                 color.Foreground = commentBrush;
+            }
+            else if (name.Contains("link") || name.Contains("url") || name.Contains("uri") || name.Contains("hyperlink") || name.Contains("href"))
+            {
+                color.Foreground = linkBrush;
             }
             else if (name.Contains("string") || name.Contains("char") || name.Contains("value"))
             {

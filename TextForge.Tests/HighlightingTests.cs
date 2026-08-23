@@ -52,4 +52,22 @@ public class HighlightingTests
     {
         Assert.Equal(expected, DarkThemeHighlighting.NormalizeLanguageName(input));
     }
+
+    [Fact]
+    public void GetDefinition_Markdown_LinkColorIsBrightAndReadable()
+    {
+        var definition = DarkThemeHighlighting.GetDefinition("Markdown");
+        Assert.NotNull(definition);
+
+        var linkColor = definition.NamedHighlightingColors.FirstOrDefault(c => c.Name.Contains("Link", System.StringComparison.OrdinalIgnoreCase));
+        Assert.NotNull(linkColor);
+        Assert.NotNull(linkColor.Foreground);
+
+        var color = linkColor.Foreground.GetColor(null);
+        Assert.True(color.HasValue);
+        // Ensure link color is bright sky blue (#4EA6EA: R=78, G=166, B=234) rather than dark blue (#0000FF)
+        Assert.Equal(0x4E, color.Value.R);
+        Assert.Equal(0xA6, color.Value.G);
+        Assert.Equal(0xEA, color.Value.B);
+    }
 }
