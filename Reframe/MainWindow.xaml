@@ -161,8 +161,6 @@
                                           Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                <ui:Button Appearance="Transparent" Command="{Binding HistoryBackCommand}" ToolTip="Previous Snapshot (Alt+Left)" Padding="6,2" FontSize="11" Margin="0,0,2,0" Icon="{ui:SymbolIcon Symbol=ArrowLeft24}"/>
-                                <ui:Button Appearance="Transparent" Command="{Binding HistoryForwardCommand}" ToolTip="Next Snapshot (Alt+Right)" Padding="6,2" FontSize="11" Margin="0,0,4,0" Icon="{ui:SymbolIcon Symbol=ArrowRight24}"/>
                                 <ui:Button Appearance="Transparent" Command="{Binding CreateSnapshotCommand}" ToolTip="Save Current Snapshot" Padding="6,2" FontSize="11" Margin="0,0,4,0" Icon="{ui:SymbolIcon Symbol=Camera24}"/>
                                 <ui:Button Appearance="Secondary" Command="{Binding LoadFileCommand}" ToolTip="Load from file (Ctrl+O)" Padding="6,2" FontSize="11" Margin="0,0,4,0">
                                     <TextBlock Text="Open" FontSize="10"/>
@@ -170,9 +168,7 @@
                                 <ui:Button Appearance="Primary" Command="{Binding PasteInputCommand}" Padding="6,2" FontSize="11" Margin="0,0,4,0">
                                     <TextBlock Text="Paste" FontSize="10"/>
                                 </ui:Button>
-                                <ui:Button Appearance="Secondary" Command="{Binding ClearInputCommand}" Padding="6,2" FontSize="11">
-                                    <TextBlock Text="Clear" FontSize="10"/>
-                                </ui:Button>
+                             
                             </StackPanel>
                         </Grid>
                     </Border>
