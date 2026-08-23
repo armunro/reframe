@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reframe", "Reframe\Reframe.csproj", "{34F289A7-5F39-483F-BBE3-9B29E32AE98B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reframe.Core", "Reframe.Core\Reframe.Core.csproj", "{2C957E8E-0F2B-4D1D-A501-986ABE0E95E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reframe.Tests", "Reframe.Tests\Reframe.Tests.csproj", "{CA16F6C9-BBA8-46FF-A0B1-3FEF78A26894}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34F289A7-5F39-483F-BBE3-9B29E32AE98B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34F289A7-5F39-483F-BBE3-9B29E32AE98B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34F289A7-5F39-483F-BBE3-9B29E32AE98B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34F289A7-5F39-483F-BBE3-9B29E32AE98B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C957E8E-0F2B-4D1D-A501-986ABE0E95E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C957E8E-0F2B-4D1D-A501-986ABE0E95E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C957E8E-0F2B-4D1D-A501-986ABE0E95E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C957E8E-0F2B-4D1D-A501-986ABE0E95E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA16F6C9-BBA8-46FF-A0B1-3FEF78A26894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA16F6C9-BBA8-46FF-A0B1-3FEF78A26894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA16F6C9-BBA8-46FF-A0B1-3FEF78A26894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA16F6C9-BBA8-46FF-A0B1-3FEF78A26894}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

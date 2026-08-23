@@ -1,8 +1,8 @@
-# TextForge
+# Reframe
 
-![TextForge Screenshot](Docs/Screenshot1.png)
+![Reframe Screenshot](Docs/Screenshot1.png)
 
-**TextForge** is a fast, modern desktop developer utility and text manipulation workbench built with **.NET 9** and **WPF**. It provides a comprehensive suite of real-time text transformation, tabular data conversion, code generation, string escaping/decoding, and text analysis tools in a responsive dark-themed interface.
+**Reframe** is a fast, modern desktop developer utility and text manipulation workbench built with **.NET 9** and **WPF**. It provides a comprehensive suite of real-time text transformation, tabular data conversion, code generation, string escaping/decoding, and text analysis tools in a responsive dark-themed interface.
 
 ---
 
@@ -150,7 +150,7 @@ Easily convert text per-line or across entire blocks into:
 - **JSON ➔ YAML & YAML ➔ JSON**: Direct bidirectional conversion between JSON and YAML.
 
 ### 7. Real-Time Text Analysis
-TextForge dynamically analyzes the input text and reports:
+Reframe dynamically analyzes the input text and reports:
 - Detected format (CSV, TSV, Markdown Table, HTML Table, JSON, YAML, SQL IN clause, Key-Value pairs, Multi-line List, Numbers, etc.)
 - Character count (total and excluding whitespace)
 - Line count and non-empty line count
@@ -165,7 +165,7 @@ TextForge dynamically analyzes the input text and reports:
 
 ### 9. File Loading & Drag-and-Drop
 - **File Dialog**: Open text, tabular data, JSON, XML, Markdown, HTML, SQL, and log files using `📂 Open` button or `Ctrl+O`.
-- **Drag-and-Drop**: Drag files directly from Windows File Explorer onto the TextForge window or editor pane to load them instantly.
+- **Drag-and-Drop**: Drag files directly from Windows File Explorer onto the Reframe window or editor pane to load them instantly.
 - **Auto-Formatting & History**: Automatically formats structured inputs upon load and records the loaded file in the history timeline.
 
 ### 10. Productivity Toggles & Transformation Chaining
@@ -178,8 +178,8 @@ TextForge dynamically analyzes the input text and reports:
 ## Architecture & Solution Structure
 
 ```
-textforge/
-├── TextForge/               # Main WPF Application
+reframe/
+├── Reframe/                 # Main WPF Application
 │   ├── Controls/            # Custom controls (BindableTextEditor with AvalonEdit)
 │   ├── Converters/          # WPF Value Converters
 │   ├── Highlighting/        # AvalonEdit syntax highlighting definitions (dark theme)
@@ -188,7 +188,7 @@ textforge/
 │   ├── MainWindow.xaml      # Main user interface layout and styling
 │   └── App.xaml             # Application startup and resource definitions
 │
-├── TextForge.Core/          # Core Business Logic & Transformers (.NET 9)
+├── Reframe.Core/            # Core Business Logic & Transformers (.NET 9)
 │   ├── Analysis/            # Text analyzer, models & format detection
 │   │   ├── Analyzers/       # ITextAnalyzer & DefaultTextAnalyzer implementations
 │   │   └── Models/          # TextAnalysisResult & analysis models
@@ -210,7 +210,7 @@ textforge/
 │       ├── Formatting/      # JSON, XML, YAML beautifiers and formatters
 │       └── Line/            # Quoting, sorting, deduplication, filtering, line numbering
 │
-└── TextForge.Tests/         # Comprehensive Unit Tests (xUnit)
+└── Reframe.Tests/           # Comprehensive Unit Tests (xUnit)
     ├── FileLoadingTests.cs
     ├── HighlightingTests.cs
     ├── HtmlTableAndTabularTests.cs
@@ -238,7 +238,7 @@ textforge/
 Clone the repository and build the solution using the .NET CLI:
 
 ```powershell
-dotnet build textforge.sln
+dotnet build reframe.sln
 ```
 
 ### Run
@@ -246,7 +246,7 @@ dotnet build textforge.sln
 Run the desktop application:
 
 ```powershell
-dotnet run --project TextForge/TextForge.csproj
+dotnet run --project Reframe/Reframe.csproj
 ```
 
 ### Run Tests
@@ -254,7 +254,7 @@ dotnet run --project TextForge/TextForge.csproj
 Execute the unit test suite:
 
 ```powershell
-dotnet test TextForge.Tests/TextForge.Tests.csproj
+dotnet test Reframe.Tests/Reframe.Tests.csproj
 ```
 
 ---
