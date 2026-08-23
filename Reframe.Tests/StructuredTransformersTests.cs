@@ -1,4 +1,5 @@
 ﻿using Reframe.Core.Structured;
+using Reframe.Core.Structured.Transformers;
 using Xunit;
 
 namespace Reframe.Tests;

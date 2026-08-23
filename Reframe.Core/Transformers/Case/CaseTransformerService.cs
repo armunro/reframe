@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Reframe.Core.Transformers;
+namespace Reframe.Core.Transformers.Case;
 
 public class CaseTransformerService : ICaseTransformer
 {

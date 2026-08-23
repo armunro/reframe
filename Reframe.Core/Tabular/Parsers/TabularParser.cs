@@ -1,9 +1,10 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Reframe.Core.Tabular.Models;
 using YamlDotNet.Serialization;
 
-namespace Reframe.Core.Tabular;
+namespace Reframe.Core.Tabular.Parsers;
 
 public static class TabularParser
 {

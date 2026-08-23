@@ -1,4 +1,4 @@
-﻿namespace Reframe.Core.Transformers;
+﻿namespace Reframe.Core.Transformers.Core;
 
 public interface ITextTransformer
 {

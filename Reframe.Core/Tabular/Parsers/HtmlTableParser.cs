@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using Reframe.Core.Tabular.Models;
 
-namespace Reframe.Core.Tabular;
+namespace Reframe.Core.Tabular.Parsers;
 
 public static class HtmlTableParser
 {

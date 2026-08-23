@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Reframe.Core.Structured;
+namespace Reframe.Core.Structured.Models;
 
 public class StructuredDataNode : INotifyPropertyChanged
 {

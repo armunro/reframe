@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Reframe.Core.Tabular.Models;
 
-namespace Reframe.Core.Tabular;
+namespace Reframe.Core.Tabular.Parsers;
 
 public static class MarkdownTableParser
 {

@@ -1,4 +1,4 @@
-﻿namespace Reframe.Core.Transformers;
+﻿namespace Reframe.Core.Transformers.Formatting;
 
 /// <summary>
 /// Provides beautification/formatting capabilities for structured text formats such as JSON, XML, XHTML/HTML, YAML, etc.

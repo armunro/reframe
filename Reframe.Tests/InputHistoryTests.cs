@@ -1,4 +1,5 @@
 ﻿using Reframe.Core.Analysis;
+using Reframe.Core.Analysis.Models;
 using Reframe.Core.History;
 using Reframe.ViewModels;
 using Xunit;

@@ -1,9 +1,10 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Reframe.Core.Tabular.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Reframe.Core.Tabular;
+namespace Reframe.Core.Tabular.Converters;
 
 public class TabularConverterService : ITabularConverter
 {

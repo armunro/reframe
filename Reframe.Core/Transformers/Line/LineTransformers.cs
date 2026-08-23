@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace Reframe.Core.Transformers;
+﻿namespace Reframe.Core.Transformers.Line;
 
 public enum QuoteStyle
 {

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Reframe.Core.Analysis;
+using Reframe.Core.Analysis.Analyzers;
+using Reframe.Core.Analysis.Models;
 
 namespace Reframe.Core.History;
 

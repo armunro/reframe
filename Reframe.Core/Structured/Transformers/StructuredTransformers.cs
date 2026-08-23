@@ -6,12 +6,18 @@ using System.Text.Json.Nodes;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using Reframe.Core.Tabular;
-using Reframe.Core.Transformers;
+using Reframe.Core.Structured.Models;
+using Reframe.Core.Structured.Parsers;
+using Reframe.Core.Tabular.Converters;
+using Reframe.Core.Tabular.Models;
+using Reframe.Core.Tabular.Parsers;
+using Reframe.Core.Transformers.Case;
+using Reframe.Core.Transformers.Developer;
+using Reframe.Core.Transformers.Formatting;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Reframe.Core.Structured;
+namespace Reframe.Core.Structured.Transformers;
 
 public static class StructuredTransformers
 {

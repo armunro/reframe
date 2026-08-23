@@ -1,6 +1,7 @@
-﻿using Reframe.Core.Transformers;
+﻿using Reframe.Core.Tabular.Models;
+using Reframe.Core.Transformers.Formatting;
 
-namespace Reframe.Core.Tabular;
+namespace Reframe.Core.Tabular.Parsers;
 
 public class YamlTabularParser : ITabularParser
 {

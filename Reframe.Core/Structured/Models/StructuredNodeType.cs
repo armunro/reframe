@@ -1,4 +1,4 @@
-﻿namespace Reframe.Core.Structured;
+﻿namespace Reframe.Core.Structured.Models;
 
 public enum StructuredNodeType
 {

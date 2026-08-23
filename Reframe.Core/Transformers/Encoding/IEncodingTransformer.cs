@@ -1,4 +1,6 @@
-﻿namespace Reframe.Core.Transformers;
+﻿using Reframe.Core.Transformers.Case;
+
+namespace Reframe.Core.Transformers.Encoding;
 
 public interface IEncodingTransformer
 {

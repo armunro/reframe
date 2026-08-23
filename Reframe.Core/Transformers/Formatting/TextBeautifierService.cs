@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Reframe.Core.Transformers;
+namespace Reframe.Core.Transformers.Formatting;
 
 public class TextBeautifierService : ITextBeautifier
 {

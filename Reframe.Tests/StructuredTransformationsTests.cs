@@ -1,5 +1,7 @@
 ﻿using Reframe.Core.Structured;
+using Reframe.Core.Structured.Transformers;
 using Reframe.Core.Transformers;
+using Reframe.Core.Transformers.Case;
 using Reframe.ViewModels;
 using Xunit;
 

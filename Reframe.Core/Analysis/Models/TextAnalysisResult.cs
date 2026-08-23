@@ -1,4 +1,4 @@
-﻿namespace Reframe.Core.Analysis;
+﻿namespace Reframe.Core.Analysis.Models;
 
 public enum DetectedFormat
 {

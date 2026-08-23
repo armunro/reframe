@@ -1,10 +1,6 @@
-﻿using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using Reframe.Core.Tabular;
-using Reframe.Core.Transformers;
+﻿using Reframe.Core.Analysis.Models;
 
-namespace Reframe.Core.Analysis;
+namespace Reframe.Core.Analysis.Analyzers;
 
 public static class TextAnalyzer
 {

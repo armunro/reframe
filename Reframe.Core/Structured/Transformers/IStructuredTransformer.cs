@@ -1,6 +1,6 @@
-﻿using Reframe.Core.Transformers;
+﻿using Reframe.Core.Transformers.Case;
 
-namespace Reframe.Core.Structured;
+namespace Reframe.Core.Structured.Transformers;
 
 public interface IStructuredTransformer
 {

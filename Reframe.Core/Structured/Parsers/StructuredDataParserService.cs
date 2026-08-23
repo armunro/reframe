@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Text.Json;
 using System.Xml.Linq;
+using Reframe.Core.Structured.Models;
 using YamlDotNet.Serialization;
 
-namespace Reframe.Core.Structured;
+namespace Reframe.Core.Structured.Parsers;
 
 public class StructuredDataParserService : IStructuredDataParser
 {

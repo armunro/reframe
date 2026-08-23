@@ -1,8 +1,7 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
-using Reframe.Core.Transformers;
+﻿using System.Text.RegularExpressions;
+using Reframe.Core.Transformers.Line;
 
-namespace Reframe.Core.Tabular;
+namespace Reframe.Core.Tabular.Models;
 
 public class TabularData
 {

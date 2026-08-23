@@ -4,7 +4,9 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Reframe.Core.Tabular;
+using Reframe.Core.Tabular.Parsers;
 using Reframe.Core.Transformers;
+using Reframe.Core.Transformers.Formatting;
 using Reframe.ViewModels;
 using Wpf.Ui.Controls;
 

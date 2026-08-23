@@ -1,5 +1,8 @@
 ﻿using System.Data;
 using Reframe.Core.Tabular;
+using Reframe.Core.Tabular.Converters;
+using Reframe.Core.Tabular.Models;
+using Reframe.Core.Tabular.Parsers;
 using Reframe.ViewModels;
 using Xunit;
 

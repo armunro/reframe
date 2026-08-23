@@ -1,6 +1,12 @@
 ﻿using Reframe.Core.Analysis;
+using Reframe.Core.Analysis.Analyzers;
+using Reframe.Core.Analysis.Models;
 using Reframe.Core.Tabular;
+using Reframe.Core.Tabular.Converters;
+using Reframe.Core.Tabular.Models;
+using Reframe.Core.Tabular.Parsers;
 using Reframe.Core.Transformers;
+using Reframe.Core.Transformers.Line;
 using Xunit;
 
 namespace Reframe.Tests;

@@ -1,4 +1,6 @@
-﻿namespace Reframe.Core.Tabular;
+﻿using Reframe.Core.Tabular.Models;
+
+namespace Reframe.Core.Tabular.Parsers;
 
 public class JsonTabularParser : ITabularParser
 {

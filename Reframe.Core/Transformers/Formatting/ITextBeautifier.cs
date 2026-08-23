@@ -1,4 +1,4 @@
-﻿namespace Reframe.Core.Transformers;
+﻿namespace Reframe.Core.Transformers.Formatting;
 
 public interface ITextBeautifier
 {

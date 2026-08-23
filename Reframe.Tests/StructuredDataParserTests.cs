@@ -1,4 +1,6 @@
 ﻿using Reframe.Core.Structured;
+using Reframe.Core.Structured.Models;
+using Reframe.Core.Structured.Parsers;
 using Xunit;
 
 namespace Reframe.Tests;

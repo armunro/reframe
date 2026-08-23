@@ -1,4 +1,6 @@
-﻿namespace Reframe.Core.Structured;
+﻿using Reframe.Core.Structured.Models;
+
+namespace Reframe.Core.Structured.Parsers;
 
 public class StructuredDataParseResult
 {

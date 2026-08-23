@@ -1,8 +1,9 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Reframe.Core.Analysis.Analyzers;
 
-namespace Reframe.Core.Transformers;
+namespace Reframe.Core.Transformers.Line;
 
 public class LineTransformerService : ILineTransformer
 {
@@ -88,7 +89,7 @@ public class LineTransformerService : ILineTransformer
         if (string.IsNullOrEmpty(delimiter))
         {
             // Auto-detect delimiter
-            var d = Analysis.TextAnalyzer.Analyze(text).DetectedDelimiter;
+            var d = TextAnalyzer.Analyze(text).DetectedDelimiter;
             if (d.HasValue)
             {
                 items = text.Split(d.Value);

@@ -9,6 +9,7 @@
         xmlns:core="clr-namespace:Reframe.Core.Transformers;assembly=Reframe.Core"
         xmlns:conv="clr-namespace:Reframe.Converters"
         xmlns:controls="clr-namespace:Reframe.Controls"
+        xmlns:line="clr-namespace:Reframe.Core.Transformers.Line;assembly=Reframe.Core"
         mc:Ignorable="d"
         Title="Reframe - General Purpose Text Analyzer &amp; Transformer"
         Height="820" Width="1300"
@@ -711,12 +712,12 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Style: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
                                                 <ComboBox Grid.Column="1" SelectedValue="{Binding QuoteStyle, Mode=TwoWay}" SelectedValuePath="Tag">
-                                                    <ComboBoxItem Content="'Single Quotes'" Tag="{x:Static core:QuoteStyle.SingleQuotes}"/>
-                                                    <ComboBoxItem Content="&quot;Double Quotes&quot;" Tag="{x:Static core:QuoteStyle.DoubleQuotes}"/>
-                                                    <ComboBoxItem Content="`Backticks`" Tag="{x:Static core:QuoteStyle.Backticks}"/>
-                                                    <ComboBoxItem Content="[Square Brackets]" Tag="{x:Static core:QuoteStyle.SquareBrackets}"/>
-                                                    <ComboBoxItem Content="(Parentheses)" Tag="{x:Static core:QuoteStyle.Parentheses}"/>
-                                                    <ComboBoxItem Content="{}{Curly Braces}" Tag="{x:Static core:QuoteStyle.CurlyBraces}"/>
+                                                    <ComboBoxItem Content="'Single Quotes'" Tag="{x:Static line:QuoteStyle.SingleQuotes}"/>
+                                                    <ComboBoxItem Content="&quot;Double Quotes&quot;" Tag="{x:Static line:QuoteStyle.DoubleQuotes}"/>
+                                                    <ComboBoxItem Content="`Backticks`" Tag="{x:Static line:QuoteStyle.Backticks}"/>
+                                                    <ComboBoxItem Content="[Square Brackets]" Tag="{x:Static line:QuoteStyle.SquareBrackets}"/>
+                                                    <ComboBoxItem Content="(Parentheses)" Tag="{x:Static line:QuoteStyle.Parentheses}"/>
+                                                    <ComboBoxItem Content="{}{Curly Braces}" Tag="{x:Static line:QuoteStyle.CurlyBraces}"/>
                                                 </ComboBox>
                                             </Grid>
                                             <Button Content="💬 Quote All Lines" Command="{Binding ActionCommand}" CommandParameter="QuoteLines" Style="{StaticResource ToolButtonStyle}"/>
@@ -806,15 +807,15 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Order: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
                                                 <ComboBox Grid.Column="1" SelectedValue="{Binding SortOrder, Mode=TwoWay}" SelectedValuePath="Tag">
-                                                    <ComboBoxItem Content="Natural Numeric (1, 2, 10)" Tag="{x:Static core:SortOrder.NaturalNumericAsc}"/>
-                                                    <ComboBoxItem Content="Natural Numeric Desc" Tag="{x:Static core:SortOrder.NaturalNumericDesc}"/>
-                                                    <ComboBoxItem Content="A-Z (Ascending)" Tag="{x:Static core:SortOrder.AlphabeticalAsc}"/>
-                                                    <ComboBoxItem Content="Z-A (Descending)" Tag="{x:Static core:SortOrder.AlphabeticalDesc}"/>
-                                                    <ComboBoxItem Content="Case Insensitive A-Z" Tag="{x:Static core:SortOrder.CaseInsensitiveAsc}"/>
-                                                    <ComboBoxItem Content="Case Insensitive Z-A" Tag="{x:Static core:SortOrder.CaseInsensitiveDesc}"/>
-                                                    <ComboBoxItem Content="By Length (Short→Long)" Tag="{x:Static core:SortOrder.LengthAsc}"/>
-                                                    <ComboBoxItem Content="By Length (Long→Short)" Tag="{x:Static core:SortOrder.LengthDesc}"/>
-                                                    <ComboBoxItem Content="Reverse Order" Tag="{x:Static core:SortOrder.Reverse}"/>
+                                                    <ComboBoxItem Content="Natural Numeric (1, 2, 10)" Tag="{x:Static line:SortOrder.NaturalNumericAsc}"/>
+                                                    <ComboBoxItem Content="Natural Numeric Desc" Tag="{x:Static line:SortOrder.NaturalNumericDesc}"/>
+                                                    <ComboBoxItem Content="A-Z (Ascending)" Tag="{x:Static line:SortOrder.AlphabeticalAsc}"/>
+                                                    <ComboBoxItem Content="Z-A (Descending)" Tag="{x:Static line:SortOrder.AlphabeticalDesc}"/>
+                                                    <ComboBoxItem Content="Case Insensitive A-Z" Tag="{x:Static line:SortOrder.CaseInsensitiveAsc}"/>
+                                                    <ComboBoxItem Content="Case Insensitive Z-A" Tag="{x:Static line:SortOrder.CaseInsensitiveDesc}"/>
+                                                    <ComboBoxItem Content="By Length (Short→Long)" Tag="{x:Static line:SortOrder.LengthAsc}"/>
+                                                    <ComboBoxItem Content="By Length (Long→Short)" Tag="{x:Static line:SortOrder.LengthDesc}"/>
+                                                    <ComboBoxItem Content="Reverse Order" Tag="{x:Static line:SortOrder.Reverse}"/>
                                                 </ComboBox>
                                             </Grid>
                                             <UniformGrid Columns="2">
