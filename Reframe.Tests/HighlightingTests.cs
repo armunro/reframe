@@ -83,10 +83,10 @@ public class HighlightingTests
 
         var color = keywordColor.Foreground.GetColor(null);
         Assert.True(color.HasValue);
-        // #668BC4: R=102 (0x66), G=139 (0x8B), B=196 (0xC4)
-        Assert.Equal(0x66, color.Value.R);
-        Assert.Equal(0x8B, color.Value.G);
-        Assert.Equal(0xC4, color.Value.B);
+        // #729BDB: R=114 (0x72), G=155 (0x9B), B=219 (0xDB)
+        Assert.Equal(0x72, color.Value.R);
+        Assert.Equal(0x9B, color.Value.G);
+        Assert.Equal(0xDB, color.Value.B);
     }
 
     [Fact]
@@ -101,9 +101,33 @@ public class HighlightingTests
 
         var color = delimiterColor.Foreground.GetColor(null);
         Assert.True(color.HasValue);
-        // #668BC4: R=102 (0x66), G=139 (0x8B), B=196 (0xC4)
-        Assert.Equal(0x66, color.Value.R);
-        Assert.Equal(0x8B, color.Value.G);
-        Assert.Equal(0xC4, color.Value.B);
+        // #729BDB: R=114 (0x72), G=155 (0x9B), B=219 (0xDB)
+        Assert.Equal(0x72, color.Value.R);
+        Assert.Equal(0x9B, color.Value.G);
+        Assert.Equal(0xDB, color.Value.B);
+    }
+
+    [Fact]
+    public void GetDefinition_AllSupportedLanguages_HaveNoDarkUnreadableTokens()
+    {
+        foreach (var lang in DarkThemeHighlighting.SupportedLanguages)
+        {
+            var def = DarkThemeHighlighting.GetDefinition(lang);
+            if (def == null) continue;
+            foreach (var col in def.NamedHighlightingColors)
+            {
+                var c = col.Foreground?.GetColor(null);
+                if (!c.HasValue) continue;
+
+                // Ensure no tokens have low luminance or dark unmapped colors (like pure blue #0000FF, dark magenta #8B008B, etc.)
+                double luminance = 0.299 * c.Value.R + 0.587 * c.Value.G + 0.114 * c.Value.B;
+                // Comments and directives can be slightly muted (>= 110)
+                Assert.True(luminance >= 110, $"Language '{lang}' token '{col.Name}' has low luminance {luminance:F1} (#{c.Value.R:X2}{c.Value.G:X2}{c.Value.B:X2})");
+                
+                // Assert no dark pure blue or dark purple
+                Assert.False(c.Value.R == 0 && c.Value.G == 0 && c.Value.B > 0, $"Language '{lang}' token '{col.Name}' has unmapped dark blue #{c.Value.R:X2}{c.Value.G:X2}{c.Value.B:X2}");
+                Assert.False(c.Value.R < 140 && c.Value.G == 0 && c.Value.B < 140, $"Language '{lang}' token '{col.Name}' has unmapped dark purple #{c.Value.R:X2}{c.Value.G:X2}{c.Value.B:X2}");
+            }
+        }
     }
 }

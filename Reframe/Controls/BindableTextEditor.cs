@@ -34,7 +34,7 @@ public class BindableTextEditor : TextEditor
         // Setup Dark Navy Theme Defaults rgb(30, 32, 48)
         Background = new SolidColorBrush(Color.FromRgb(0x1E, 0x20, 0x30));
         Foreground = new SolidColorBrush(Color.FromRgb(0xDC, 0xE1, 0xEB));
-        LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x52, 0x58, 0x66));
+        LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x60, 0x68, 0x7A));
         ShowLineNumbers = true;
         FontFamily = new FontFamily("Consolas, Cascadia Code, JetBrains Mono, Courier New, monospace");
         FontSize = 13;
