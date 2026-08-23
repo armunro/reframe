@@ -433,9 +433,12 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 _isTabularTabHighlighted = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsTableTabHighlighted));
             }
         }
     }
+
+    public bool IsTableTabHighlighted => IsTabularTabHighlighted;
 
     private bool _isStructuredTabHighlighted;
     public bool IsStructuredTabHighlighted
@@ -1411,6 +1414,7 @@ public class MainViewModel : INotifyPropertyChanged
             IsStructuredTabHighlighted = false;
             IsCodeTabHighlighted = false;
             IsCaseEncTabHighlighted = false;
+            SelectedSidebarTabIndex = 0;
             return;
         }
 
@@ -1447,26 +1451,30 @@ public class MainViewModel : INotifyPropertyChanged
         // 6. Presets Tab (useful for all non-empty text, especially multiline, delimited, or tabular extractions)
         IsPresetsTabHighlighted = isMultiLine || isDelimitedSingle || isTabular || isStructured;
 
-        // Auto-select the most relevant sidebar tab
+        // Auto-select the most relevant sidebar tab (0: Lines, 1: Table, 2: Structured, 3: Code, 4: Case & Enc)
         if (isTabular)
         {
-            SelectedSidebarTabIndex = 2; // Tabular
+            SelectedSidebarTabIndex = 1; // Tabular / Table
         }
         else if (isStructured)
         {
-            SelectedSidebarTabIndex = 3; // Structured
+            SelectedSidebarTabIndex = 2; // Structured
         }
         else if (isCode && (Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.KeyValuePairs))
         {
-            SelectedSidebarTabIndex = 4; // Code
+            SelectedSidebarTabIndex = 3; // Code
         }
         else if (isMultiLine || isDelimitedSingle)
         {
-            SelectedSidebarTabIndex = 1; // Lines
+            SelectedSidebarTabIndex = 0; // Lines
         }
         else if (isSingleLineOrToken)
         {
-            SelectedSidebarTabIndex = 5; // Case / Enc
+            SelectedSidebarTabIndex = 4; // Case / Enc
+        }
+        else
+        {
+            SelectedSidebarTabIndex = 0; // Lines
         }
     }
 

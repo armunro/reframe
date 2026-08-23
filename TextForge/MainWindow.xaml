@@ -243,6 +243,17 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- TabItem Style with explicit Disabled Appearance -->
+        <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.35"/>
+                    <Setter Property="Foreground" Value="#707070"/>
+                    <Setter Property="Cursor" Value="No"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </ui:FluentWindow.Resources>
 
     <Grid>
@@ -556,7 +567,7 @@
                 <Border Grid.Row="0" Background="#12FFFFFF" BorderBrush="#25FFFFFF" BorderThickness="1" CornerRadius="8">
                     <TabControl SelectedIndex="{Binding SelectedCenterTabIndex, Mode=TwoWay}" BorderThickness="0" Background="Transparent" Padding="0">
                         <!-- Tab 1: Tabular Grid View -->
-                        <TabItem Header="Table Grid View">
+                        <TabItem Header="Table Grid View" IsEnabled="{Binding HasTabularData}" ToolTipService.ShowOnDisabled="True" ToolTip="Table view is available when input contains tabular data">
                             <Grid Background="#181818">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -598,7 +609,7 @@
                         </TabItem>
 
                         <!-- Tab 2: Structured Tree View (JSON / YAML / XML) -->
-                        <TabItem Header="Structured Tree View">
+                        <TabItem Header="Structured Tree View" IsEnabled="{Binding HasStructuredData}" ToolTipService.ShowOnDisabled="True" ToolTip="Structured tree view is available when input contains JSON, YAML, or XML">
                             <Grid Background="#181818">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -884,7 +895,7 @@
                     </Border>
 
                     <!-- Sidebar Category Tabs -->
-                    <TabControl Grid.Row="1" BorderThickness="0" Background="Transparent" Padding="0">
+                    <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedSidebarTabIndex, Mode=TwoWay}" BorderThickness="0" Background="Transparent" Padding="0">
                         <!-- TAB 1: LINE OPERATIONS -->
                         <TabItem>
                             <TabItem.Header>
@@ -1061,7 +1072,7 @@
                         </TabItem>
 
                         <!-- TAB 2: TABLE & CSV OPERATIONS -->
-                        <TabItem>
+                        <TabItem IsEnabled="{Binding HasTabularData}" ToolTipService.ShowOnDisabled="True" ToolTip="Table operations are available when input contains tabular data">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="📊 Table" FontSize="11" VerticalAlignment="Center"/>
@@ -1331,7 +1342,7 @@
                         </TabItem>
 
                         <!-- TAB 3: STRUCTURED DATA (JSON / YAML / XML) -->
-                        <TabItem>
+                        <TabItem IsEnabled="{Binding HasStructuredData}" ToolTipService.ShowOnDisabled="True" ToolTip="Structured operations are available when input contains JSON, YAML, or XML">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="🌳 Structured" FontSize="11" VerticalAlignment="Center"/>
