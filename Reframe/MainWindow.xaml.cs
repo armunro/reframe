@@ -3,10 +3,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Reframe.Core.Tabular;
 using Reframe.Core.Tabular.Parsers;
 using Reframe.Core.Transformers;
 using Reframe.Core.Transformers.Formatting;
+using Reframe.Services;
 using Reframe.ViewModels;
 using Wpf.Ui.Controls;
 
@@ -14,6 +16,8 @@ namespace Reframe;
 
 public partial class MainWindow : FluentWindow
 {
+    private ClipboardWatcher? _clipboardWatcher;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -29,6 +33,7 @@ public partial class MainWindow : FluentWindow
             if (e.OldValue is MainViewModel oldVm)
             {
                 oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+                oldVm.ClipboardWatcher = null;
             }
             if (e.NewValue is MainViewModel newVm)
             {
@@ -67,6 +72,26 @@ public partial class MainWindow : FluentWindow
     {
         vm.PropertyChanged += OnViewModelPropertyChanged;
         RebuildDataGridColumns(vm.PreviewDataTable);
+
+        if (_clipboardWatcher == null)
+        {
+            _clipboardWatcher = new ClipboardWatcher();
+            var helper = new WindowInteropHelper(this);
+            if (helper.Handle != IntPtr.Zero)
+            {
+                _clipboardWatcher.Attach(helper.Handle);
+            }
+            else
+            {
+                SourceInitialized += (s, e) =>
+                {
+                    var h = new WindowInteropHelper(this).Handle;
+                    _clipboardWatcher?.Attach(h);
+                };
+            }
+        }
+
+        vm.ClipboardWatcher = _clipboardWatcher;
     }
 
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -237,5 +262,16 @@ public partial class MainWindow : FluentWindow
                 }
             }
         }
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        if (DataContext is MainViewModel vm)
+        {
+            vm.ClipboardWatcher = null;
+        }
+        _clipboardWatcher?.Dispose();
+        _clipboardWatcher = null;
     }
 }

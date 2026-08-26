@@ -24,6 +24,7 @@ using Reframe.Core.Transformers.Encoding;
 using Reframe.Core.Transformers.Formatting;
 using Reframe.Core.Transformers.Line;
 using Reframe.Highlighting;
+using Reframe.Services;
 
 namespace Reframe.ViewModels;
 
@@ -36,6 +37,9 @@ public class MainViewModel : INotifyPropertyChanged
     private bool _isWordWrap = false;
     private bool _autoSendOutputToInput = false;
     private bool _isAutoSendingOutput = false;
+    private bool _watchClipboard = false;
+    private string? _lastProcessedClipboardText;
+    private IClipboardWatcher? _clipboardWatcher;
     private TextAnalysisResult _analysis = new();
     private DataTable? _previewDataTable;
     private TabularData? _currentTable;
@@ -231,6 +235,101 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool WatchClipboard
+    {
+        get => _watchClipboard;
+        set
+        {
+            if (_watchClipboard != value)
+            {
+                _watchClipboard = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsWatchingClipboard));
+                if (value)
+                {
+                    StatusMessage = "Watching clipboard for new items";
+                    _clipboardWatcher?.Start();
+                }
+                else
+                {
+                    StatusMessage = "Stopped watching clipboard";
+                    _clipboardWatcher?.Stop();
+                }
+            }
+        }
+    }
+
+    public bool IsWatchingClipboard => WatchClipboard;
+
+    public IClipboardWatcher? ClipboardWatcher
+    {
+        get => _clipboardWatcher;
+        set
+        {
+            if (_clipboardWatcher != value)
+            {
+                if (_clipboardWatcher != null)
+                {
+                    _clipboardWatcher.ClipboardChanged -= OnClipboardWatcherChanged;
+                }
+                _clipboardWatcher = value;
+                if (_clipboardWatcher != null)
+                {
+                    _clipboardWatcher.ClipboardChanged += OnClipboardWatcherChanged;
+                    if (WatchClipboard)
+                    {
+                        _clipboardWatcher.Start();
+                    }
+                }
+            }
+        }
+    }
+
+    private void OnClipboardWatcherChanged(object? sender, ClipboardChangedEventArgs e)
+    {
+        ProcessClipboardItem(e.Text, e.Html);
+    }
+
+    public void ProcessClipboardItem(string? text, string? html = null)
+    {
+        if (!WatchClipboard) return;
+
+        try
+        {
+            string? newText = null;
+            string source = "Clipboard Watch";
+
+            if (!string.IsNullOrEmpty(html) && HtmlTableParser.IsHtmlTable(html))
+            {
+                string cleanTable = HtmlTableParser.ExtractTableHtml(html);
+                newText = TextBeautifier.Beautify(cleanTable);
+                source = "Clipboard Watch (HTML Table)";
+            }
+            else if (!string.IsNullOrEmpty(text))
+            {
+                newText = TextBeautifier.Beautify(text);
+            }
+
+            if (string.IsNullOrWhiteSpace(newText)) return;
+
+            if (string.Equals(newText, _lastProcessedClipboardText, StringComparison.Ordinal) ||
+                string.Equals(newText, InputText, StringComparison.Ordinal))
+            {
+                _lastProcessedClipboardText = newText;
+                return;
+            }
+
+            _lastProcessedClipboardText = newText;
+            InputText = newText;
+            RecordHistory(InputText, source);
+            StatusMessage = "Added new item from clipboard";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Clipboard watch error: {ex.Message}";
+        }
+    }
+
     private string _selectedInputSyntax = "Auto";
     private string _selectedOutputSyntax = "Auto";
 
@@ -313,7 +412,7 @@ public class MainViewModel : INotifyPropertyChanged
             DetectedFormat.TsvTable => "TSV",
             DetectedFormat.HtmlTable => "HTML",
             DetectedFormat.MarkdownTable => "Markdown",
-            DetectedFormat.SqlInClause => "SQL",
+            DetectedFormat.SqlInClause or DetectedFormat.Sql => "SQL",
             _ => DetectSyntaxFromContent(text)
         };
     }
@@ -322,16 +421,16 @@ public class MainViewModel : INotifyPropertyChanged
     {
         return action switch
         {
-            "ToCsv" => "CSV",
-            "ToTsv" => "TSV",
-            "ToYaml" or "ToYamlObjects" or "ToYamlArrays" or "ToYamlArray" or "ToYamlList" or "KvToYaml" or "JsonToYaml" or "FormatYaml" or "TableToKeyValueYaml" or "ExtractSelectedToYaml" => "YAML",
-            "SqlIn" or "SqlInMultiLine" or "ExtractSqlIn" => "SQL",
-            "ToCSharpArray" or "ToCSharpList" or "EscapeCSharp" or "UnescapeCSharp" or "ExtractCSharpArray" => "C#",
+            "ToCsv" or "ExtractSelectedToCsv" => "CSV",
+            "ToTsv" or "ExtractSelectedToTsv" => "TSV",
+            "ToYaml" or "ToYamlObjects" or "ToYamlArrays" or "ToYamlArray" or "ToYamlList" or "KvToYaml" or "JsonToYaml" or "FormatYaml" or "TableToKeyValueYaml" or "TableToKeyValueYamlRest" or "ExtractSelectedToYaml" => "YAML",
+            "SqlIn" or "SqlInMultiLine" or "ExtractSqlIn" or "ExtractSelectedToSqlIn" or "ToSqlInserts" => "SQL",
+            "ToCSharpArray" or "ToCSharpList" or "EscapeCSharp" or "UnescapeCSharp" or "ExtractCSharpArray" or "ExtractSelectedToCodeArray" => "C#",
             "ToTypeScriptArray" => "TypeScript",
             "ToPythonList" => "Python",
-            "ToJsonArray" or "KvToJson" or "YamlToJson" or "FormatJson" or "JwtDecode" or "ExtractJsonMap" => "JSON",
+            "ToJsonArray" or "ToJsonObjects" or "ToJsonArrays" or "ExtractSelectedToJson" or "KvToJson" or "TableToKeyValueJson" or "TableToKeyValueJsonRest" or "YamlToJson" or "FormatJson" or "JwtDecode" or "ExtractJsonMap" => "JSON",
             "FormatXml" => "XML",
-            "ToMarkdownTable" => "Markdown",
+            "ToMarkdownTable" or "ExtractSelectedToMarkdown" => "Markdown",
             "ToHtmlTable" => "HTML",
             _ => DetectSyntaxFromContent(text)
         };
@@ -349,11 +448,7 @@ public class MainViewModel : INotifyPropertyChanged
             trimmed.StartsWith("<div", StringComparison.OrdinalIgnoreCase)) return "HTML";
         if (trimmed.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
             (trimmed.StartsWith("<") && trimmed.TrimEnd().EndsWith(">"))) return "XML";
-        if (trimmed.StartsWith("SELECT ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("INSERT ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("UPDATE ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("DELETE ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("IN (", StringComparison.OrdinalIgnoreCase)) return "SQL";
+        if (DefaultTextAnalyzer.IsSql(text)) return "SQL";
 
         var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         if (lines.Length > 0 && lines[0].Contains('\t'))
@@ -1153,7 +1248,8 @@ public class MainViewModel : INotifyPropertyChanged
             var item = p as InputHistoryItem ?? SelectedHistoryItem;
             if (item != null && !string.IsNullOrEmpty(item.FullText))
             {
-                Clipboard.SetText(item.FullText);
+                _lastProcessedClipboardText = item.FullText;
+                try { Clipboard.SetText(item.FullText); } catch {}
                 StatusMessage = $"Copied {item.TimeDisplay} snapshot to clipboard";
             }
         });
@@ -1204,7 +1300,9 @@ public class MainViewModel : INotifyPropertyChanged
                 sb.AppendLine(h.FullText);
                 sb.AppendLine(new string('-', 40));
             }
-            Clipboard.SetText(sb.ToString());
+            var fullExport = sb.ToString();
+            _lastProcessedClipboardText = fullExport;
+            try { Clipboard.SetText(fullExport); } catch {}
             StatusMessage = "Exported history timeline report to clipboard";
         });
 
@@ -1212,7 +1310,8 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (!string.IsNullOrEmpty(OutputText))
             {
-                Clipboard.SetText(OutputText);
+                _lastProcessedClipboardText = OutputText;
+                try { Clipboard.SetText(OutputText); } catch {}
                 StatusMessage = "Copied output to clipboard";
             }
         });
@@ -1254,6 +1353,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (SelectedStructuredNode != null && !string.IsNullOrEmpty(SelectedStructuredNode.Path))
             {
+                _lastProcessedClipboardText = SelectedStructuredNode.Path;
                 try { Clipboard.SetText(SelectedStructuredNode.Path); } catch {}
                 StatusMessage = $"Copied path: {SelectedStructuredNode.Path}";
             }
@@ -1267,6 +1367,7 @@ public class MainViewModel : INotifyPropertyChanged
             if (SelectedStructuredNode != null)
             {
                 string val = SelectedStructuredNode.Value ?? SelectedStructuredNode.DisplayValue;
+                _lastProcessedClipboardText = val;
                 try { Clipboard.SetText(val); } catch {}
                 StatusMessage = "Copied node value to clipboard";
             }
@@ -1280,6 +1381,7 @@ public class MainViewModel : INotifyPropertyChanged
             if (SelectedStructuredNode != null)
             {
                 string val = SelectedStructuredNode.DisplayValue;
+                _lastProcessedClipboardText = val;
                 try { Clipboard.SetText(val); } catch {}
                 StatusMessage = "Copied subtree to clipboard";
             }
@@ -1438,6 +1540,7 @@ public class MainViewModel : INotifyPropertyChanged
                             Analysis.Format == DetectedFormat.Xml ||
                             _hasStructuredData;
         bool isCode = Analysis.Format == DetectedFormat.SqlInClause ||
+                      Analysis.Format == DetectedFormat.Sql ||
                       Analysis.Format == DetectedFormat.KeyValuePairs ||
                       IsCodeLikeContent(_inputText);
         bool isSingleLineOrToken = Analysis.NonEmptyLineCount <= 1 && !isTabular && !isDelimitedSingle && !isStructured;
@@ -1472,7 +1575,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             SelectedSidebarTabIndex = 2; // Structured
         }
-        else if (isCode && (Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.KeyValuePairs))
+        else if (isCode && (Analysis.Format == DetectedFormat.SqlInClause || Analysis.Format == DetectedFormat.Sql || Analysis.Format == DetectedFormat.KeyValuePairs))
         {
             SelectedSidebarTabIndex = 3; // Code
         }
@@ -1504,12 +1607,7 @@ public class MainViewModel : INotifyPropertyChanged
             return true;
         }
 
-        if (trimmed.StartsWith("SELECT ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("INSERT INTO ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("UPDATE ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("DELETE FROM ", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("IN (", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase))
+        if (DefaultTextAnalyzer.IsSql(trimmed))
         {
             return true;
         }

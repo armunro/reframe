@@ -10,10 +10,23 @@ namespace Reframe.Core.Analysis.Analyzers;
 public class DefaultTextAnalyzer : ITextAnalyzer
 {
     private static readonly Regex WordRegex = new(@"\b\S+\b", RegexOptions.Compiled);
-    private static readonly Regex SqlInRegex = new(@"^\s*(?:where\s+\w+\s+)?in\s*\((.*)\)\s*;?$", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly Regex SqlInRegex = new(@"^\s*(?:where\s+[\w\.\[\]`""]+\s+)?in\s*\([\s\S]*\)\s*;?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex LeadingSqlCommentsRegex = new(@"^(?:\s+|--[^\r\n]*\r?\n?|\/\*[\s\S]*?\*\/)+", RegexOptions.Compiled);
+    private static readonly Regex SqlStatementStartRegex = new(
+        @"^(?:SELECT(?:\s+(?:DISTINCT\b|TOP\s*\(\d+\)|ALL\b\s*)?|\s*[\*\(])|INSERT\s+(?:INTO\s+|[\w\.\[\]`""]+\s*(?:\(|VALUES\b))|UPDATE\s+(?:TOP\s*\(\d+\)\s+)?[\w\.\[\]`""]+\s+SET\b|DELETE\s+(?:TOP\s*\(\d+\)\s+)?(?:FROM\s+|[\w\.\[\]`""]+\s+FROM\s+)[\w\.\[\]`""]+|CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+|TEMP\s+)?(?:TABLE|VIEW|INDEX|UNIQUE\s+INDEX|PROCEDURE|PROC|FUNCTION|TRIGGER|DATABASE|SCHEMA|TYPE|SEQUENCE)\b|ALTER\s+(?:TABLE|VIEW|PROCEDURE|PROC|FUNCTION|TRIGGER|DATABASE|SCHEMA)\b|DROP\s+(?:TABLE|VIEW|PROCEDURE|PROC|FUNCTION|TRIGGER|DATABASE|SCHEMA|INDEX)\b|TRUNCATE\s+(?:TABLE\s+)?[\w\.\[\]`""]+|MERGE\s+(?:INTO\s+)?[\w\.\[\]`""]+|WITH\s+[\w\.\[\]`""]+\s*(?:\([^)]*\)\s*)?AS\s*\(|USE\s+\[?[\w\.`""]+\]?|EXEC(?:UTE)?\s+[\w\.\[\]`""]+|DECLARE\s+@[\w]+|SET\s+(?:@[\w]+|NOCOUNT|ANSI_|IDENTITY_INSERT|QUOTED_IDENTIFIER|TRANSACTION)|BEGIN\s+(?:TRAN|TRANSACTION|TRY|DISTRIBUTED\s+TRAN|CATCH)|COMMIT\b|ROLLBACK\b|(?:GRANT|REVOKE|DENY)\s+(?:SELECT|INSERT|UPDATE|DELETE|EXECUTE|ALL|CONTROL)\b|REPLACE\s+INTO\b|UPSERT\b|SHOW\s+(?:TABLES|DATABASES|COLUMNS|SCHEMAS|INDEXES|CREATE\s+TABLE)\b|(?:DESCRIBE|DESC)\s+[\w\.\[\]`""]+|EXPLAIN\s+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex KeyValueRegex = new(@"^[\w\.-]+\s*[:=]\s*.+$", RegexOptions.Compiled);
 
     public static DefaultTextAnalyzer Instance { get; } = new();
+
+    public static bool IsSql(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        var stripped = LeadingSqlCommentsRegex.Replace(text, "").TrimStart();
+        if (string.IsNullOrWhiteSpace(stripped)) return false;
+
+        return SqlInRegex.IsMatch(stripped) || SqlStatementStartRegex.IsMatch(stripped);
+    }
 
     public TextAnalysisResult Analyze(string? text, bool? hasHeaders = null)
     {
@@ -152,10 +165,18 @@ public class DefaultTextAnalyzer : ITextAnalyzer
             }
         }
 
-        // 3. SQL IN clause
+        // 3a. SQL IN clause
         if (SqlInRegex.IsMatch(trimmed))
         {
             return (DetectedFormat.SqlInClause, "SQL IN (...) clause", ',', false, 0, 0, Array.Empty<string>(), false);
+        }
+
+        // 3b. SQL Statements / Queries
+        if (IsSql(trimmed))
+        {
+            int stmtCount = Math.Max(1, nonEmptyLines.Count(l => !l.StartsWith("--") && !l.StartsWith("/*")));
+            string desc = stmtCount > 1 ? $"SQL Script ({stmtCount} lines)" : "SQL Query";
+            return (DetectedFormat.Sql, desc, null, false, 0, 0, Array.Empty<string>(), false);
         }
 
         // 4. Single Line vs Multi-Line

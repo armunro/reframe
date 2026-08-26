@@ -15,6 +15,7 @@ public enum DetectedFormat
     Yaml,
     Xml,
     SqlInClause,
+    Sql,
     KeyValuePairs,
     Base64,
     UrlEncoded

@@ -1341,6 +1341,7 @@
                 <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
                     <ui:ToggleSwitch Content="⚡ Real-time Transform" IsChecked="{Binding IsRealTimeTransform, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <ui:ToggleSwitch Content="📋 Watch Clipboard" IsChecked="{Binding WatchClipboard, Mode=TwoWay}" ToolTip="Automatically watch for new clipboard items and add them to the input" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <ui:ToggleSwitch Content="🔁 Auto Output → Input" IsChecked="{Binding AutoSendOutputToInput, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <ui:ToggleSwitch Content="↩ Word Wrap" IsChecked="{Binding IsWordWrap, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
