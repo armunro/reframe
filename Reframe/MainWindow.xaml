@@ -37,6 +37,7 @@
         <KeyBinding Key="F4" Command="{Binding SendToInputCommand}"/>
         <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding HistoryBackCommand}"/>
         <KeyBinding Key="Right" Modifiers="Alt" Command="{Binding HistoryForwardCommand}"/>
+        <KeyBinding Key="F5" Command="{Binding ExecuteCurrentPipelineCommand}"/>
     </ui:FluentWindow.InputBindings>
 
     <ui:FluentWindow.Resources>
@@ -44,6 +45,48 @@
         <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <conv:BooleanToTextWrappingConverter x:Key="BoolToWrapConv"/>
         <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+
+        <!-- Secondary Tool Button Style -->
+        <Style x:Key="SecondaryToolButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource ControlStrongFillColorDefaultBrush}" />
+                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="{DynamicResource SystemAccentColorBrush}" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource SolidBackgroundFillColorSecondaryBrush}" />
+                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="btnBorder" Property="Opacity" Value="0.4" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </ui:FluentWindow.Resources>
 
     <Grid Background="{DynamicResource ApplicationBackgroundBrush}">
@@ -1355,6 +1398,178 @@
                                             <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}"/>
                                             <Button Content="🔑 JWT Decode" Command="{Binding ActionCommand}" CommandParameter="JwtDecode" Style="{StaticResource ToolButtonStyle}"/>
                                         </UniformGrid>
+                                    </Expander>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <!-- TAB 6: RECIPES & PIPELINES -->
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="⚡ Recipes" FontSize="11" VerticalAlignment="Center"/>
+                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                             Visibility="{Binding IsRecipesTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                             ToolTip="Recommended recipe available"/>
+                                </StackPanel>
+                            </TabItem.Header>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                                <StackPanel>
+                                    <!-- Visual Pipeline Builder Expander -->
+                                    <Expander Header="🔗 Visual Pipeline Builder" IsExpanded="True" controls:SectionState.Key="Recipes_PipelineBuilder" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <!-- Pipeline Action Toolbar -->
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding PipelineStatusText}" Foreground="{DynamicResource AccentBlueBadgeBrush}" FontSize="11" VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                <Button Grid.Column="1" Content="🗑️ Clear" Command="{Binding ClearPipelineCommand}" Style="{DynamicResource SecondaryToolButtonStyle}" Padding="6,2" FontSize="10" ToolTip="Clear all steps in the current pipeline"/>
+                                            </Grid>
+
+                                            <!-- Step Builder List -->
+                                            <Border Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="4" Margin="0,0,0,6" MinHeight="40">
+                                                <StackPanel>
+                                                    <TextBlock Text="Pipeline is empty. Add steps below to build a transformation chain."
+                                                               Foreground="{DynamicResource MutedTextBrush}" FontSize="11" FontStyle="Italic" Margin="6,8"
+                                                               Visibility="{Binding HasPipelineSteps, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+
+                                                    <ItemsControl ItemsSource="{Binding CurrentPipelineSteps}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Margin="0,2" Padding="6,4">
+                                                                    <Grid>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <!-- Step Checkbox -->
+                                                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,4,0" ToolTip="Enable / disable this step"/>
+                                                                        <!-- Icon -->
+                                                                        <TextBlock Grid.Column="1" Text="{Binding Icon}" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                                        <!-- Title & Description -->
+                                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                                                            <TextBlock Text="{Binding Category}" FontSize="9" Foreground="{DynamicResource MutedTextBrush}"/>
+                                                                        </StackPanel>
+                                                                        <!-- Step Actions: Up / Down / Remove -->
+                                                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                                                            <Button Content="▲" Command="{Binding DataContext.MoveStepUpCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Width="20" Height="20" Padding="0" Margin="1,0" FontSize="8" ToolTip="Move step up"/>
+                                                                            <Button Content="▼" Command="{Binding DataContext.MoveStepDownCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Width="20" Height="20" Padding="0" Margin="1,0" FontSize="8" ToolTip="Move step down"/>
+                                                                            <Button Content="✕" Command="{Binding DataContext.RemoveStepFromPipelineCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Width="20" Height="20" Padding="0" Margin="1,0" FontSize="8" Foreground="#FF6B6B" ToolTip="Remove step"/>
+                                                                        </StackPanel>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Add Step Selector -->
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox ItemsSource="{Binding CatalogItems}" SelectedItem="{Binding SelectedCatalogItemToAdd, Mode=TwoWay}" DisplayMemberPath="Title" FontSize="11" Margin="0,0,4,0"/>
+                                                <Button Grid.Column="1" Content="➕ Add Step" Command="{Binding AddStepToPipelineCommand}" Style="{StaticResource PrimaryToolButtonStyle}" Padding="8,4" FontSize="11"/>
+                                            </Grid>
+
+                                            <!-- Execute Pipeline Button -->
+                                            <Button Content="▶ Run Current Pipeline (F5)" Command="{Binding ExecuteCurrentPipelineCommand}" Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,0,0,4" FontWeight="Bold"/>
+
+                                            <!-- Save Custom Preset Expander -->
+                                            <Expander Header="💾 Save Pipeline as New Preset" Style="{StaticResource SectionExpanderStyle}" Margin="0,4,0,0">
+                                                <StackPanel Margin="0,4,0,0">
+                                                    <TextBlock Text="Recipe Name:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" Margin="0,0,0,2"/>
+                                                    <ui:TextBox Text="{Binding NewRecipeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="11" Margin="0,0,0,4"/>
+                                                    <TextBlock Text="Description:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" Margin="0,0,0,2"/>
+                                                    <ui:TextBox Text="{Binding NewRecipeDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="11" Margin="0,0,0,4"/>
+                                                    <TextBlock Text="Hotkey (optional, e.g. Ctrl+Alt+8):" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" Margin="0,0,0,2"/>
+                                                    <ui:TextBox Text="{Binding NewRecipeHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="11" Margin="0,0,0,6"/>
+                                                    <Button Content="💾 Save Recipe Preset" Command="{Binding SavePipelineAsRecipeCommand}" Style="{StaticResource PrimaryToolButtonStyle}"/>
+                                                </StackPanel>
+                                            </Expander>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- Saved Recipes & Presets Library Expander -->
+                                    <Expander Header="📚 Saved Recipe Presets" IsExpanded="True" controls:SectionState.Key="Recipes_PresetLibrary" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <!-- Import / Export Bar -->
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="📥 Import JSON" Command="{Binding ImportRecipesCommand}" Style="{StaticResource ToolButtonStyle}" Margin="0,0,2,0" FontSize="10" ToolTip="Import recipe(s) from clipboard JSON"/>
+                                                <Button Grid.Column="1" Content="📤 Export All JSON" Command="{Binding ExportAllRecipesCommand}" Style="{StaticResource ToolButtonStyle}" Margin="2,0,0,0" FontSize="10" ToolTip="Export all recipes to clipboard JSON"/>
+                                            </Grid>
+
+                                            <!-- Preset Cards List -->
+                                            <ItemsControl ItemsSource="{Binding SavedRecipes}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Margin="0,0,0,6" Padding="8,6">
+                                                            <StackPanel>
+                                                                <!-- Card Header -->
+                                                                <Grid Margin="0,0,0,3">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"/>
+                                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                                        <Border Background="{DynamicResource BadgeBackgroundBrush}" CornerRadius="3" Padding="4,1" Margin="0,0,3,0"
+                                                                                Visibility="{Binding Hotkey, Converter={StaticResource StringToVisibilityConverter}}">
+                                                                            <TextBlock Text="{Binding Hotkey}" FontSize="9" Foreground="{DynamicResource AccentBlueBadgeBrush}" FontWeight="SemiBold"/>
+                                                                        </Border>
+                                                                        <Border Background="{DynamicResource BadgeBackgroundBrush}" CornerRadius="3" Padding="4,1">
+                                                                            <TextBlock Text="{Binding Category}" FontSize="9" Foreground="{DynamicResource MutedTextBrush}"/>
+                                                                        </Border>
+                                                                    </StackPanel>
+                                                                </Grid>
+
+                                                                <!-- Steps Summary -->
+                                                                <TextBlock Text="{Binding StepSummary}" FontSize="10" Foreground="{DynamicResource AccentBlueBadgeBrush}" TextWrapping="Wrap" Margin="0,0,0,3"/>
+
+                                                                <!-- Description -->
+                                                                <TextBlock Text="{Binding Description}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+                                                                <!-- Card Actions -->
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Button Grid.Column="0" Content="▶ Run" Command="{Binding DataContext.ExecuteRecipeCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                            Style="{StaticResource PrimaryToolButtonStyle}" Padding="6,3" FontSize="10" FontWeight="SemiBold"/>
+                                                                    <Button Grid.Column="1" Content="✏️ Edit" Command="{Binding DataContext.LoadRecipeToPipelineCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                            Style="{DynamicResource SecondaryToolButtonStyle}" Margin="3,0,0,0" Padding="5,3" FontSize="10" ToolTip="Load steps into visual pipeline editor"/>
+                                                                    <Button Grid.Column="2" Content="📑 Copy" Command="{Binding DataContext.DuplicateRecipeCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                            Style="{DynamicResource SecondaryToolButtonStyle}" Margin="3,0,0,0" Padding="5,3" FontSize="10" ToolTip="Duplicate recipe as new custom preset"/>
+                                                                    <Button Grid.Column="3" Content="📋 JSON" Command="{Binding DataContext.ExportRecipeCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                            Style="{DynamicResource SecondaryToolButtonStyle}" Margin="3,0,0,0" Padding="5,3" FontSize="10" ToolTip="Export recipe JSON to clipboard"/>
+                                                                    <Button Grid.Column="4" Content="🗑️" Command="{Binding DataContext.DeleteRecipeCommand, RelativeSource={RelativeSource AncestorType=TabControl}}" CommandParameter="{Binding}"
+                                                                            Style="{DynamicResource SecondaryToolButtonStyle}" Margin="3,0,0,0" Padding="5,3" FontSize="10" Foreground="#FF6B6B" ToolTip="Delete custom recipe"
+                                                                            Visibility="{Binding IsBuiltIn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
                                     </Expander>
                                 </StackPanel>
                             </ScrollViewer>

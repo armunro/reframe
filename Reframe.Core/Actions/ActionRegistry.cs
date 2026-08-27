@@ -1192,20 +1192,66 @@ public static class ActionRegistry
             targetSidebarTab: 4),
 
         new ActionItem(
+            id: "ShowRecipesTab",
+            title: "Go to Recipes & Pipelines Tab",
+            category: "Navigation & Workflow",
+            description: "Open Recipes and Visual Pipeline builder tab in sidebar",
+            keywords: ["recipes tab", "pipelines tab", "custom presets", "visual pipeline", "switch to recipes"],
+            icon: "⚡",
+            targetSidebarTab: 5),
+
+        new ActionItem(
+            id: "ExecuteActivePipeline",
+            title: "Execute Current Visual Pipeline",
+            category: "Recipes & Pipelines",
+            description: "Run all enabled steps in the visual pipeline against current input",
+            keywords: ["run pipeline", "execute pipeline", "chain", "pipeline"],
+            icon: "▶",
+            shortcut: "F5"),
+
+        new ActionItem(
             id: "ShowHistoryTab",
             title: "Go to History Timeline Tab",
             category: "Navigation & Workflow",
             description: "Open History & Timeline tab in sidebar",
             keywords: ["history tab", "timeline tab", "snapshots tab", "switch to history"],
             icon: "🕒",
-            targetSidebarTab: 5),
+            targetSidebarTab: 6),
     };
 
-    public static IReadOnlyList<ActionItem> AllActions => _allActions;
+    private static readonly List<ActionItem> _dynamicActions = new();
+
+    public static IReadOnlyList<ActionItem> AllActions
+    {
+        get
+        {
+            lock (_dynamicActions)
+            {
+                if (_dynamicActions.Count == 0) return _allActions;
+                var list = new List<ActionItem>(_allActions.Count + _dynamicActions.Count);
+                list.AddRange(_allActions);
+                list.AddRange(_dynamicActions);
+                return list;
+            }
+        }
+    }
+
+    public static void SetDynamicActions(IEnumerable<ActionItem> actions)
+    {
+        lock (_dynamicActions)
+        {
+            _dynamicActions.Clear();
+            if (actions != null)
+            {
+                _dynamicActions.AddRange(actions);
+            }
+        }
+    }
 
     public static IReadOnlyList<ActionItem> Search(string? query)
     {
-        return FuzzyMatcher.MatchActions(_allActions, query)
+        var actions = AllActions;
+        return FuzzyMatcher.MatchActions(actions, query)
             .Select(r => r.Item)
             .ToList();
     }

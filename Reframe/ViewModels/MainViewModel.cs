@@ -11,6 +11,7 @@ using Reframe.Core.Analysis;
 using Reframe.Core.Analysis.Analyzers;
 using Reframe.Core.Analysis.Models;
 using Reframe.Core.History;
+using Reframe.Core.Recipes;
 using Reframe.Core.Structured;
 using Reframe.Core.Structured.Models;
 using Reframe.Core.Structured.Parsers;
@@ -145,9 +146,24 @@ public class MainViewModel : INotifyPropertyChanged
     private ObservableCollection<ActionItem> _filteredActions = new();
     private ActionItem? _selectedAction;
 
+    // Recipes & Visual Pipelines
+    private TransformationRecipe? _selectedRecipe;
+    private RecipeStep? _selectedPipelineStep;
+    private RecipeCatalogItem? _selectedCatalogItemToAdd;
+    private string _newRecipeName = "My Custom Recipe";
+    private string _newRecipeDescription = string.Empty;
+    private string? _newRecipeHotkey;
+    private string _pipelineStatusText = "Pipeline ready";
+    private bool _isRecipesTabHighlighted;
+
+    public ObservableCollection<TransformationRecipe> SavedRecipes { get; } = new();
+    public ObservableCollection<RecipeStep> CurrentPipelineSteps { get; } = new();
+    public IReadOnlyList<RecipeCatalogItem> CatalogItems { get; } = RecipeCatalog.GetAllCatalogItems();
+
     public MainViewModel()
     {
         InitializeCommands();
+        InitializeRecipes();
         UpdateActionSearchResults();
         // Set sample text initially
         InputText = "1001\n1002\n1003\n1004\n1005";
@@ -647,6 +663,120 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool IsRecipesTabHighlighted
+    {
+        get => _isRecipesTabHighlighted;
+        private set
+        {
+            if (_isRecipesTabHighlighted != value)
+            {
+                _isRecipesTabHighlighted = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public TransformationRecipe? SelectedRecipe
+    {
+        get => _selectedRecipe;
+        set
+        {
+            if (_selectedRecipe != value)
+            {
+                _selectedRecipe = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSelectedRecipe));
+                OnPropertyChanged(nameof(CanDeleteSelectedRecipe));
+            }
+        }
+    }
+
+    public bool HasSelectedRecipe => _selectedRecipe != null;
+    public bool CanDeleteSelectedRecipe => _selectedRecipe != null && !_selectedRecipe.IsBuiltIn;
+
+    public RecipeStep? SelectedPipelineStep
+    {
+        get => _selectedPipelineStep;
+        set
+        {
+            if (_selectedPipelineStep != value)
+            {
+                _selectedPipelineStep = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSelectedPipelineStep));
+            }
+        }
+    }
+
+    public bool HasSelectedPipelineStep => _selectedPipelineStep != null;
+    public bool HasPipelineSteps => CurrentPipelineSteps.Count > 0;
+    public int PipelineStepCount => CurrentPipelineSteps.Count;
+
+    public RecipeCatalogItem? SelectedCatalogItemToAdd
+    {
+        get => _selectedCatalogItemToAdd;
+        set
+        {
+            if (_selectedCatalogItemToAdd != value)
+            {
+                _selectedCatalogItemToAdd = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string NewRecipeName
+    {
+        get => _newRecipeName;
+        set
+        {
+            if (_newRecipeName != value)
+            {
+                _newRecipeName = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string NewRecipeDescription
+    {
+        get => _newRecipeDescription;
+        set
+        {
+            if (_newRecipeDescription != value)
+            {
+                _newRecipeDescription = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string? NewRecipeHotkey
+    {
+        get => _newRecipeHotkey;
+        set
+        {
+            if (_newRecipeHotkey != value)
+            {
+                _newRecipeHotkey = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string PipelineStatusText
+    {
+        get => _pipelineStatusText;
+        set
+        {
+            if (_pipelineStatusText != value)
+            {
+                _pipelineStatusText = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private bool _hasHeaders = true;
     public bool HasHeaders
     {
@@ -1113,6 +1243,22 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SelectPreviousActionCommand { get; private set; } = null!;
     public ICommand ExecuteSelectedActionCommand { get; private set; } = null!;
 
+    // Recipe & Pipeline Commands
+    public ICommand ExecuteRecipeCommand { get; private set; } = null!;
+    public ICommand ExecuteCurrentPipelineCommand { get; private set; } = null!;
+    public ICommand AddStepToPipelineCommand { get; private set; } = null!;
+    public ICommand RemoveStepFromPipelineCommand { get; private set; } = null!;
+    public ICommand MoveStepUpCommand { get; private set; } = null!;
+    public ICommand MoveStepDownCommand { get; private set; } = null!;
+    public ICommand ClearPipelineCommand { get; private set; } = null!;
+    public ICommand LoadRecipeToPipelineCommand { get; private set; } = null!;
+    public ICommand SavePipelineAsRecipeCommand { get; private set; } = null!;
+    public ICommand DeleteRecipeCommand { get; private set; } = null!;
+    public ICommand DuplicateRecipeCommand { get; private set; } = null!;
+    public ICommand ExportRecipeCommand { get; private set; } = null!;
+    public ICommand ExportAllRecipesCommand { get; private set; } = null!;
+    public ICommand ImportRecipesCommand { get; private set; } = null!;
+
     public void UpdateActionSearchResults()
     {
         var matches = ActionRegistry.Search(_actionSearchQuery);
@@ -1134,6 +1280,23 @@ public class MainViewModel : INotifyPropertyChanged
         if (item.TargetSidebarTab.HasValue)
         {
             SelectedSidebarTabIndex = item.TargetSidebarTab.Value;
+        }
+
+        if (item.Id.StartsWith("Recipe:", StringComparison.OrdinalIgnoreCase))
+        {
+            string recipeId = item.Id.Substring("Recipe:".Length);
+            var recipe = SavedRecipes.FirstOrDefault(r => string.Equals(r.Id, recipeId, StringComparison.OrdinalIgnoreCase) || string.Equals(r.Name, recipeId, StringComparison.OrdinalIgnoreCase));
+            if (recipe != null)
+            {
+                ExecuteRecipe(recipe);
+            }
+            return;
+        }
+
+        if (string.Equals(item.Id, "ExecuteActivePipeline", StringComparison.OrdinalIgnoreCase))
+        {
+            ExecuteCurrentPipeline();
+            return;
         }
 
         switch (item.Id)
@@ -1202,6 +1365,9 @@ public class MainViewModel : INotifyPropertyChanged
                 break;
             case "ShowCaseEncTab":
                 SelectedSidebarTabIndex = 4;
+                break;
+            case "ShowRecipesTab":
+                SelectedSidebarTabIndex = 5;
                 break;
             case "ShowHistoryTab":
                 SelectedSidebarTabIndex = 5;
@@ -1652,6 +1818,451 @@ public class MainViewModel : INotifyPropertyChanged
                 ExecuteActionItem(SelectedAction);
             }
         });
+
+        // Recipe & Pipeline Commands
+        ExecuteRecipeCommand = new RelayCommand(p =>
+        {
+            TransformationRecipe? recipe = p as TransformationRecipe ?? SelectedRecipe;
+            if (recipe != null)
+            {
+                ExecuteRecipe(recipe);
+            }
+        });
+
+        ExecuteCurrentPipelineCommand = new RelayCommand(_ =>
+        {
+            ExecuteCurrentPipeline();
+        });
+
+        AddStepToPipelineCommand = new RelayCommand(p =>
+        {
+            if (p is RecipeCatalogItem catItem)
+            {
+                AddCatalogItemToPipeline(catItem);
+            }
+            else if (p is string actionId)
+            {
+                AddStepToPipeline(actionId);
+            }
+            else if (SelectedCatalogItemToAdd != null)
+            {
+                AddCatalogItemToPipeline(SelectedCatalogItemToAdd);
+            }
+        });
+
+        RemoveStepFromPipelineCommand = new RelayCommand(p =>
+        {
+            RecipeStep? step = p as RecipeStep ?? SelectedPipelineStep;
+            if (step != null)
+            {
+                RemovePipelineStep(step);
+            }
+        });
+
+        MoveStepUpCommand = new RelayCommand(p =>
+        {
+            RecipeStep? step = p as RecipeStep ?? SelectedPipelineStep;
+            if (step != null)
+            {
+                MovePipelineStepUp(step);
+            }
+        });
+
+        MoveStepDownCommand = new RelayCommand(p =>
+        {
+            RecipeStep? step = p as RecipeStep ?? SelectedPipelineStep;
+            if (step != null)
+            {
+                MovePipelineStepDown(step);
+            }
+        });
+
+        ClearPipelineCommand = new RelayCommand(_ =>
+        {
+            ClearPipeline();
+        });
+
+        LoadRecipeToPipelineCommand = new RelayCommand(p =>
+        {
+            TransformationRecipe? recipe = p as TransformationRecipe ?? SelectedRecipe;
+            if (recipe != null)
+            {
+                LoadRecipeToPipeline(recipe);
+            }
+        });
+
+        SavePipelineAsRecipeCommand = new RelayCommand(_ =>
+        {
+            SavePipelineAsRecipe(NewRecipeName, NewRecipeDescription, NewRecipeHotkey);
+        });
+
+        DeleteRecipeCommand = new RelayCommand(p =>
+        {
+            TransformationRecipe? recipe = p as TransformationRecipe ?? SelectedRecipe;
+            if (recipe != null)
+            {
+                DeleteRecipe(recipe);
+            }
+        });
+
+        DuplicateRecipeCommand = new RelayCommand(p =>
+        {
+            TransformationRecipe? recipe = p as TransformationRecipe ?? SelectedRecipe;
+            if (recipe != null)
+            {
+                DuplicateRecipe(recipe);
+            }
+        });
+
+        ExportRecipeCommand = new RelayCommand(p =>
+        {
+            TransformationRecipe? recipe = p as TransformationRecipe ?? SelectedRecipe;
+            if (recipe != null)
+            {
+                ExportRecipe(recipe);
+            }
+        });
+
+        ExportAllRecipesCommand = new RelayCommand(_ =>
+        {
+            ExportAllRecipes();
+        });
+
+        ImportRecipesCommand = new RelayCommand(p =>
+        {
+            string? json = p as string;
+            ImportRecipes(json);
+        });
+    }
+
+    public void InitializeRecipes()
+    {
+        var presets = RecipeStorage.LoadUserPresets();
+        SavedRecipes.Clear();
+        foreach (var p in presets)
+        {
+            SavedRecipes.Add(p);
+        }
+        SelectedRecipe = SavedRecipes.FirstOrDefault();
+        if (SelectedRecipe != null)
+        {
+            LoadRecipeToPipeline(SelectedRecipe);
+        }
+        SelectedCatalogItemToAdd = CatalogItems.FirstOrDefault();
+        UpdateDynamicRecipeActions();
+    }
+
+    public void UpdateDynamicRecipeActions()
+    {
+        var actions = new List<ActionItem>();
+        foreach (var recipe in SavedRecipes)
+        {
+            var keywords = new List<string>
+            {
+                "recipe",
+                "pipeline",
+                "preset",
+                recipe.Name.ToLowerInvariant(),
+                recipe.Category.ToLowerInvariant()
+            };
+            keywords.AddRange(recipe.Tags);
+            foreach (var step in recipe.Steps)
+            {
+                keywords.Add(step.Title.ToLowerInvariant());
+            }
+
+            actions.Add(new ActionItem(
+                id: $"Recipe:{recipe.Id}",
+                title: $"Recipe: {recipe.Name}",
+                category: "Recipes & Pipelines",
+                description: string.IsNullOrEmpty(recipe.Description) ? recipe.StepSummary : recipe.Description,
+                keywords: keywords,
+                icon: "⚡",
+                shortcut: recipe.Hotkey,
+                targetSidebarTab: 5));
+        }
+        ActionRegistry.SetDynamicActions(actions);
+    }
+
+    public void ExecuteRecipe(TransformationRecipe recipe)
+    {
+        if (recipe == null) return;
+
+        var result = RecipeEngine.Instance.Execute(recipe, InputText);
+        OutputText = result.Output;
+
+        if (result.Success)
+        {
+            StatusMessage = $"Recipe '{recipe.Name}' executed in {result.TotalTimeMs:F1}ms ({result.StepResults.Count} steps)";
+            PipelineStatusText = $"{recipe.Name}: {result.StepResults.Count} steps, {result.TotalTimeMs:F1}ms";
+        }
+        else
+        {
+            StatusMessage = $"Recipe '{recipe.Name}' error: {result.ErrorMessage}";
+            PipelineStatusText = $"Error: {result.ErrorMessage}";
+        }
+
+        if (recipe.AutoSendToInput && !string.IsNullOrEmpty(result.Output))
+        {
+            InputText = result.Output;
+        }
+
+        RecordHistory(result.Output, $"Recipe: {recipe.Name}");
+    }
+
+    public void ExecuteCurrentPipeline()
+    {
+        if (CurrentPipelineSteps.Count == 0)
+        {
+            StatusMessage = "Visual pipeline has no steps";
+            PipelineStatusText = "Add steps to pipeline to execute";
+            return;
+        }
+
+        var result = RecipeEngine.Instance.ExecuteSteps(CurrentPipelineSteps, InputText);
+        OutputText = result.Output;
+
+        if (result.Success)
+        {
+            StatusMessage = $"Pipeline executed in {result.TotalTimeMs:F1}ms ({CurrentPipelineSteps.Count} steps)";
+            PipelineStatusText = $"Executed in {result.TotalTimeMs:F1}ms ({CurrentPipelineSteps.Count} steps)";
+        }
+        else
+        {
+            StatusMessage = $"Pipeline error: {result.ErrorMessage}";
+            PipelineStatusText = $"Error: {result.ErrorMessage}";
+        }
+
+        if (AutoSendOutputToInput && !string.IsNullOrEmpty(result.Output))
+        {
+            InputText = result.Output;
+        }
+
+        RecordHistory(result.Output, $"Pipeline ({CurrentPipelineSteps.Count} steps)");
+    }
+
+    public void AddStepToPipeline(string actionId)
+    {
+        var item = RecipeCatalog.FindCatalogItem(actionId);
+        if (item != null)
+        {
+            AddCatalogItemToPipeline(item);
+        }
+        else
+        {
+            var step = new RecipeStep(actionId, actionId, "Custom", "", "⚡");
+            CurrentPipelineSteps.Add(step);
+            SelectedPipelineStep = step;
+            OnPropertyChanged(nameof(HasPipelineSteps));
+            OnPropertyChanged(nameof(PipelineStepCount));
+            PipelineStatusText = $"{CurrentPipelineSteps.Count} steps in pipeline";
+        }
+    }
+
+    public void AddCatalogItemToPipeline(RecipeCatalogItem item)
+    {
+        if (item == null) return;
+        var step = item.CreateStep();
+        CurrentPipelineSteps.Add(step);
+        SelectedPipelineStep = step;
+        OnPropertyChanged(nameof(HasPipelineSteps));
+        OnPropertyChanged(nameof(PipelineStepCount));
+        PipelineStatusText = $"{CurrentPipelineSteps.Count} steps in pipeline";
+        StatusMessage = $"Added '{step.Title}' to pipeline";
+    }
+
+    public void RemovePipelineStep(RecipeStep step)
+    {
+        if (step == null) return;
+        int idx = CurrentPipelineSteps.IndexOf(step);
+        CurrentPipelineSteps.Remove(step);
+        if (CurrentPipelineSteps.Count > 0)
+        {
+            int nextIdx = Math.Min(idx, CurrentPipelineSteps.Count - 1);
+            SelectedPipelineStep = CurrentPipelineSteps[nextIdx];
+        }
+        else
+        {
+            SelectedPipelineStep = null;
+        }
+        OnPropertyChanged(nameof(HasPipelineSteps));
+        OnPropertyChanged(nameof(PipelineStepCount));
+        PipelineStatusText = $"{CurrentPipelineSteps.Count} steps in pipeline";
+    }
+
+    public void MovePipelineStepUp(RecipeStep step)
+    {
+        if (step == null) return;
+        int idx = CurrentPipelineSteps.IndexOf(step);
+        if (idx > 0)
+        {
+            CurrentPipelineSteps.Move(idx, idx - 1);
+            SelectedPipelineStep = step;
+        }
+    }
+
+    public void MovePipelineStepDown(RecipeStep step)
+    {
+        if (step == null) return;
+        int idx = CurrentPipelineSteps.IndexOf(step);
+        if (idx >= 0 && idx < CurrentPipelineSteps.Count - 1)
+        {
+            CurrentPipelineSteps.Move(idx, idx + 1);
+            SelectedPipelineStep = step;
+        }
+    }
+
+    public void ClearPipeline()
+    {
+        CurrentPipelineSteps.Clear();
+        SelectedPipelineStep = null;
+        OnPropertyChanged(nameof(HasPipelineSteps));
+        OnPropertyChanged(nameof(PipelineStepCount));
+        PipelineStatusText = "Pipeline cleared (0 steps)";
+        StatusMessage = "Cleared visual pipeline";
+    }
+
+    public void LoadRecipeToPipeline(TransformationRecipe recipe)
+    {
+        if (recipe == null) return;
+        CurrentPipelineSteps.Clear();
+        foreach (var step in recipe.Steps)
+        {
+            CurrentPipelineSteps.Add(step.Clone());
+        }
+        NewRecipeName = recipe.Name;
+        NewRecipeDescription = recipe.Description;
+        NewRecipeHotkey = recipe.Hotkey;
+        SelectedRecipe = recipe;
+        PipelineStatusText = $"Loaded '{recipe.Name}' ({CurrentPipelineSteps.Count} steps)";
+        StatusMessage = $"Loaded recipe '{recipe.Name}' into pipeline builder";
+        OnPropertyChanged(nameof(HasPipelineSteps));
+        OnPropertyChanged(nameof(PipelineStepCount));
+    }
+
+    public void SavePipelineAsRecipe(string name, string description = "", string? hotkey = null)
+    {
+        if (CurrentPipelineSteps.Count == 0)
+        {
+            StatusMessage = "Cannot save empty pipeline as recipe";
+            return;
+        }
+
+        string recipeName = string.IsNullOrWhiteSpace(name) ? "My Custom Recipe" : name.Trim();
+        var newRecipe = new TransformationRecipe(
+            name: recipeName,
+            description: description,
+            category: "Custom",
+            hotkey: hotkey,
+            steps: CurrentPipelineSteps.Select(s => s.Clone()),
+            isBuiltIn: false);
+
+        SavedRecipes.Add(newRecipe);
+        SelectedRecipe = newRecipe;
+        RecipeStorage.SaveUserPresets(SavedRecipes);
+        UpdateDynamicRecipeActions();
+        StatusMessage = $"Saved custom recipe '{newRecipe.Name}'";
+        PipelineStatusText = $"Saved as '{newRecipe.Name}'";
+    }
+
+    public void DeleteRecipe(TransformationRecipe recipe)
+    {
+        if (recipe == null || recipe.IsBuiltIn) return;
+        SavedRecipes.Remove(recipe);
+        if (SelectedRecipe == recipe)
+        {
+            SelectedRecipe = SavedRecipes.FirstOrDefault();
+        }
+        RecipeStorage.SaveUserPresets(SavedRecipes);
+        UpdateDynamicRecipeActions();
+        StatusMessage = $"Deleted recipe '{recipe.Name}'";
+    }
+
+    public void DuplicateRecipe(TransformationRecipe recipe)
+    {
+        if (recipe == null) return;
+        var copy = recipe.Clone(asNewCustom: true);
+        SavedRecipes.Add(copy);
+        SelectedRecipe = copy;
+        LoadRecipeToPipeline(copy);
+        RecipeStorage.SaveUserPresets(SavedRecipes);
+        UpdateDynamicRecipeActions();
+        StatusMessage = $"Duplicated recipe as '{copy.Name}'";
+    }
+
+    public string ExportRecipe(TransformationRecipe recipe)
+    {
+        if (recipe == null) return string.Empty;
+        string json = RecipeStorage.ExportToJson(recipe);
+        try
+        {
+            _lastProcessedClipboardText = json;
+            Clipboard.SetText(json);
+        }
+        catch { }
+        StatusMessage = $"Exported recipe '{recipe.Name}' to clipboard (JSON)";
+        return json;
+    }
+
+    public string ExportAllRecipes()
+    {
+        string json = RecipeStorage.ExportAllToJson(SavedRecipes);
+        try
+        {
+            _lastProcessedClipboardText = json;
+            Clipboard.SetText(json);
+        }
+        catch { }
+        StatusMessage = $"Exported {SavedRecipes.Count} recipes to clipboard (JSON)";
+        return json;
+    }
+
+    public int ImportRecipes(string? json)
+    {
+        string toImport = json ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(toImport))
+        {
+            try
+            {
+                if (Clipboard.ContainsText())
+                {
+                    toImport = Clipboard.GetText();
+                }
+            }
+            catch { }
+        }
+
+        if (string.IsNullOrWhiteSpace(toImport))
+        {
+            StatusMessage = "No JSON found to import";
+            return 0;
+        }
+
+        var imported = RecipeStorage.ImportFromJson(toImport);
+        if (imported.Count == 0)
+        {
+            StatusMessage = "No valid recipes could be imported from JSON";
+            return 0;
+        }
+
+        int count = 0;
+        foreach (var r in imported)
+        {
+            r.IsBuiltIn = false;
+            SavedRecipes.Add(r);
+            count++;
+        }
+
+        SelectedRecipe = imported.LastOrDefault();
+        if (SelectedRecipe != null)
+        {
+            LoadRecipeToPipeline(SelectedRecipe);
+        }
+
+        RecipeStorage.SaveUserPresets(SavedRecipes);
+        UpdateDynamicRecipeActions();
+        StatusMessage = $"Successfully imported {count} recipe(s)";
+        return count;
     }
 
     public void ExpandAllStructuredNodes()
