@@ -27,6 +27,10 @@
     </ui:FluentWindow.DataContext>
 
     <ui:FluentWindow.InputBindings>
+        <KeyBinding Key="K" Modifiers="Control" Command="{Binding OpenCommandPaletteCommand}"/>
+        <KeyBinding Key="P" Modifiers="Control" Command="{Binding OpenCommandPaletteCommand}"/>
+        <KeyBinding Key="P" Modifiers="Control+Shift" Command="{Binding OpenCommandPaletteCommand}"/>
+        <KeyBinding Key="F1" Command="{Binding OpenCommandPaletteCommand}"/>
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding LoadFileCommand}"/>
         <KeyBinding Key="I" Modifiers="Control+Shift" Command="{Binding SendToInputCommand}"/>
         <KeyBinding Key="I" Modifiers="Alt" Command="{Binding SendToInputCommand}"/>
@@ -39,6 +43,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <conv:BooleanToTextWrappingConverter x:Key="BoolToWrapConv"/>
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
     </ui:FluentWindow.Resources>
 
     <Grid Background="{DynamicResource ApplicationBackgroundBrush}">
@@ -67,6 +72,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -83,7 +89,7 @@
                 </StackPanel>
 
                 <!-- Quick Action Buttons -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
                     <ui:Button Appearance="Secondary" Command="{Binding HistoryBackCommand}" ToolTip="Restore previous input snapshot (Alt+Left)" Margin="0,0,4,0" Padding="8,4" Icon="{ui:SymbolIcon Symbol=ArrowUndo24}">
                         <TextBlock Text="Back" FontSize="11"/>
                     </ui:Button>
@@ -101,8 +107,36 @@
                     </ui:Button>
                 </StackPanel>
 
+                <!-- Search Actions / Command Palette Trigger Button -->
+                <Button Grid.Column="2" HorizontalAlignment="Left"
+                        Command="{Binding OpenCommandPaletteCommand}"
+                        ToolTip="Search actions and transformers (Ctrl+K or Ctrl+P)"
+                        Background="#252526" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1"
+                        Padding="10,4" Margin="0,0,10,0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="SearchBtnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="SearchBtnBorder" Property="Background" Value="#333333"/>
+                                    <Setter TargetName="SearchBtnBorder" Property="BorderBrush" Value="{DynamicResource AccentBlueBadgeBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <ui:SymbolIcon Symbol="Search24" FontSize="12" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Search actions... " Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                        <Border Background="#383838" CornerRadius="3" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Ctrl+K" Foreground="#AAAAAA" FontSize="9" FontFamily="Consolas" FontWeight="SemiBold"/>
+                        </Border>
+                    </StackPanel>
+                </Button>
+
                 <!-- Sample Data Menu -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                     <ui:DropDownButton Appearance="Secondary" Padding="8,4" Icon="{ui:SymbolIcon Symbol=Lightbulb24}">
                         <TextBlock Text="Samples" FontSize="11"/>
                         <ui:DropDownButton.Flyout>
@@ -1347,5 +1381,140 @@
                 </StackPanel>
             </Grid>
         </Border>
+
+        <!-- COMMAND PALETTE / ACTION FUZZY SEARCH MODAL OVERLAY -->
+        <Grid Grid.Row="0" Grid.RowSpan="4" Panel.ZIndex="2000"
+              Visibility="{Binding IsCommandPaletteOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!-- Semi-transparent backdrop -->
+            <Border Background="#B0000000" MouseDown="CommandPaletteBackdrop_MouseDown"/>
+
+            <!-- Floating Command Palette Dialog Card -->
+            <Border Width="640" MaxHeight="500" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,45,0,0"
+                    Background="{DynamicResource SurfaceBackgroundBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270" Color="#000000" Opacity="0.85"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Search Box Header -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Results List -->
+                        <RowDefinition Height="*"/>
+                        <!-- Footer Hints -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Search Box Header -->
+                    <Border Grid.Row="0" Padding="12,10" Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:SymbolIcon Symbol="Search24" FontSize="18" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="2,0,10,0" VerticalAlignment="Center"/>
+                            <ui:TextBox x:Name="ActionSearchTextBox" Grid.Column="1"
+                                        Text="{Binding ActionSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        PlaceholderText="Type an action, format, conversion, or shortcut... (e.g. 'sql in', 'json', 'camel', 'yaml', 'sort', 'ts')"
+                                        FontSize="13"
+                                        ClearButtonEnabled="True"
+                                        VerticalAlignment="Center"
+                                        PreviewKeyDown="ActionSearchTextBox_PreviewKeyDown"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Action Results ListBox -->
+                    <ListBox x:Name="ActionSearchResultsListBox" Grid.Row="1"
+                             ItemsSource="{Binding FilteredActions}"
+                             SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
+                             MaxHeight="360"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="6"
+                             MouseDoubleClick="ActionSearchResultsListBox_MouseDoubleClick"
+                             KeyDown="ActionSearchResultsListBox_KeyDown">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="8,6"/>
+                                <Setter Property="Margin" Value="0,1"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="ItemBorder" CornerRadius="6" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="ItemBorder" Property="Background" Value="#25FFFFFF"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="ItemBorder" Property="Background" Value="#30007ACC"/>
+                                                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#60007ACC"/>
+                                                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="1"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Icon / Emoji -->
+                                    <TextBlock Grid.Column="0" Text="{Binding Icon}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                    <!-- Title & Description -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,10,0">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+
+                                    <!-- Category Badge -->
+                                    <Border Grid.Column="2" Background="#20FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <TextBlock Text="{Binding Category}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                    </Border>
+
+                                    <!-- Shortcut Badge (if any) -->
+                                    <Border Grid.Column="3" Background="#33000000" BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="3" Padding="4,1" VerticalAlignment="Center"
+                                            Visibility="{Binding Shortcut, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding Shortcut}" FontSize="9" FontFamily="Consolas" Foreground="#AAAAAA"/>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Footer Hints Bar -->
+                    <Border Grid.Row="2" Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,6" CornerRadius="0,0,8,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="↑↓ to navigate  •  " FontSize="10" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="Enter to select  •  " FontSize="10" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="Esc to close" FontSize="10" Foreground="{DynamicResource MutedTextBrush}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding ActionResultsCountText}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </ui:FluentWindow>

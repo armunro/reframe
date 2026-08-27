@@ -100,6 +100,82 @@ public partial class MainWindow : FluentWindow
         {
             RebuildDataGridColumns(vm.PreviewDataTable);
         }
+        else if (e.PropertyName == nameof(MainViewModel.IsCommandPaletteOpen) && sender is MainViewModel vm2)
+        {
+            if (vm2.IsCommandPaletteOpen)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ActionSearchTextBox.Focus();
+                    ActionSearchTextBox.SelectAll();
+                }), System.Windows.Threading.DispatcherPriority.Input);
+            }
+        }
+        else if (e.PropertyName == nameof(MainViewModel.SelectedAction) && sender is MainViewModel vm3)
+        {
+            if (vm3.SelectedAction != null)
+            {
+                ActionSearchResultsListBox.ScrollIntoView(vm3.SelectedAction);
+            }
+        }
+    }
+
+    private void CommandPaletteBackdrop_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            vm.IsCommandPaletteOpen = false;
+        }
+    }
+
+    private void ActionSearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainViewModel vm) return;
+
+        if (e.Key == Key.Down)
+        {
+            vm.SelectNextActionCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Up)
+        {
+            vm.SelectPreviousActionCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Enter)
+        {
+            vm.ExecuteSelectedActionCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            vm.CloseCommandPaletteCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private void ActionSearchResultsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            vm.ExecuteSelectedActionCommand.Execute(null);
+        }
+    }
+
+    private void ActionSearchResultsListBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainViewModel vm) return;
+
+        if (e.Key == Key.Enter)
+        {
+            vm.ExecuteSelectedActionCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            vm.CloseCommandPaletteCommand.Execute(null);
+            e.Handled = true;
+        }
     }
 
     private void RebuildDataGridColumns(DataTable? dt)

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using Reframe.Core.Actions;
 using Reframe.Core.Analysis;
 using Reframe.Core.Analysis.Analyzers;
 using Reframe.Core.Analysis.Models;
@@ -138,9 +139,16 @@ public class MainViewModel : INotifyPropertyChanged
     // Selected Operation ID for real-time mode
     private string _currentAction = "SqlIn";
 
+    // Action Fuzzy Search & Command Palette
+    private bool _isCommandPaletteOpen = false;
+    private string _actionSearchQuery = string.Empty;
+    private ObservableCollection<ActionItem> _filteredActions = new();
+    private ActionItem? _selectedAction;
+
     public MainViewModel()
     {
         InitializeCommands();
+        UpdateActionSearchResults();
         // Set sample text initially
         InputText = "1001\n1002\n1003\n1004\n1005";
         RecordHistory(InputText, "Initial Sample");
@@ -260,6 +268,56 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public bool IsWatchingClipboard => WatchClipboard;
+
+    public bool IsCommandPaletteOpen
+    {
+        get => _isCommandPaletteOpen;
+        set
+        {
+            if (_isCommandPaletteOpen != value)
+            {
+                _isCommandPaletteOpen = value;
+                OnPropertyChanged();
+                if (value)
+                {
+                    ActionSearchQuery = string.Empty;
+                    UpdateActionSearchResults();
+                }
+            }
+        }
+    }
+
+    public string ActionSearchQuery
+    {
+        get => _actionSearchQuery;
+        set
+        {
+            if (_actionSearchQuery != value)
+            {
+                _actionSearchQuery = value;
+                OnPropertyChanged();
+                UpdateActionSearchResults();
+            }
+        }
+    }
+
+    public ObservableCollection<ActionItem> FilteredActions => _filteredActions;
+
+    public ActionItem? SelectedAction
+    {
+        get => _selectedAction;
+        set
+        {
+            if (_selectedAction != value)
+            {
+                _selectedAction = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool HasActionResults => _filteredActions.Count > 0;
+    public string ActionResultsCountText => $"{_filteredActions.Count} actions";
 
     public IClipboardWatcher? ClipboardWatcher
     {
@@ -1046,6 +1104,116 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand DeselectAllColumnsCommand { get; private set; } = null!;
     public ICommand InvertColumnsCommand { get; private set; } = null!;
 
+    // Action Fuzzy Search & Command Palette Commands
+    public ICommand OpenCommandPaletteCommand { get; private set; } = null!;
+    public ICommand CloseCommandPaletteCommand { get; private set; } = null!;
+    public ICommand ToggleCommandPaletteCommand { get; private set; } = null!;
+    public ICommand ExecuteActionItemCommand { get; private set; } = null!;
+    public ICommand SelectNextActionCommand { get; private set; } = null!;
+    public ICommand SelectPreviousActionCommand { get; private set; } = null!;
+    public ICommand ExecuteSelectedActionCommand { get; private set; } = null!;
+
+    public void UpdateActionSearchResults()
+    {
+        var matches = ActionRegistry.Search(_actionSearchQuery);
+        _filteredActions.Clear();
+        foreach (var match in matches)
+        {
+            _filteredActions.Add(match);
+        }
+        SelectedAction = _filteredActions.FirstOrDefault();
+        OnPropertyChanged(nameof(HasActionResults));
+        OnPropertyChanged(nameof(ActionResultsCountText));
+    }
+
+    public void ExecuteActionItem(ActionItem? item)
+    {
+        if (item == null) return;
+        IsCommandPaletteOpen = false;
+
+        if (item.TargetSidebarTab.HasValue)
+        {
+            SelectedSidebarTabIndex = item.TargetSidebarTab.Value;
+        }
+
+        switch (item.Id)
+        {
+            case "SendOutputToInput":
+                if (!string.IsNullOrEmpty(OutputText))
+                {
+                    InputText = OutputText;
+                    RecordHistory(InputText, "Output ➔ Input");
+                    StatusMessage = "Copied output to input";
+                }
+                break;
+
+            case "LoadFile":
+                LoadFileCommand.Execute(null);
+                break;
+
+            case "ClearInput":
+                ClearInputCommand.Execute(null);
+                break;
+
+            case "CreateSnapshot":
+                CreateSnapshotCommand.Execute(null);
+                break;
+
+            case "HistoryBack":
+                if (HistoryBackCommand.CanExecute(null))
+                    HistoryBackCommand.Execute(null);
+                break;
+
+            case "HistoryForward":
+                if (HistoryForwardCommand.CanExecute(null))
+                    HistoryForwardCommand.Execute(null);
+                break;
+
+            case "ToggleRealTime":
+                IsRealTimeTransform = !IsRealTimeTransform;
+                StatusMessage = IsRealTimeTransform ? "Real-time transformation enabled" : "Real-time transformation paused";
+                break;
+
+            case "ToggleWatchClipboard":
+                WatchClipboard = !WatchClipboard;
+                break;
+
+            case "ToggleAutoSend":
+                AutoSendOutputToInput = !AutoSendOutputToInput;
+                StatusMessage = AutoSendOutputToInput ? "Auto Output ➔ Input enabled" : "Auto Output ➔ Input disabled";
+                break;
+
+            case "ToggleWordWrap":
+                IsWordWrap = !IsWordWrap;
+                StatusMessage = IsWordWrap ? "Word wrap enabled" : "Word wrap disabled";
+                break;
+
+            case "ShowLinesTab":
+                SelectedSidebarTabIndex = 0;
+                break;
+            case "ShowTabularTab":
+                SelectedSidebarTabIndex = 1;
+                break;
+            case "ShowStructuredTab":
+                SelectedSidebarTabIndex = 2;
+                break;
+            case "ShowCodeTab":
+                SelectedSidebarTabIndex = 3;
+                break;
+            case "ShowCaseEncTab":
+                SelectedSidebarTabIndex = 4;
+                break;
+            case "ShowHistoryTab":
+                SelectedSidebarTabIndex = 5;
+                break;
+
+            default:
+                _currentAction = item.Id;
+                ExecuteCurrentAction();
+                break;
+        }
+    }
+
     public void RecordHistory(string text, string source = "Pasted")
     {
         if (string.IsNullOrEmpty(text) || _isNavigatingHistory) return;
@@ -1422,6 +1590,67 @@ public class MainViewModel : INotifyPropertyChanged
             string action = p?.ToString() ?? "SqlIn";
             _currentAction = action;
             ExecuteCurrentAction();
+        });
+
+        // Action Fuzzy Search & Command Palette Commands
+        OpenCommandPaletteCommand = new RelayCommand(_ =>
+        {
+            IsCommandPaletteOpen = true;
+        });
+
+        CloseCommandPaletteCommand = new RelayCommand(_ =>
+        {
+            IsCommandPaletteOpen = false;
+        });
+
+        ToggleCommandPaletteCommand = new RelayCommand(_ =>
+        {
+            IsCommandPaletteOpen = !IsCommandPaletteOpen;
+        });
+
+        ExecuteActionItemCommand = new RelayCommand(p =>
+        {
+            if (p is ActionItem item)
+            {
+                ExecuteActionItem(item);
+            }
+            else if (p is string actionId)
+            {
+                var found = ActionRegistry.AllActions.FirstOrDefault(a => string.Equals(a.Id, actionId, StringComparison.OrdinalIgnoreCase));
+                if (found != null)
+                {
+                    ExecuteActionItem(found);
+                }
+                else
+                {
+                    _currentAction = actionId;
+                    ExecuteCurrentAction();
+                }
+            }
+        });
+
+        SelectNextActionCommand = new RelayCommand(_ =>
+        {
+            if (_filteredActions.Count == 0) return;
+            int idx = SelectedAction != null ? _filteredActions.IndexOf(SelectedAction) : -1;
+            idx = (idx + 1) % _filteredActions.Count;
+            SelectedAction = _filteredActions[idx];
+        });
+
+        SelectPreviousActionCommand = new RelayCommand(_ =>
+        {
+            if (_filteredActions.Count == 0) return;
+            int idx = SelectedAction != null ? _filteredActions.IndexOf(SelectedAction) : -1;
+            idx = idx <= 0 ? _filteredActions.Count - 1 : idx - 1;
+            SelectedAction = _filteredActions[idx];
+        });
+
+        ExecuteSelectedActionCommand = new RelayCommand(_ =>
+        {
+            if (SelectedAction != null)
+            {
+                ExecuteActionItem(SelectedAction);
+            }
         });
     }
 
@@ -1853,6 +2082,13 @@ public class MainViewModel : INotifyPropertyChanged
                 "TitleCase" => CaseTransformers.ChangeCase(InputText, TextCasing.TitleCase),
                 "UpperCase" => CaseTransformers.ChangeCase(InputText, TextCasing.UpperCase),
                 "LowerCase" => CaseTransformers.ChangeCase(InputText, TextCasing.LowerCase),
+                "DotCase" => CaseTransformers.ChangeCase(InputText, TextCasing.DotCase),
+                "PathCase" => CaseTransformers.ChangeCase(InputText, TextCasing.PathCase),
+                "ExtractEmails" => LineTransformers.ExtractRegex(InputText, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
+                "ExtractUrls" => LineTransformers.ExtractRegex(InputText, @"https?:\/\/[^\s/$.?#].[^\s]*"),
+                "ExtractIps" => LineTransformers.ExtractRegex(InputText, @"\b(?:\d{1,3}\.){3}\d{1,3}\b"),
+                "ExtractGuids" => LineTransformers.ExtractRegex(InputText, @"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b"),
+                "ExtractNumbers" => LineTransformers.ExtractRegex(InputText, @"[-+]?\d*\.?\d+"),
 
                 // Encodings & Formatting
                 "UrlEncode" => EncodingTransformers.UrlEncode(InputText),
