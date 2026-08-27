@@ -14,6 +14,7 @@ using Reframe.Core.Analysis.Models;
 using Reframe.Core.History;
 using Reframe.Core.Recipes;
 using Reframe.Core.RegexLab;
+using Reframe.Core.Scripting;
 using Reframe.Core.Structured;
 using Reframe.Core.Structured.Models;
 using Reframe.Core.Structured.Parsers;
@@ -172,6 +173,16 @@ public class MainViewModel : INotifyPropertyChanged
     private string _regexPresetSearchQuery = string.Empty;
     private ICollectionView? _filteredRegexPresets;
 
+    // Roslyn / C# Scripting & LINQ Scratchpad
+    private readonly CSharpScriptEngine _scriptEngine = new();
+    private string _csharpScript = "lines.Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x))";
+    private ScriptResult _scriptResult = ScriptResult.Empty;
+    private bool _isScriptLiveEvaluation = true;
+    private ScriptPreset? _selectedScriptPreset;
+    private ObservableCollection<ScriptPreset> _scriptPresets = new(ScriptLibraryCatalog.Presets);
+    private string _scriptPresetSearchQuery = string.Empty;
+    private ICollectionView? _filteredScriptPresets;
+
     public ObservableCollection<TransformationRecipe> SavedRecipes { get; } = new();
     public ObservableCollection<RecipeStep> CurrentPipelineSteps { get; } = new();
     public IReadOnlyList<RecipeCatalogItem> CatalogItems { get; } = RecipeCatalog.GetAllCatalogItems();
@@ -181,6 +192,7 @@ public class MainViewModel : INotifyPropertyChanged
         InitializeCommands();
         InitializeRecipes();
         InitializeRegexLab();
+        InitializeScripting();
         UpdateActionSearchResults();
         // Set sample text initially
         InputText = "1001\n1002\n1003\n1004\n1005";
@@ -937,6 +949,97 @@ public class MainViewModel : INotifyPropertyChanged
 
     public ICollectionView FilteredRegexPresets => _filteredRegexPresets ?? CollectionViewSource.GetDefaultView(_regexPresets);
 
+    // Roslyn / C# Scripting & LINQ Scratchpad Properties
+    public string CSharpScript
+    {
+        get => _csharpScript;
+        set
+        {
+            if (_csharpScript != value)
+            {
+                _csharpScript = value;
+                OnPropertyChanged();
+                if (_isScriptLiveEvaluation)
+                {
+                    UpdateScripting();
+                }
+            }
+        }
+    }
+
+    public bool IsScriptLiveEvaluation
+    {
+        get => _isScriptLiveEvaluation;
+        set
+        {
+            if (_isScriptLiveEvaluation != value)
+            {
+                _isScriptLiveEvaluation = value;
+                OnPropertyChanged();
+                if (value)
+                {
+                    UpdateScripting();
+                }
+            }
+        }
+    }
+
+    public ScriptResult ScriptResult => _scriptResult;
+    public string ScriptOutput => _scriptResult.Output;
+    public bool ScriptHasError => !_scriptResult.IsSuccess;
+    public string ScriptErrorMessage => _scriptResult.ErrorMessage ?? string.Empty;
+    public IReadOnlyList<string> ScriptDiagnostics => _scriptResult.Diagnostics;
+    public double ScriptExecutionTimeMs => _scriptResult.ExecutionTimeMs;
+    public double ScriptCompilationTimeMs => _scriptResult.CompilationTimeMs;
+    public string ScriptReturnTypeName => _scriptResult.ReturnTypeName;
+    public bool HasScriptOutput => !string.IsNullOrEmpty(_scriptResult.Output);
+
+    public string ScriptStatusSummary
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_csharpScript))
+                return "Enter a C# or LINQ expression to evaluate.";
+            if (!_scriptResult.IsSuccess)
+                return $"Error: {_scriptResult.ErrorMessage}";
+            return $"⚡ Executed in {ScriptExecutionTimeMs:F2}ms | Type: {ScriptReturnTypeName}";
+        }
+    }
+
+    public ScriptPreset? SelectedScriptPreset
+    {
+        get => _selectedScriptPreset;
+        set
+        {
+            if (_selectedScriptPreset != value)
+            {
+                _selectedScriptPreset = value;
+                OnPropertyChanged();
+                if (value != null)
+                {
+                    ApplyScriptPreset(value, loadSample: false);
+                }
+            }
+        }
+    }
+
+    public ObservableCollection<ScriptPreset> ScriptPresets => _scriptPresets;
+    public ICollectionView FilteredScriptPresets => _filteredScriptPresets ?? CollectionViewSource.GetDefaultView(_scriptPresets);
+
+    public string ScriptPresetSearchQuery
+    {
+        get => _scriptPresetSearchQuery;
+        set
+        {
+            if (_scriptPresetSearchQuery != value)
+            {
+                _scriptPresetSearchQuery = value;
+                OnPropertyChanged();
+                _filteredScriptPresets?.Refresh();
+            }
+        }
+    }
+
     private bool _hasHeaders = true;
     public bool HasHeaders
     {
@@ -1428,6 +1531,15 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand ClearRegexPatternCommand { get; private set; } = null!;
     public ICommand OpenRegexLabCommand { get; private set; } = null!;
 
+    // Roslyn / C# Scripting & Scratchpad Commands
+    public ICommand ExecuteCSharpScriptCommand { get; private set; } = null!;
+    public ICommand SendScriptOutputToInputCommand { get; private set; } = null!;
+    public ICommand SendScriptOutputToOutputCommand { get; private set; } = null!;
+    public ICommand ClearCSharpScriptCommand { get; private set; } = null!;
+    public ICommand OpenScriptingTabCommand { get; private set; } = null!;
+    public ICommand ApplyScriptPresetCommand { get; private set; } = null!;
+    public ICommand LoadScriptSampleInputCommand { get; private set; } = null!;
+
     public void UpdateActionSearchResults()
     {
         var matches = ActionRegistry.Search(_actionSearchQuery);
@@ -1502,6 +1614,44 @@ public class MainViewModel : INotifyPropertyChanged
         if (string.Equals(item.Id, "ExtractRegexGroupsJson", StringComparison.OrdinalIgnoreCase))
         {
             ExtractRegexGroupsJsonCommand.Execute(null);
+            return;
+        }
+
+        if (item.Id.StartsWith("ScriptPreset:", StringComparison.OrdinalIgnoreCase))
+        {
+            string presetId = item.Id.Substring("ScriptPreset:".Length);
+            var preset = ScriptLibraryCatalog.Presets.FirstOrDefault(p => string.Equals(p.Id, presetId, StringComparison.OrdinalIgnoreCase));
+            if (preset != null)
+            {
+                SelectedCenterTabIndex = 4;
+                ApplyScriptPreset(preset, loadSample: false);
+            }
+            return;
+        }
+
+        if (string.Equals(item.Id, "OpenScriptingTab", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(item.Id, "ShowScriptingTab", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(item.Id, "OpenScriptingLab", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectedCenterTabIndex = 4;
+            return;
+        }
+
+        if (string.Equals(item.Id, "ExecuteCSharpScript", StringComparison.OrdinalIgnoreCase))
+        {
+            ExecuteCSharpScriptCommand.Execute(null);
+            return;
+        }
+
+        if (string.Equals(item.Id, "SendScriptOutputToInput", StringComparison.OrdinalIgnoreCase))
+        {
+            SendScriptOutputToInputCommand.Execute(null);
+            return;
+        }
+
+        if (string.Equals(item.Id, "SendScriptOutputToOutput", StringComparison.OrdinalIgnoreCase))
+        {
+            SendScriptOutputToOutputCommand.Execute(null);
             return;
         }
 
@@ -2215,6 +2365,69 @@ public class MainViewModel : INotifyPropertyChanged
         {
             SelectedCenterTabIndex = 3;
         });
+
+        // Roslyn / C# Scripting Commands
+        ExecuteCSharpScriptCommand = new RelayCommand(_ =>
+        {
+            UpdateScripting(manual: true);
+        });
+
+        SendScriptOutputToInputCommand = new RelayCommand(_ =>
+        {
+            if (!string.IsNullOrEmpty(_scriptResult.Output))
+            {
+                InputText = _scriptResult.Output;
+                RecordHistory(InputText, "C# Script ➔ Input");
+                StatusMessage = "Sent C# script output to input";
+            }
+        });
+
+        SendScriptOutputToOutputCommand = new RelayCommand(_ =>
+        {
+            if (!string.IsNullOrEmpty(_scriptResult.Output))
+            {
+                OutputText = _scriptResult.Output;
+                StatusMessage = "Sent C# script output to main output";
+            }
+        });
+
+        ClearCSharpScriptCommand = new RelayCommand(_ =>
+        {
+            CSharpScript = string.Empty;
+        });
+
+        OpenScriptingTabCommand = new RelayCommand(_ =>
+        {
+            SelectedCenterTabIndex = 4;
+        });
+
+        ApplyScriptPresetCommand = new RelayCommand(param =>
+        {
+            if (param is ScriptPreset preset)
+            {
+                ApplyScriptPreset(preset, loadSample: false);
+            }
+            else if (param is string presetId)
+            {
+                var p = ScriptLibraryCatalog.Presets.FirstOrDefault(x => string.Equals(x.Id, presetId, StringComparison.OrdinalIgnoreCase));
+                if (p != null)
+                {
+                    ApplyScriptPreset(p, loadSample: false);
+                }
+            }
+        });
+
+        LoadScriptSampleInputCommand = new RelayCommand(param =>
+        {
+            if (param is ScriptPreset preset && !string.IsNullOrEmpty(preset.SampleInput))
+            {
+                ApplyScriptPreset(preset, loadSample: true);
+            }
+            else if (_selectedScriptPreset != null && !string.IsNullOrEmpty(_selectedScriptPreset.SampleInput))
+            {
+                ApplyScriptPreset(_selectedScriptPreset, loadSample: true);
+            }
+        });
     }
 
     public void InitializeRecipes()
@@ -2629,6 +2842,77 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasRegexMatches));
     }
 
+    // -------------------------------------------------------------
+    // Roslyn / C# Scripting & Scratchpad Methods
+    // -------------------------------------------------------------
+    public void InitializeScripting()
+    {
+        _scriptPresets = new ObservableCollection<ScriptPreset>(ScriptLibraryCatalog.Presets);
+        _filteredScriptPresets = CollectionViewSource.GetDefaultView(_scriptPresets);
+        _filteredScriptPresets.Filter = FilterScriptPresetItem;
+        _selectedScriptPreset = _scriptPresets.FirstOrDefault();
+        _scriptEngine.WarmUp();
+        UpdateScripting();
+    }
+
+    private bool FilterScriptPresetItem(object obj)
+    {
+        if (obj is not ScriptPreset preset) return false;
+        if (string.IsNullOrWhiteSpace(_scriptPresetSearchQuery)) return true;
+
+        string query = _scriptPresetSearchQuery.Trim();
+        return preset.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               preset.Category.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               preset.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               preset.Script.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void ApplyScriptPreset(ScriptPreset preset, bool loadSample = false)
+    {
+        _selectedScriptPreset = preset;
+        _csharpScript = preset.Script;
+
+        OnPropertyChanged(nameof(SelectedScriptPreset));
+        OnPropertyChanged(nameof(CSharpScript));
+
+        if (loadSample && !string.IsNullOrEmpty(preset.SampleInput))
+        {
+            InputText = preset.SampleInput;
+            RecordHistory(InputText, $"Sample ({preset.Title})");
+        }
+
+        UpdateScripting();
+        StatusMessage = $"Loaded C# script preset: {preset.Title}";
+    }
+
+    public void UpdateScripting(bool manual = false)
+    {
+        _scriptResult = _scriptEngine.Evaluate(_csharpScript, _inputText);
+
+        OnPropertyChanged(nameof(ScriptResult));
+        OnPropertyChanged(nameof(ScriptOutput));
+        OnPropertyChanged(nameof(ScriptHasError));
+        OnPropertyChanged(nameof(ScriptErrorMessage));
+        OnPropertyChanged(nameof(ScriptDiagnostics));
+        OnPropertyChanged(nameof(ScriptExecutionTimeMs));
+        OnPropertyChanged(nameof(ScriptCompilationTimeMs));
+        OnPropertyChanged(nameof(ScriptReturnTypeName));
+        OnPropertyChanged(nameof(HasScriptOutput));
+        OnPropertyChanged(nameof(ScriptStatusSummary));
+
+        if (manual)
+        {
+            if (_scriptResult.IsSuccess)
+            {
+                StatusMessage = $"C# script executed in {_scriptResult.ExecutionTimeMs:F2}ms";
+            }
+            else
+            {
+                StatusMessage = $"C# script error: {_scriptResult.ErrorMessage}";
+            }
+        }
+    }
+
     public void ExpandAllStructuredNodes()
     {
         foreach (var node in _structuredNodes)
@@ -2706,10 +2990,14 @@ public class MainViewModel : INotifyPropertyChanged
 
         AnalyzeStructuredData();
         UpdateRegexLab();
-
-        if (SelectedCenterTabIndex == 3)
+        if (_isScriptLiveEvaluation)
         {
-            // Keep user on Regex Lab tab if currently active
+            UpdateScripting();
+        }
+
+        if (SelectedCenterTabIndex == 3 || SelectedCenterTabIndex == 4)
+        {
+            // Keep user on Regex Lab or C# Scripting tab if currently active
         }
         else if (HasTabularData)
         {

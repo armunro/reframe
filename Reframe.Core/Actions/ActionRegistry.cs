@@ -1356,6 +1356,138 @@ public static class ActionRegistry
             description: "Load key=value query string parameter pattern into Regex Lab",
             keywords: ["query params", "key value", "query string", "url params"],
             icon: "🔍"),
+
+        // -------------------------------------------------------------
+        // Roslyn / C# Scripting & LINQ Scratchpad
+        // -------------------------------------------------------------
+        new ActionItem(
+            id: "OpenScriptingTab",
+            title: "💻 Open C# / LINQ Scratchpad",
+            category: "C# Scripting",
+            description: "Roslyn-powered lightweight scratchpad for ad-hoc C# expressions and LINQ queries",
+            keywords: ["c#", "csharp", "linq", "script", "roslyn", "scratchpad", "code", "eval", "expression", "sandbox"],
+            icon: "💻"),
+
+        new ActionItem(
+            id: "ExecuteCSharpScript",
+            title: "Execute C# / LINQ Script",
+            category: "C# Scripting",
+            description: "Run current C# script expression against input text using Roslyn engine",
+            keywords: ["run script", "execute c#", "eval linq", "eval script", "execute expression"],
+            icon: "▶",
+            shortcut: "F5"),
+
+        new ActionItem(
+            id: "SendScriptOutputToInput",
+            title: "Send Script Output to Input",
+            category: "C# Scripting",
+            description: "Replace editor input with current C# script output for further transformations",
+            keywords: ["script to input", "send to input", "script output to editor"],
+            icon: "⬆️"),
+
+        new ActionItem(
+            id: "SendScriptOutputToOutput",
+            title: "Send Script Output to Main Output",
+            category: "C# Scripting",
+            description: "Copy C# script output directly to the main output editor",
+            keywords: ["script to output", "copy to output", "script result"],
+            icon: "📋"),
+
+        new ActionItem(
+            id: "ScriptPreset:FilterAndTrimLines",
+            title: "C# Script: Filter & Trim Lines",
+            category: "C# Scripting",
+            description: "Load LINQ expression to trim and filter non-empty lines",
+            keywords: ["c# trim", "linq filter", "csharp lines", "filter lines"],
+            icon: "✂️"),
+
+        new ActionItem(
+            id: "ScriptPreset:DeduplicateAndSort",
+            title: "C# Script: Deduplicate & Sort Alphabetically",
+            category: "C# Scripting",
+            description: "Load LINQ expression to deduplicate and sort items alphabetically",
+            keywords: ["c# distinct", "linq sort", "csharp distinct", "c# orderby"],
+            icon: "🔤"),
+
+        new ActionItem(
+            id: "ScriptPreset:ExtractNumbersAndSum",
+            title: "C# Script: Extract Numbers & Calculate Sum",
+            category: "C# Scripting",
+            description: "Load C# script to extract all numbers with Regex and compute their total sum",
+            keywords: ["c# sum", "linq sum", "c# regex sum", "calculate total"],
+            icon: "➕"),
+
+        new ActionItem(
+            id: "ScriptPreset:LineNumbering",
+            title: "C# Script: Add Line Numbers",
+            category: "C# Scripting",
+            description: "Load LINQ expression to prepend padded line numbers to each line",
+            keywords: ["c# line numbers", "linq index", "number lines"],
+            icon: "🔢"),
+
+        new ActionItem(
+            id: "ScriptPreset:GroupByFrequency",
+            title: "C# Script: Group by Frequency & Count",
+            category: "C# Scripting",
+            description: "Load LINQ expression to group items by frequency and count occurrences",
+            keywords: ["c# groupby", "linq count", "frequency count", "c# histogram"],
+            icon: "📊"),
+
+        new ActionItem(
+            id: "ScriptPreset:SqlInClause",
+            title: "C# Script: Generate SQL IN Clause",
+            category: "C# Scripting",
+            description: "Load C# expression to format lines into a SQL IN clause",
+            keywords: ["c# sql in", "linq sql", "generate in clause"],
+            icon: "🗄️"),
+
+        new ActionItem(
+            id: "ScriptPreset:CSharpStringArray",
+            title: "C# Script: Wrap in C# String Array",
+            category: "C# Scripting",
+            description: "Load C# expression to wrap input lines into string[] code initializer",
+            keywords: ["c# string array", "generate string array", "c# array"],
+            icon: "📜"),
+
+        new ActionItem(
+            id: "ScriptPreset:CsvToJsonObjects",
+            title: "C# Script: CSV Lines to JSON Objects",
+            category: "C# Scripting",
+            description: "Load LINQ expression to parse CSV lines into dynamic JSON objects",
+            keywords: ["c# csv to json", "linq csv", "csharp json objects"],
+            icon: "📦"),
+
+        new ActionItem(
+            id: "ScriptPreset:ExtractEmails",
+            title: "C# Script: Extract Email Addresses",
+            category: "C# Scripting",
+            description: "Load C# script to extract distinct email addresses with Regex",
+            keywords: ["c# extract emails", "linq emails", "c# regex email"],
+            icon: "✉️"),
+
+        new ActionItem(
+            id: "ScriptPreset:SplitDelimitersAndFlatten",
+            title: "C# Script: Split Delimiters & Flatten",
+            category: "C# Scripting",
+            description: "Load LINQ expression to split on multiple delimiters and extract distinct tokens",
+            keywords: ["c# split", "linq split", "flatten tokens"],
+            icon: "🧩"),
+
+        new ActionItem(
+            id: "ScriptPreset:Base64EncodeLines",
+            title: "C# Script: Base64 Encode Lines",
+            category: "C# Scripting",
+            description: "Load LINQ expression to Base64 encode each line",
+            keywords: ["c# base64", "linq base64", "encode base64 c#"],
+            icon: "🔒"),
+
+        new ActionItem(
+            id: "ScriptPreset:RegexWordTransformer",
+            title: "C# Script: Regex Word Transformation",
+            category: "C# Scripting",
+            description: "Load C# script using Regex.Replace with MatchEvaluator function",
+            keywords: ["c# regex replace", "match evaluator", "word transform"],
+            icon: "🔀"),
     };
 
     private static readonly List<ActionItem> _dynamicActions = new();

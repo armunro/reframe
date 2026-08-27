@@ -887,6 +887,178 @@
                                 </Grid>
                             </Grid>
                         </TabItem>
+
+                        <!-- Tab 5: Roslyn / C# Scripting & LINQ Scratchpad -->
+                        <TabItem Header="💻 C# Scratchpad">
+                            <Grid Background="{DynamicResource SurfaceBackgroundBrush}">
+                                <Grid.RowDefinitions>
+                                    <!-- Row 0: Toolbar & Preset Selector -->
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- Row 1: Status & Diagnostics Message -->
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- Row 2: Two-Pane Script Editor & Live Result Output -->
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- ROW 0: TOOLBAR & PRESETS -->
+                                <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,6" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Preset Selector -->
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                                            <TextBlock Text="📚 Preset:" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlueBadgeBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                            <ComboBox ItemsSource="{Binding FilteredScriptPresets}"
+                                                      SelectedItem="{Binding SelectedScriptPreset, Mode=TwoWay}"
+                                                      DisplayMemberPath="Title" Padding="4,4"
+                                                      Width="220" Height="26" FontSize="11" VerticalAlignment="Center"
+                                                      ToolTip="Select a built-in C# / LINQ transformation preset"/>
+                                            <Button Content="🧪 Sample" Command="{Binding LoadScriptSampleInputCommand}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="4,0,0,0" Padding="6,3" FontSize="10"
+                                                    ToolTip="Load sample input text for the selected script preset into the editor"/>
+                                        </StackPanel>
+
+                                        <!-- Center: Quick Globals Hint -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                                            <Border Background="{DynamicResource BadgeBackgroundBrush}" CornerRadius="3" Padding="5,2" VerticalAlignment="Center" ToolTip="Available host globals: input (string), text (string), lines (string[]), nonEmptyLines (string[]), print(val), dump(val)">
+                                                <TextBlock Text="💡 Globals: input, lines, nonEmptyLines, print(), dump()" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" FontFamily="Consolas"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Action Buttons -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <CheckBox Content="⚡ Live Eval" IsChecked="{Binding IsScriptLiveEvaluation, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Automatically evaluate script on every keystroke or input change"/>
+                                            <Button Content="▶ Run" Command="{Binding ExecuteCSharpScriptCommand}"
+                                                    Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
+                                                    ToolTip="Execute current C# script expression (F5)"/>
+                                            <Button Content="⬆ To Input" Command="{Binding SendScriptOutputToInputCommand}"
+                                                    IsEnabled="{Binding HasScriptOutput}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
+                                                    ToolTip="Send script output directly to input editor"/>
+                                            <Button Content="📋 To Output" Command="{Binding SendScriptOutputToOutputCommand}"
+                                                    IsEnabled="{Binding HasScriptOutput}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
+                                                    ToolTip="Send script output to main text output editor"/>
+                                            <Button Content="✕ Clear" Command="{Binding ClearCSharpScriptCommand}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Padding="6,3" FontSize="10"
+                                                    ToolTip="Clear script editor"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- ROW 1: STATUS & DIAGNOSTICS BAR -->
+                                <Border Grid.Row="1" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ScriptStatusSummary}"
+                                                       FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentSuccessBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ScriptHasError}" Value="True">
+                                                                <Setter Property="Foreground" Value="#FF6B6B"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1" Text="{Binding SelectedScriptPreset.Description}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="400"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- ROW 2: SPLIT SCRIPT EDITOR & OUTPUT PREVIEW -->
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Left: C# Script Editor -->
+                                    <Border Grid.Column="0" Background="{DynamicResource SurfaceBackgroundBrush}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="C# / LINQ EXPRESSION" FontWeight="Bold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10"/>
+                                                    <TextBlock Grid.Column="1" Text="Type expression or code block" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                </Grid>
+                                            </Border>
+
+                                            <controls:BindableTextEditor x:Name="CSharpScriptEditor"
+                                                                         Grid.Row="1"
+                                                                         BoundText="{Binding CSharpScript, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         SyntaxLanguage="C#"
+                                                                         FontFamily="{StaticResource EditorFontFamily}"
+                                                                         FontSize="13"
+                                                                         Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                                         Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Splitter between Editor and Output -->
+                                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" Background="Transparent"/>
+
+                                    <!-- Right: Script Output / Results -->
+                                    <Border Grid.Column="2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1,0,0,0">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="EVALUATION OUTPUT" FontWeight="Bold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" Margin="0,0,8,0"/>
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Border Background="{DynamicResource BadgeBackgroundBrush}" CornerRadius="3" Padding="4,1" Margin="0,0,4,0" Visibility="{Binding ScriptReturnTypeName, Converter={StaticResource StringToVisibilityConverter}}">
+                                                            <TextBlock Text="{Binding ScriptReturnTypeName}" Foreground="{DynamicResource AccentBlueBadgeBrush}" FontSize="9" FontFamily="Consolas"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="2" Text="{Binding ScriptExecutionTimeMs, StringFormat='{}{0:F2}ms'}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="10" FontWeight="SemiBold"/>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- Output text editor (read-only view) -->
+                                            <controls:BindableTextEditor x:Name="ScriptOutputEditor"
+                                                                         Grid.Row="1"
+                                                                         BoundText="{Binding ScriptOutput, Mode=OneWay}"
+                                                                         SyntaxLanguage="Auto"
+                                                                         IsReadOnly="True"
+                                                                         FontFamily="{StaticResource EditorFontFamily}"
+                                                                         FontSize="13"
+                                                                         Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                                         Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
                     </TabControl>
                 </Border>
 
