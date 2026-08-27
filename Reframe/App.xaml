@@ -181,8 +181,8 @@
                 <Setter Property="Foreground" Value="{DynamicResource AccentInfoBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="FontSize" Value="11" />
-                <Setter Property="Margin" Value="0,2,0,5" />
-                <Setter Property="Padding" Value="8,8,8,6" />
+                <Setter Property="Margin" Value="0,1,0,3" />
+                <Setter Property="Padding" Value="6,5,6,5" />
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Template">
                     <Setter.Value>
@@ -205,8 +205,8 @@
                                                         Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                                                         BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                                                         BorderThickness="1"
-                                                        CornerRadius="5"
-                                                        Padding="9,6"
+                                                        CornerRadius="4"
+                                                        Padding="7,4"
                                                         Cursor="Hand"
                                                         SnapsToDevicePixels="True">
                                                     <Grid>
@@ -241,7 +241,7 @@
                                                         <Setter TargetName="arrow" Property="Fill" Value="{DynamicResource AccentSuccessBrush}" />
                                                         <Setter TargetName="headerBorder" Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
                                                         <Setter TargetName="headerBorder" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}" />
-                                                        <Setter TargetName="headerBorder" Property="CornerRadius" Value="5,5,0,0" />
+                                                        <Setter TargetName="headerBorder" Property="CornerRadius" Value="4,4,0,0" />
                                                     </Trigger>
                                                     <Trigger Property="IsMouseOver" Value="True">
                                                         <Setter TargetName="headerBorder" Property="Background" Value="{DynamicResource ControlStrongFillColorDefaultBrush}" />
@@ -257,7 +257,7 @@
                                             Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}"
                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                                             BorderThickness="1,0,1,1"
-                                            CornerRadius="0,0,5,5"
+                                            CornerRadius="0,0,4,4"
                                             Margin="0,-1,0,0"
                                             Padding="{TemplateBinding Padding}"
                                             Visibility="Collapsed">
@@ -287,8 +287,8 @@
                 <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="Margin" Value="1,2" />
-                <Setter Property="Padding" Value="8,5" />
+                <Setter Property="Margin" Value="1,1" />
+                <Setter Property="Padding" Value="6,4" />
                 <Setter Property="FontSize" Value="11" />
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
                 <Setter Property="Cursor" Value="Hand" />
@@ -299,7 +299,7 @@
                                     Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="4"
+                                    CornerRadius="3"
                                     Padding="{TemplateBinding Padding}"
                                     SnapsToDevicePixels="True">
                                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -331,6 +331,7 @@
                 <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Margin" Value="1,1" />
                 <Setter Property="Padding" Value="4,2" />
                 <Setter Property="FontSize" Value="10" />
                 <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -373,8 +374,8 @@
                 <Setter Property="Foreground" Value="#FFFFFF" />
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="Margin" Value="1,2" />
-                <Setter Property="Padding" Value="8,5" />
+                <Setter Property="Margin" Value="1,1" />
+                <Setter Property="Padding" Value="6,4" />
                 <Setter Property="FontSize" Value="11" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -386,7 +387,7 @@
                                     Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="4"
+                                    CornerRadius="3"
                                     Padding="{TemplateBinding Padding}"
                                     SnapsToDevicePixels="True">
                                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"

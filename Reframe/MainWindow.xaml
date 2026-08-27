@@ -202,16 +202,16 @@
         </Border>
 
         <!-- Main Workspace Area -->
-        <Grid Grid.Row="2" Margin="8">
+        <Grid Grid.Row="2" Margin="3,2,3,2">
             <Grid.ColumnDefinitions>
                 <!-- Input Pane (38%) -->
                 <ColumnDefinition Width="3.8*" MinWidth="250"/>
-                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="3"/>
                 <!-- Output Pane (38%) -->
                 <ColumnDefinition Width="3.8*" MinWidth="250"/>
-                <ColumnDefinition Width="6"/>
-                <!-- Tools / Transform Options Sidebar (24%) -->
-                <ColumnDefinition Width="3.2*" MinWidth="260" MaxWidth="440"/>
+                <ColumnDefinition Width="3"/>
+                <!-- Tools / Transform Options Sidebar (20%) -->
+                <ColumnDefinition Width="2.7*" MinWidth="220" MaxWidth="360"/>
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: INPUT PANE -->
@@ -356,7 +356,7 @@
                                     </ListBox>
                                 </Grid>
 
-                                <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+                                <GridSplitter Grid.Row="1" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource ControlStrokeColorDefaultBrush}"/>
 
                                 <!-- Bottom: Full text preview of selected history snapshot -->
                                 <Border Grid.Row="2" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="6">
@@ -389,8 +389,7 @@
                                                  FontSize="12"
                                                  Background="{DynamicResource SurfaceDarkBackgroundBrush}"
                                                  Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                                 BorderThickness="1"
+                                                 BorderThickness="0"
                                                  Padding="6"
                                                  VerticalScrollBarVisibility="Auto"
                                                  HorizontalScrollBarVisibility="Auto"/>
@@ -408,14 +407,14 @@
             </Border>
 
             <!-- GridSplitter 1 -->
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" Background="Transparent"/>
+            <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" Background="Transparent"/>
 
             <!-- CENTER: DATA VIEW & TEXT OUTPUT PANES (SPLIT VERTICALLY) -->
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <!-- Top: Table Grid View / Analysis & Stats -->
                     <RowDefinition Height="1*" MinHeight="100"/>
-                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="3"/>
                     <!-- Bottom: Dedicated Text Output Pane -->
                     <RowDefinition Height="1*" MinHeight="100"/>
                 </Grid.RowDefinitions>
@@ -812,7 +811,7 @@
                                               AlternatingRowBackground="{DynamicResource SurfaceHeaderBackgroundBrush}"/>
 
                                     <!-- Splitter between table and cheat sheet -->
-                                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" Background="Transparent"/>
+                                    <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" Background="Transparent"/>
 
                                     <!-- Right: Match Inspector & Regex Cheat Sheet -->
                                     <Border Grid.Column="2" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1,0,0,0">
@@ -1017,7 +1016,7 @@
                                     </Border>
 
                                     <!-- Splitter between Editor and Output -->
-                                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" Background="Transparent"/>
+                                    <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" Background="Transparent"/>
 
                                     <!-- Right: Script Output / Results -->
                                     <Border Grid.Column="2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1,0,0,0">
@@ -1063,7 +1062,7 @@
                 </Border>
 
                 <!-- GridSplitter 2 (Vertical split between Table and Output) -->
-                <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent"/>
+                <GridSplitter Grid.Row="1" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent"/>
 
                 <!-- BOTTOM: DEDICATED TEXT OUTPUT PANE -->
                 <Border Grid.Row="2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
@@ -1121,7 +1120,7 @@
             </Grid>
 
             <!-- GridSplitter 3 -->
-            <GridSplitter Grid.Column="3" Width="6" HorizontalAlignment="Center" Background="Transparent"/>
+            <GridSplitter Grid.Column="3" Width="3" HorizontalAlignment="Center" Background="Transparent"/>
 
             <!-- RIGHT: TOOLS / TRANSFORM OPTIONS SIDEBAR -->
             <Border Grid.Column="4" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
@@ -1148,142 +1147,136 @@
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
                             </TabItem.Header>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
                                 <StackPanel>
                                     <!-- Join Lines -->
                                     <Expander Header="Join Lines" controls:SectionState.Key="Lines_JoinLines" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Delimiter: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding JoinDelimiter, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
-                                            </Grid>
-                                            <Button Content="🔗 Join Lines into Single Row" Command="{Binding ActionCommand}" CommandParameter="JoinLines" Style="{StaticResource PrimaryToolButtonStyle}"/>
-                                        </StackPanel>
-                                    </Expander>
-
-                                    <!-- Quote Lines -->
-                                    <Expander Header="Quote Lines" controls:SectionState.Key="Lines_QuoteLines" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Style: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
-                                                <ComboBox Grid.Column="1" SelectedValue="{Binding QuoteStyle, Mode=TwoWay}" SelectedValuePath="Tag">
-                                                    <ComboBoxItem Content="'Single Quotes'" Tag="{x:Static line:QuoteStyle.SingleQuotes}"/>
-                                                    <ComboBoxItem Content="&quot;Double Quotes&quot;" Tag="{x:Static line:QuoteStyle.DoubleQuotes}"/>
-                                                    <ComboBoxItem Content="`Backticks`" Tag="{x:Static line:QuoteStyle.Backticks}"/>
-                                                    <ComboBoxItem Content="[Square Brackets]" Tag="{x:Static line:QuoteStyle.SquareBrackets}"/>
-                                                    <ComboBoxItem Content="(Parentheses)" Tag="{x:Static line:QuoteStyle.Parentheses}"/>
-                                                    <ComboBoxItem Content="{}{Curly Braces}" Tag="{x:Static line:QuoteStyle.CurlyBraces}"/>
-                                                </ComboBox>
-                                            </Grid>
-                                            <Button Content="💬 Quote All Lines" Command="{Binding ActionCommand}" CommandParameter="QuoteLines" Style="{StaticResource ToolButtonStyle}"/>
-                                        </StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Delim:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,4,0" FontSize="10"/>
+                                            <ui:TextBox Grid.Column="1" Text="{Binding JoinDelimiter, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
+                                            <Button Grid.Column="2" Content="🔗 Join Lines" Command="{Binding ActionCommand}" CommandParameter="JoinLines" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                        </Grid>
                                     </Expander>
 
                                     <!-- Split Lines -->
                                     <Expander Header="Split Delimited Line" controls:SectionState.Key="Lines_SplitDelimitedLine" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Split By: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding SplitDelimiter, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
-                                            </Grid>
-                                            <Button Content="✂️ Split into Multiple Lines" Command="{Binding ActionCommand}" CommandParameter="SplitLine" Style="{StaticResource ToolButtonStyle}"/>
-                                        </StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Split:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,4,0" FontSize="10"/>
+                                            <ui:TextBox Grid.Column="1" Text="{Binding SplitDelimiter, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
+                                            <Button Grid.Column="2" Content="✂️ Split Lines" Command="{Binding ActionCommand}" CommandParameter="SplitLine" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                        </Grid>
+                                    </Expander>
+
+                                    <!-- Quote Lines -->
+                                    <Expander Header="Quote Lines" controls:SectionState.Key="Lines_QuoteLines" Style="{StaticResource SectionExpanderStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox Grid.Column="0" SelectedValue="{Binding QuoteStyle, Mode=TwoWay}" SelectedValuePath="Tag" FontSize="11" Margin="0,0,4,0">
+                                                <ComboBoxItem Content="'Single Quotes'" Tag="{x:Static line:QuoteStyle.SingleQuotes}"/>
+                                                <ComboBoxItem Content="&quot;Double Quotes&quot;" Tag="{x:Static line:QuoteStyle.DoubleQuotes}"/>
+                                                <ComboBoxItem Content="`Backticks`" Tag="{x:Static line:QuoteStyle.Backticks}"/>
+                                                <ComboBoxItem Content="[Square Brackets]" Tag="{x:Static line:QuoteStyle.SquareBrackets}"/>
+                                                <ComboBoxItem Content="(Parentheses)" Tag="{x:Static line:QuoteStyle.Parentheses}"/>
+                                                <ComboBoxItem Content="{}{Curly Braces}" Tag="{x:Static line:QuoteStyle.CurlyBraces}"/>
+                                            </ComboBox>
+                                            <Button Grid.Column="1" Content="💬 Quote" Command="{Binding ActionCommand}" CommandParameter="QuoteLines" Style="{StaticResource ToolButtonStyle}" Padding="10,4" HorizontalContentAlignment="Center"/>
+                                        </Grid>
                                     </Expander>
 
                                     <!-- Prefix / Suffix -->
                                     <Expander Header="Prefix / Suffix" controls:SectionState.Key="Lines_PrefixSuffix" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
+                                            <Grid Margin="0,0,0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="32"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Pre:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding LinePrefix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
+                                                <CheckBox Grid.Column="2" Content="1st" IsChecked="{Binding LinePrefixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="3" Content="last" IsChecked="{Binding LinePrefixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
+                                            </Grid>
                                             <Grid Margin="0,0,0,3">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="32"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Prefix: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding LinePrefix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
+                                                <TextBlock Text="Suf:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding LineSuffix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
+                                                <CheckBox Grid.Column="2" Content="1st" IsChecked="{Binding LineSuffixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="3" Content="last" IsChecked="{Binding LineSuffixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
                                             </Grid>
-                                            <StackPanel Orientation="Horizontal" Margin="45,0,0,4">
-                                                <CheckBox Content="Skip 1st" IsChecked="{Binding LinePrefixSkipFirst, Mode=TwoWay}" Foreground="#AAAAAA" FontSize="10" Margin="0,0,8,0"/>
-                                                <CheckBox Content="Skip last" IsChecked="{Binding LinePrefixSkipLast, Mode=TwoWay}" Foreground="#AAAAAA" FontSize="10"/>
-                                            </StackPanel>
-                                            <Grid Margin="0,0,0,3">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="45"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Suffix: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding LineSuffix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
-                                            </Grid>
-                                            <StackPanel Orientation="Horizontal" Margin="45,0,0,4">
-                                                <CheckBox Content="Skip 1st" IsChecked="{Binding LineSuffixSkipFirst, Mode=TwoWay}" Foreground="#AAAAAA" FontSize="10" Margin="0,0,8,0"/>
-                                                <CheckBox Content="Skip last" IsChecked="{Binding LineSuffixSkipLast, Mode=TwoWay}" Foreground="#AAAAAA" FontSize="10"/>
-                                            </StackPanel>
-                                            <Button Content="➕ Add Prefix / Suffix to Lines" Command="{Binding ActionCommand}" CommandParameter="PrefixSuffix" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="➕ Add Prefix / Suffix" Command="{Binding ActionCommand}" CommandParameter="PrefixSuffix" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </StackPanel>
                                     </Expander>
 
                                     <!-- Find & Replace in Lines -->
                                     <Expander Header="Find &amp; Replace" controls:SectionState.Key="Lines_FindReplace" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
-                                            <Grid Margin="0,0,0,3">
+                                            <Grid Margin="0,0,0,2">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="32"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Find: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding LineFind, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
+                                                <TextBlock Text="Find:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding LineFind, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11"/>
                                             </Grid>
-                                            <Grid Margin="0,0,0,3">
+                                            <Grid Margin="0,0,0,2">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="32"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Replace: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding LineReplace, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
+                                                <TextBlock Text="Repl:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding LineReplace, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11"/>
                                             </Grid>
-                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,4">
-                                                <CheckBox Content="Match Case" IsChecked="{Binding LineReplaceCaseSensitive, Mode=TwoWay}" Foreground="#AAAAAA" FontSize="10" Margin="0,0,10,0"/>
-                                                <CheckBox Content="Regex" IsChecked="{Binding LineReplaceIsRegex, Mode=TwoWay}" Foreground="#AAAAAA" FontSize="10"/>
-                                            </StackPanel>
-                                            <Button Content="🔄 Replace in Every Line" Command="{Binding ActionCommand}" CommandParameter="ReplaceInLines" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Content="Case" IsChecked="{Binding LineReplaceCaseSensitive, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                    <CheckBox Content="Regex" IsChecked="{Binding LineReplaceIsRegex, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Content="🔄 Replace" Command="{Binding ActionCommand}" CommandParameter="ReplaceInLines" Style="{StaticResource ToolButtonStyle}" Padding="8,3" HorizontalContentAlignment="Center"/>
+                                            </Grid>
                                         </StackPanel>
                                     </Expander>
 
                                     <!-- Sort & Deduplicate -->
                                     <Expander Header="Sort &amp; Deduplicate" controls:SectionState.Key="Lines_SortDeduplicate" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Order: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
-                                                <ComboBox Grid.Column="1" SelectedValue="{Binding SortOrder, Mode=TwoWay}" SelectedValuePath="Tag">
-                                                    <ComboBoxItem Content="Natural Numeric (1, 2, 10)" Tag="{x:Static line:SortOrder.NaturalNumericAsc}"/>
-                                                    <ComboBoxItem Content="Natural Numeric Desc" Tag="{x:Static line:SortOrder.NaturalNumericDesc}"/>
-                                                    <ComboBoxItem Content="A-Z (Ascending)" Tag="{x:Static line:SortOrder.AlphabeticalAsc}"/>
-                                                    <ComboBoxItem Content="Z-A (Descending)" Tag="{x:Static line:SortOrder.AlphabeticalDesc}"/>
-                                                    <ComboBoxItem Content="Case Insensitive A-Z" Tag="{x:Static line:SortOrder.CaseInsensitiveAsc}"/>
-                                                    <ComboBoxItem Content="Case Insensitive Z-A" Tag="{x:Static line:SortOrder.CaseInsensitiveDesc}"/>
-                                                    <ComboBoxItem Content="By Length (Short→Long)" Tag="{x:Static line:SortOrder.LengthAsc}"/>
-                                                    <ComboBoxItem Content="By Length (Long→Short)" Tag="{x:Static line:SortOrder.LengthDesc}"/>
-                                                    <ComboBoxItem Content="Reverse Order" Tag="{x:Static line:SortOrder.Reverse}"/>
-                                                </ComboBox>
-                                            </Grid>
+                                            <ComboBox SelectedValue="{Binding SortOrder, Mode=TwoWay}" SelectedValuePath="Tag" FontSize="11" Margin="0,0,0,3">
+                                                <ComboBoxItem Content="Natural Numeric (1, 2, 10)" Tag="{x:Static line:SortOrder.NaturalNumericAsc}"/>
+                                                <ComboBoxItem Content="Natural Numeric Desc" Tag="{x:Static line:SortOrder.NaturalNumericDesc}"/>
+                                                <ComboBoxItem Content="A-Z (Ascending)" Tag="{x:Static line:SortOrder.AlphabeticalAsc}"/>
+                                                <ComboBoxItem Content="Z-A (Descending)" Tag="{x:Static line:SortOrder.AlphabeticalDesc}"/>
+                                                <ComboBoxItem Content="Case Insensitive A-Z" Tag="{x:Static line:SortOrder.CaseInsensitiveAsc}"/>
+                                                <ComboBoxItem Content="Case Insensitive Z-A" Tag="{x:Static line:SortOrder.CaseInsensitiveDesc}"/>
+                                                <ComboBoxItem Content="By Length (Short→Long)" Tag="{x:Static line:SortOrder.LengthAsc}"/>
+                                                <ComboBoxItem Content="By Length (Long→Short)" Tag="{x:Static line:SortOrder.LengthDesc}"/>
+                                                <ComboBoxItem Content="Reverse Order" Tag="{x:Static line:SortOrder.Reverse}"/>
+                                            </ComboBox>
                                             <UniformGrid Columns="2">
-                                                <Button Content="🔤 Sort Lines" Command="{Binding ActionCommand}" CommandParameter="SortLines" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🧹 Remove Dupes" Command="{Binding ActionCommand}" CommandParameter="RemoveDuplicates" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🔤 Sort Lines" Command="{Binding ActionCommand}" CommandParameter="SortLines" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🧹 Remove Dupes" Command="{Binding ActionCommand}" CommandParameter="RemoveDuplicates" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Expander>
@@ -1292,20 +1285,20 @@
                                     <Expander Header="Filter, Trim &amp; Number" controls:SectionState.Key="Lines_FilterTrimNumber" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
                                             <UniformGrid Columns="2">
-                                                <Button Content="🧹 Trim Whitespace" Command="{Binding ActionCommand}" CommandParameter="TrimLines" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🗑 Remove Empty" Command="{Binding ActionCommand}" CommandParameter="RemoveEmptyLines" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔢 Number Lines" Command="{Binding ActionCommand}" CommandParameter="NumberLines" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🚫 Remove Numbers" Command="{Binding ActionCommand}" CommandParameter="RemoveLineNumbers" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔠 Pad Start" Command="{Binding ActionCommand}" CommandParameter="PadStart" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔡 Pad End" Command="{Binding ActionCommand}" CommandParameter="PadEnd" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🧹 Trim" Command="{Binding ActionCommand}" CommandParameter="TrimLines" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🗑 No Empty" Command="{Binding ActionCommand}" CommandParameter="RemoveEmptyLines" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔢 Number Lines" Command="{Binding ActionCommand}" CommandParameter="NumberLines" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🚫 No Numbers" Command="{Binding ActionCommand}" CommandParameter="RemoveLineNumbers" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔠 Pad Start" Command="{Binding ActionCommand}" CommandParameter="PadStart" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔡 Pad End" Command="{Binding ActionCommand}" CommandParameter="PadEnd" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
-                                            <Grid Margin="0,3,0,3">
+                                            <Grid Margin="0,3,0,0">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Grid.Column="0" Text="{Binding FilterPattern, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Filter pattern..." ClearButtonEnabled="True" FontSize="12"/>
-                                                <Button Grid.Column="1" Content="Keep" Command="{Binding ActionCommand}" CommandParameter="FilterKeepMatching" Style="{StaticResource ToolButtonStyle}" Margin="3,0,0,0"/>
+                                                <ui:TextBox Grid.Column="0" Text="{Binding FilterPattern, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Filter pattern..." ClearButtonEnabled="False" FontSize="11"/>
+                                                <Button Grid.Column="1" Content="Keep" Command="{Binding ActionCommand}" CommandParameter="FilterKeepMatching" Style="{StaticResource ToolButtonStyle}" Padding="8,3" Margin="3,0,0,0" HorizontalContentAlignment="Center"/>
                                             </Grid>
                                         </StackPanel>
                                     </Expander>
@@ -1323,22 +1316,21 @@
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
                             </TabItem.Header>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
                                 <StackPanel>
                                     <!-- Column Selection & Extraction -->
                                     <Expander Header="Column Selection &amp; Extract" IsExpanded="True" controls:SectionState.Key="Tabular_ColumnSelectionExtract" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
                                             <!-- Surrogate / Override Headers -->
-                                            <TextBlock Text="Surrogate / Override Headers:" Foreground="#AAAAAA" FontSize="10" Margin="0,0,0,3"/>
-                                            <Grid Margin="0,0,0,6">
+                                            <Grid Margin="0,0,0,4">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <ui:TextBox Grid.Column="0"
                                                             Text="{Binding SurrogateHeaders, UpdateSourceTrigger=PropertyChanged}"
-                                                            PlaceholderText="Surrogate headers (comma separated)..."
-                                                            ClearButtonEnabled="True"
+                                                            PlaceholderText="Override headers (col1, col2)..."
+                                                            ClearButtonEnabled="False"
                                                             FontSize="11"
                                                             ToolTip="Surrogate / override column headers (comma or delimited)"/>
                                                 <ui:Button Grid.Column="1"
@@ -1347,33 +1339,33 @@
                                                            CommandParameter="GenerateSurrogateHeaders"
                                                            ToolTip="Auto-generate Col1, Col2, ... headers"
                                                            Padding="6,2"
-                                                           Margin="4,0,0,0">
+                                                           Margin="3,0,0,0">
                                                     <TextBlock Text="Auto" FontSize="10"/>
                                                 </ui:Button>
                                             </Grid>
 
                                             <!-- Column Selector Panel -->
-                                            <Border Background="{DynamicResource SurfaceCardBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,6">
+                                            <Border Background="{DynamicResource SurfaceCardBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,4">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="*"/>
                                                     </Grid.RowDefinitions>
-                                                    <Border Grid.Row="0" Background="{DynamicResource ControlFillColorSecondaryBrush}" Padding="6,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="4,4,0,0">
+                                                    <Border Grid.Row="0" Background="{DynamicResource ControlFillColorSecondaryBrush}" Padding="5,3" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="4,4,0,0">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="Columns" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="Columns" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="10.5" VerticalAlignment="Center"/>
                                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                                                <ui:Button Appearance="Transparent" Command="{Binding SelectAllColumnsCommand}" Padding="5,2" Margin="0,0,2,0">
+                                                                <ui:Button Appearance="Transparent" Command="{Binding SelectAllColumnsCommand}" Padding="4,1" Margin="0,0,2,0">
                                                                     <TextBlock Text="All" FontSize="9"/>
                                                                 </ui:Button>
-                                                                <ui:Button Appearance="Transparent" Command="{Binding DeselectAllColumnsCommand}" Padding="5,2" Margin="0,0,2,0">
+                                                                <ui:Button Appearance="Transparent" Command="{Binding DeselectAllColumnsCommand}" Padding="4,1" Margin="0,0,2,0">
                                                                     <TextBlock Text="None" FontSize="9"/>
                                                                 </ui:Button>
-                                                                <ui:Button Appearance="Transparent" Command="{Binding InvertColumnsCommand}" Padding="5,2">
+                                                                <ui:Button Appearance="Transparent" Command="{Binding InvertColumnsCommand}" Padding="4,1">
                                                                     <TextBlock Text="Invert" FontSize="9"/>
                                                                 </ui:Button>
                                                             </StackPanel>
@@ -1384,12 +1376,12 @@
                                                              Background="Transparent"
                                                              BorderThickness="0"
                                                              Padding="2"
-                                                             MaxHeight="180"
+                                                             MaxHeight="140"
                                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                                         <ListBox.ItemContainerStyle>
                                                             <Style TargetType="ListBoxItem">
-                                                                <Setter Property="Padding" Value="4,2"/>
+                                                                <Setter Property="Padding" Value="3,1"/>
                                                                 <Setter Property="Margin" Value="0,1"/>
                                                                 <Setter Property="MinHeight" Value="0"/>
                                                                 <Setter Property="Background" Value="Transparent"/>
@@ -1423,13 +1415,13 @@
                                                                           ToolTip="{Binding DisplayText}"
                                                                           VerticalContentAlignment="Center">
                                                                     <StackPanel Orientation="Horizontal" Margin="3,0,0,0" VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding DisplayIndex, StringFormat='[{0}] '}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center"/>
-                                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="130" VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding DisplayIndex, StringFormat='[{0}] '}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="10.5" TextTrimming="CharacterEllipsis" MaxWidth="110" VerticalAlignment="Center"/>
                                                                         <TextBlock Text="{Binding SampleValue, StringFormat=' ({0})'}"
                                                                                    Foreground="{DynamicResource DimTextBrush}"
-                                                                                   FontSize="9.5"
+                                                                                   FontSize="9"
                                                                                    TextTrimming="CharacterEllipsis"
-                                                                                   MaxWidth="130"
+                                                                                   MaxWidth="95"
                                                                                    Visibility="{Binding HasSampleValue, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                                    VerticalAlignment="Center"
                                                                                    Margin="2,0,0,0"/>
@@ -1442,56 +1434,52 @@
                                             </Border>
 
                                             <UniformGrid Columns="2">
-                                                <Button Content="📋 Extract to Lines" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToLines" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔍 SQL IN (...)" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToSql" Style="{StaticResource PrimaryToolButtonStyle}"/>
-                                                <Button Content="📊 CSV (Comma)" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToCsv" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📊 TSV (Tab)" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToTsv" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📝 Markdown Table" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToMarkdown" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🌐 HTML Table" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToHtml" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📦 JSON Objects" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToJson" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📜 YAML Objects" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📋 Lines" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToLines" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔍 SQL IN" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToSql" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📊 CSV" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToCsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📊 TSV" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToTsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📝 Markdown" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToMarkdown" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🌐 HTML" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToHtml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📦 JSON" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📜 YAML" Command="{Binding ActionCommand}" CommandParameter="ExtractSelectedToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Expander>
 
                                     <!-- Column Case Conversion -->
                                     <Expander Header="Column Case Conversion" controls:SectionState.Key="Tabular_ColumnCaseConversion" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Transform case of selected columns:" Foreground="#AAAAAA" FontSize="10" Margin="0,0,0,4"/>
-                                            <UniformGrid Columns="2">
-                                                <Button Content="UPPERCASE" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedUpperCase" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="lowercase" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedLowerCase" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="Title Case" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedTitleCase" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="camelCase" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedCamelCase" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="PascalCase" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedPascalCase" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="snake_case" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedSnakeCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            </UniformGrid>
-                                        </StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <Button Content="UPPERCASE" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedUpperCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="lowercase" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedLowerCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="Title Case" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedTitleCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="camelCase" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedCamelCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="PascalCase" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedPascalCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="snake_case" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedSnakeCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                        </UniformGrid>
                                     </Expander>
 
                                     <!-- Column Prefix / Suffix & Replace -->
                                     <Expander Header="Column Prefix / Suffix &amp; Replace" controls:SectionState.Key="Tabular_ColumnPrefixSuffixReplace" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
-                                            <Grid Margin="0,0,0,3">
+                                            <Grid Margin="0,0,0,2">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Grid.Column="0" Text="{Binding TableColumnPrefix, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Prefix..." ClearButtonEnabled="True" FontSize="12" Margin="0,0,3,0"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding TableColumnSuffix, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Suffix..." ClearButtonEnabled="True" FontSize="12"/>
+                                                <ui:TextBox Grid.Column="0" Text="{Binding TableColumnPrefix, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Prefix..." ClearButtonEnabled="False" FontSize="11" Margin="0,0,2,0"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding TableColumnSuffix, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Suffix..." ClearButtonEnabled="False" FontSize="11" Margin="2,0,0,0"/>
                                             </Grid>
-                                            <Button Content="➕ Add Prefix/Suffix to Columns" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedPrefixSuffix" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="➕ Add Prefix/Suffix to Cols" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedPrefixSuffix" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center" Margin="0,0,0,3"/>
 
-                                            <!-- Find and Replace in Columns -->
-                                            <Grid Margin="0,3,0,3">
+                                            <Grid Margin="0,0,0,2">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Grid.Column="0" Text="{Binding TableColumnFind, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Find..." ClearButtonEnabled="True" FontSize="12" Margin="0,0,3,0"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding TableColumnReplaceWith, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Replace..." ClearButtonEnabled="True" FontSize="12"/>
+                                                <ui:TextBox Grid.Column="0" Text="{Binding TableColumnFind, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Find..." ClearButtonEnabled="False" FontSize="11" Margin="0,0,2,0"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding TableColumnReplaceWith, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Replace..." ClearButtonEnabled="False" FontSize="11" Margin="2,0,0,0"/>
                                             </Grid>
-                                            <Button Content="🔄 Find &amp; Replace in Columns" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedReplace" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 Find &amp; Replace in Cols" Command="{Binding ActionCommand}" CommandParameter="TransformSelectedReplace" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </StackPanel>
                                     </Expander>
 
@@ -1499,21 +1487,20 @@
                                     <Expander Header="Table Structure &amp; Filter" controls:SectionState.Key="Tabular_TableStructureFilter" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
                                             <UniformGrid Columns="2">
-                                                <Button Content="📌 Keep Columns" Command="{Binding ActionCommand}" CommandParameter="KeepOnlySelectedColumns" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🗑️ Drop Columns" Command="{Binding ActionCommand}" CommandParameter="DropSelectedColumns" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📌 Keep Cols" Command="{Binding ActionCommand}" CommandParameter="KeepOnlySelectedColumns" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🗑️ Drop Cols" Command="{Binding ActionCommand}" CommandParameter="DropSelectedColumns" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
-
                                             <Grid Margin="0,3,0,3">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Grid.Column="0" Text="{Binding TableFilterQuery, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Filter rows by col..." ClearButtonEnabled="True" FontSize="12"/>
-                                                <Button Grid.Column="1" Content="🔍 Filter" Command="{Binding ActionCommand}" CommandParameter="FilterTableByColumn" Style="{StaticResource ToolButtonStyle}" Margin="3,0,0,0"/>
+                                                <ui:TextBox Grid.Column="0" Text="{Binding TableFilterQuery, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Filter rows by col..." ClearButtonEnabled="False" FontSize="11"/>
+                                                <Button Grid.Column="1" Content="🔍 Filter" Command="{Binding ActionCommand}" CommandParameter="FilterTableByColumn" Style="{StaticResource ToolButtonStyle}" Padding="8,3" Margin="3,0,0,0" HorizontalContentAlignment="Center"/>
                                             </Grid>
                                             <UniformGrid Columns="2">
-                                                <Button Content="📶 Sort by Col" Command="{Binding ActionCommand}" CommandParameter="SortTableByColumn" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔄 Transpose" Command="{Binding ActionCommand}" CommandParameter="TransposeTable" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📶 Sort by Col" Command="{Binding ActionCommand}" CommandParameter="SortTableByColumn" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔄 Transpose" Command="{Binding ActionCommand}" CommandParameter="TransposeTable" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Expander>
@@ -1523,30 +1510,36 @@
                                         <StackPanel>
                                             <Grid Margin="0,0,0,3">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="35"/>
+                                                    <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Key: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding DetectedColumns}" SelectedItem="{Binding SelectedKeyColumn, Mode=TwoWay}"/>
+                                                <Grid Grid.Column="0" Margin="0,0,2,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="K:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" Margin="0,0,3,0"/>
+                                                    <ComboBox Grid.Column="1" ItemsSource="{Binding DetectedColumns}" SelectedItem="{Binding SelectedKeyColumn, Mode=TwoWay}" FontSize="11"/>
+                                                </Grid>
+                                                <Grid Grid.Column="1" Margin="2,0,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="V:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" Margin="0,0,3,0"/>
+                                                    <ComboBox Grid.Column="1" ItemsSource="{Binding DetectedColumns}" SelectedItem="{Binding SelectedValueColumn, Mode=TwoWay}" FontSize="11"/>
+                                                </Grid>
                                             </Grid>
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="35"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Val: " VerticalAlignment="Center" Foreground="#AAAAAA" FontSize="11"/>
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding DetectedColumns}" SelectedItem="{Binding SelectedValueColumn, Mode=TwoWay}"/>
-                                            </Grid>
-                                            <CheckBox Content="Include rest of properties in value"
+                                            <CheckBox Content="Include other columns in value"
                                                       IsChecked="{Binding KeyValueIncludeRestOfColumns, UpdateSourceTrigger=PropertyChanged}"
-                                                      Foreground="#D4D4D4"
-                                                      FontSize="11"
-                                                      Margin="0,0,0,6"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      FontSize="10"
+                                                      Margin="0,0,0,3"
                                                       ToolTip="When checked, the value is an object or map containing all other properties and columns instead of a single column."/>
                                             <UniformGrid Columns="3">
-                                                <Button Content="📦 JSON Object" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueJson" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📜 YAML Map" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔗 URL Query" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueQuery" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📦 JSON" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📜 YAML" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔗 Query" Command="{Binding ActionCommand}" CommandParameter="TableToKeyValueQuery" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Expander>
@@ -1554,30 +1547,29 @@
                                     <!-- Whole Table Conversions -->
                                     <Expander Header="Full Table Conversions" controls:SectionState.Key="Tabular_FullTableConversions" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="📝 Markdown Table" Command="{Binding ActionCommand}" CommandParameter="ToMarkdownTable" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📊 CSV (Comma)" Command="{Binding ActionCommand}" CommandParameter="ToCsv" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📊 TSV (Tab)" Command="{Binding ActionCommand}" CommandParameter="ToTsv" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🌐 HTML Table" Command="{Binding ActionCommand}" CommandParameter="ToHtmlTable" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📦 JSON (Objects)" Command="{Binding ActionCommand}" CommandParameter="ToJsonObjects" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📜 YAML (Objects)" Command="{Binding ActionCommand}" CommandParameter="ToYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📦 JSON (Arrays)" Command="{Binding ActionCommand}" CommandParameter="ToJsonArrays" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📜 YAML (Arrays)" Command="{Binding ActionCommand}" CommandParameter="ToYamlArrays" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="📝 Markdown" Command="{Binding ActionCommand}" CommandParameter="ToMarkdownTable" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🌐 HTML Table" Command="{Binding ActionCommand}" CommandParameter="ToHtmlTable" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📊 CSV (Comma)" Command="{Binding ActionCommand}" CommandParameter="ToCsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📊 TSV (Tab)" Command="{Binding ActionCommand}" CommandParameter="ToTsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📦 JSON (Obj)" Command="{Binding ActionCommand}" CommandParameter="ToJsonObjects" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 YAML (Obj)" Command="{Binding ActionCommand}" CommandParameter="ToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📦 JSON (Arr)" Command="{Binding ActionCommand}" CommandParameter="ToJsonArrays" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 YAML (Arr)" Command="{Binding ActionCommand}" CommandParameter="ToYamlArrays" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
                                     <!-- SQL INSERT -->
                                     <Expander Header="SQL INSERT Statements" controls:SectionState.Key="Tabular_SqlInsertStatements" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Table: " VerticalAlignment="Center" Foreground="#AAAAAA" Margin="0,0,5,0" FontSize="11"/>
-                                                <ui:TextBox Grid.Column="1" Text="{Binding SqlTableName, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" FontSize="12"/>
-                                            </Grid>
-                                            <Button Content="💾 Generate SQL INSERTs" Command="{Binding ActionCommand}" CommandParameter="ToSqlInserts" Style="{StaticResource PrimaryToolButtonStyle}"/>
-                                        </StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Table:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,4,0" FontSize="10"/>
+                                            <ui:TextBox Grid.Column="1" Text="{Binding SqlTableName, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
+                                            <Button Grid.Column="2" Content="💾 Generate" Command="{Binding ActionCommand}" CommandParameter="ToSqlInserts" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                        </Grid>
                                     </Expander>
                                 </StackPanel>
                             </ScrollViewer>
@@ -1593,46 +1585,44 @@
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
                             </TabItem.Header>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
                                 <StackPanel>
                                     <!-- Format Conversions -->
                                     <Expander Header="Format Conversions" controls:SectionState.Key="Structured_FormatConversions" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="🔄 JSON ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 XML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="XmlToJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 JSON ➔ XML" Command="{Binding ActionCommand}" CommandParameter="JsonToXml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 XML ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="XmlToYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 YAML ➔ XML" Command="{Binding ActionCommand}" CommandParameter="YamlToXml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📊 → CSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToCsv" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📊 → TSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToTsv" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📝 → Markdown Table" Command="{Binding ActionCommand}" CommandParameter="StructuredToMarkdown" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔄 JSON ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 XML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="XmlToJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 JSON ➔ XML" Command="{Binding ActionCommand}" CommandParameter="JsonToXml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 XML ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="XmlToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 YAML ➔ XML" Command="{Binding ActionCommand}" CommandParameter="YamlToXml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📊 → CSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToCsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📊 → TSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToTsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📝 → Markdown" Command="{Binding ActionCommand}" CommandParameter="StructuredToMarkdown" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
                                     <!-- Key Casing & Renaming -->
                                     <Expander Header="Key Casing &amp; Renaming" controls:SectionState.Key="Structured_KeyCasing" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="🐪 camelCase Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredCamelCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📐 PascalCase Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredPascalCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🐍 snake_case Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredSnakeCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🍢 kebab-case Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredKebabCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔠 UPPER_CASE Keys" Command="{Binding ActionCommand}" CommandParameter="StructuredConstantCase" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🐪 camelCase" Command="{Binding ActionCommand}" CommandParameter="StructuredCamelCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📐 PascalCase" Command="{Binding ActionCommand}" CommandParameter="StructuredPascalCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🐍 snake_case" Command="{Binding ActionCommand}" CommandParameter="StructuredSnakeCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🍢 kebab-case" Command="{Binding ActionCommand}" CommandParameter="StructuredKebabCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔠 UPPER_CASE" Command="{Binding ActionCommand}" CommandParameter="StructuredConstantCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
                                     <!-- Key & Field Filtering -->
                                     <Expander Header="Key &amp; Field Filtering" controls:SectionState.Key="Structured_KeyFiltering" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
-                                            <Grid Margin="0,0,0,3">
-                                                <ui:TextBox Text="{Binding StructuredFilterKeyList, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Keys (e.g. id, name, email)..." ClearButtonEnabled="True" FontSize="12"/>
-                                            </Grid>
+                                            <ui:TextBox Text="{Binding StructuredFilterKeyList, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Keys (e.g. id, name, email)..." ClearButtonEnabled="False" FontSize="11" Margin="0,0,0,3"/>
                                             <UniformGrid Columns="2">
-                                                <Button Content="🎯 Pick / Keep Keys" Command="{Binding ActionCommand}" CommandParameter="PickStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🚫 Omit / Remove Keys" Command="{Binding ActionCommand}" CommandParameter="OmitStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🎯 Pick Keys" Command="{Binding ActionCommand}" CommandParameter="PickStructuredKeys" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🚫 Omit Keys" Command="{Binding ActionCommand}" CommandParameter="OmitStructuredKeys" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
-                                            <Button Content="🧹 Strip Nulls &amp; Empty" Command="{Binding ActionCommand}" CommandParameter="RemoveNullsAndEmpty" Style="{StaticResource ToolButtonStyle}" Margin="0,3,0,0"/>
+                                            <Button Content="🧹 Strip Nulls &amp; Empty" Command="{Binding ActionCommand}" CommandParameter="RemoveNullsAndEmpty" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center" Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </Expander>
 
@@ -1644,16 +1634,16 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Grid.Column="0" Text="{Binding StructuredQueryPath, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="XPath / Path / Key (e.g. //item/*, //@id, $.users)..." ClearButtonEnabled="True" FontSize="12"/>
-                                                <Button Grid.Column="1" Content="🔍 Query" Command="{Binding ActionCommand}" CommandParameter="QueryStructuredPath" Style="{StaticResource ToolButtonStyle}" Margin="3,0,0,0"/>
+                                                <ui:TextBox Grid.Column="0" Text="{Binding StructuredQueryPath, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="XPath / Path (e.g. //item, $.users)..." ClearButtonEnabled="False" FontSize="11"/>
+                                                <Button Grid.Column="1" Content="🔍 Query" Command="{Binding ActionCommand}" CommandParameter="QueryStructuredPath" Style="{StaticResource ToolButtonStyle}" Padding="8,3" Margin="3,0,0,0" HorizontalContentAlignment="Center"/>
                                             </Grid>
                                             <UniformGrid Columns="2">
-                                                <Button Content="🧭 XPath Query" Command="{Binding ActionCommand}" CommandParameter="QueryXPath" Style="{StaticResource PrimaryToolButtonStyle}"/>
-                                                <Button Content="🏷️ XPath Values" Command="{Binding ActionCommand}" CommandParameter="ExtractXPathValues" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🗺️ Extract All Paths" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredPaths" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔑 Extract All Keys" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredKeys" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📋 Extract All Values" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredValues" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🏷️ Extract Attributes" Command="{Binding ActionCommand}" CommandParameter="ExtractXPathAttributes" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="🧭 XPath Query" Command="{Binding ActionCommand}" CommandParameter="QueryXPath" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🏷️ XPath Values" Command="{Binding ActionCommand}" CommandParameter="ExtractXPathValues" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🗺️ All Paths" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredPaths" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🔑 All Keys" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredKeys" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📋 All Values" Command="{Binding ActionCommand}" CommandParameter="ExtractStructuredValues" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🏷️ Attributes" Command="{Binding ActionCommand}" CommandParameter="ExtractXPathAttributes" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Expander>
@@ -1661,23 +1651,23 @@
                                     <!-- Deep Sort & Flatten -->
                                     <Expander Header="Deep Sort &amp; Flatten" controls:SectionState.Key="Structured_SortFlatten" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="🔤 Sort Keys (A-Z)" Command="{Binding ActionCommand}" CommandParameter="SortStructuredKeysAsc" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔤 Sort Keys (Z-A)" Command="{Binding ActionCommand}" CommandParameter="SortStructuredKeysDesc" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🌿 Flatten to Paths" Command="{Binding ActionCommand}" CommandParameter="FlattenStructured" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📦 Flatten to Flat JSON" Command="{Binding ActionCommand}" CommandParameter="FlattenToFlatJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🌳 Unflatten to JSON" Command="{Binding ActionCommand}" CommandParameter="UnflattenToJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📜 Unflatten to YAML" Command="{Binding ActionCommand}" CommandParameter="UnflattenToYaml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔤 Sort A-Z" Command="{Binding ActionCommand}" CommandParameter="SortStructuredKeysAsc" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔤 Sort Z-A" Command="{Binding ActionCommand}" CommandParameter="SortStructuredKeysDesc" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🌿 Flatten Paths" Command="{Binding ActionCommand}" CommandParameter="FlattenStructured" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📦 Flat JSON" Command="{Binding ActionCommand}" CommandParameter="FlattenToFlatJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🌳 Unflatten JSON" Command="{Binding ActionCommand}" CommandParameter="UnflattenToJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 Unflatten YAML" Command="{Binding ActionCommand}" CommandParameter="UnflattenToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
                                     <!-- Formatting & Minification -->
                                     <Expander Header="Formatting &amp; Minify" controls:SectionState.Key="Structured_FormatMinify" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="✨ Beautify JSON" Command="{Binding ActionCommand}" CommandParameter="BeautifyJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ Beautify YAML" Command="{Binding ActionCommand}" CommandParameter="BeautifyYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ Beautify XML" Command="{Binding ActionCommand}" CommandParameter="BeautifyXml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📦 Minify JSON" Command="{Binding ActionCommand}" CommandParameter="MinifyJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📑 Minify XML" Command="{Binding ActionCommand}" CommandParameter="MinifyXml" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="✨ Beautify JSON" Command="{Binding ActionCommand}" CommandParameter="BeautifyJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📦 Minify JSON" Command="{Binding ActionCommand}" CommandParameter="MinifyJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ Beautify YAML" Command="{Binding ActionCommand}" CommandParameter="BeautifyYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📑 Minify XML" Command="{Binding ActionCommand}" CommandParameter="MinifyXml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ Beautify XML" Command="{Binding ActionCommand}" CommandParameter="BeautifyXml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
@@ -1685,10 +1675,10 @@
                                     <Expander Header="Code &amp; Schema Generation" controls:SectionState.Key="Structured_CodeSchemaGen" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
                                             <UniformGrid Columns="2">
-                                                <Button Content="📜 TypeScript Interfaces" Command="{Binding ActionCommand}" CommandParameter="ToTypeScriptInterfaces" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="💻 C# POCO Classes" Command="{Binding ActionCommand}" CommandParameter="ToCSharpClasses" Style="{StaticResource ToolButtonStyle}"/>
+                                                <Button Content="📜 TypeScript" Command="{Binding ActionCommand}" CommandParameter="ToTypeScriptInterfaces" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="💻 C# POCO" Command="{Binding ActionCommand}" CommandParameter="ToCSharpClasses" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             </UniformGrid>
-                                            <Button Content="📋 Generate JSON Schema" Command="{Binding ActionCommand}" CommandParameter="ToJsonSchema" Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,3,0,0"/>
+                                            <Button Content="📋 JSON Schema" Command="{Binding ActionCommand}" CommandParameter="ToJsonSchema" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center" Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </Expander>
                                 </StackPanel>
@@ -1705,37 +1695,33 @@
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
                             </TabItem.Header>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
                                 <StackPanel>
                                     <Expander Header="SQL Queries" controls:SectionState.Key="Code_SqlQueries" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="🔍 SQL IN (...)" Command="{Binding ActionCommand}" CommandParameter="SqlIn" Style="{StaticResource PrimaryToolButtonStyle}"/>
-                                            <Button Content="📜 SQL Multi-Line" Command="{Binding ActionCommand}" CommandParameter="SqlInMultiLine" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🔍 SQL IN (...)" Command="{Binding ActionCommand}" CommandParameter="SqlIn" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 SQL Multi-Line" Command="{Binding ActionCommand}" CommandParameter="SqlInMultiLine" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
                                     <Expander Header="Code Array Literals" controls:SectionState.Key="Code_CodeArrayLiterals" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <UniformGrid Columns="2">
-                                                <Button Content="💻 C# Array" Command="{Binding ActionCommand}" CommandParameter="ToCSharpArray" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="💻 C# List" Command="{Binding ActionCommand}" CommandParameter="ToCSharpList" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📜 TypeScript" Command="{Binding ActionCommand}" CommandParameter="ToTypeScriptArray" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🐍 Python List" Command="{Binding ActionCommand}" CommandParameter="ToPythonList" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📦 JSON Array" Command="{Binding ActionCommand}" CommandParameter="ToJsonArray" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📜 YAML List" Command="{Binding ActionCommand}" CommandParameter="ToYamlArray" Style="{StaticResource ToolButtonStyle}"/>
-                                            </UniformGrid>
-                                        </StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <Button Content="💻 C# Array" Command="{Binding ActionCommand}" CommandParameter="ToCSharpArray" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="💻 C# List" Command="{Binding ActionCommand}" CommandParameter="ToCSharpList" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 TypeScript" Command="{Binding ActionCommand}" CommandParameter="ToTypeScriptArray" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🐍 Python List" Command="{Binding ActionCommand}" CommandParameter="ToPythonList" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📦 JSON Array" Command="{Binding ActionCommand}" CommandParameter="ToJsonArray" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 YAML List" Command="{Binding ActionCommand}" CommandParameter="ToYamlArray" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                        </UniformGrid>
                                     </Expander>
 
                                     <Expander Header="Web &amp; Parameters" controls:SectionState.Key="Code_WebParameters" Style="{StaticResource SectionExpanderStyle}">
-                                        <StackPanel>
-                                            <UniformGrid Columns="2">
-                                                <Button Content="🌐 Query → KV" Command="{Binding ActionCommand}" CommandParameter="QueryStringToKv" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="🔗 KV → Query" Command="{Binding ActionCommand}" CommandParameter="KvToQueryString" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📦 KV → JSON" Command="{Binding ActionCommand}" CommandParameter="KvToJson" Style="{StaticResource ToolButtonStyle}"/>
-                                                <Button Content="📜 KV → YAML" Command="{Binding ActionCommand}" CommandParameter="KvToYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            </UniformGrid>
-                                        </StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <Button Content="🌐 Query → KV" Command="{Binding ActionCommand}" CommandParameter="QueryStringToKv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔗 KV → Query" Command="{Binding ActionCommand}" CommandParameter="KvToQueryString" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📦 KV → JSON" Command="{Binding ActionCommand}" CommandParameter="KvToJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📜 KV → YAML" Command="{Binding ActionCommand}" CommandParameter="KvToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                        </UniformGrid>
                                     </Expander>
                                 </StackPanel>
                             </ScrollViewer>
@@ -1751,38 +1737,38 @@
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
                             </TabItem.Header>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
                                 <StackPanel>
                                     <Expander Header="Case Conversions" controls:SectionState.Key="CaseEnc_CaseConversions" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="🐪 camelCase" Command="{Binding ActionCommand}" CommandParameter="CamelCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📐 PascalCase" Command="{Binding ActionCommand}" CommandParameter="PascalCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🐍 snake_case" Command="{Binding ActionCommand}" CommandParameter="SnakeCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🍢 kebab-case" Command="{Binding ActionCommand}" CommandParameter="KebabCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔠 CONSTANT_CASE" Command="{Binding ActionCommand}" CommandParameter="ConstantCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="📰 Title Case" Command="{Binding ActionCommand}" CommandParameter="TitleCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔠 UPPERCASE" Command="{Binding ActionCommand}" CommandParameter="UpperCase" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔡 lowercase" Command="{Binding ActionCommand}" CommandParameter="LowerCase" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🐪 camelCase" Command="{Binding ActionCommand}" CommandParameter="CamelCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📐 PascalCase" Command="{Binding ActionCommand}" CommandParameter="PascalCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🐍 snake_case" Command="{Binding ActionCommand}" CommandParameter="SnakeCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🍢 kebab-case" Command="{Binding ActionCommand}" CommandParameter="KebabCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔠 CONSTANT_CASE" Command="{Binding ActionCommand}" CommandParameter="ConstantCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="📰 Title Case" Command="{Binding ActionCommand}" CommandParameter="TitleCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔠 UPPERCASE" Command="{Binding ActionCommand}" CommandParameter="UpperCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔡 lowercase" Command="{Binding ActionCommand}" CommandParameter="LowerCase" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
 
                                     <Expander Header="Encodings &amp; Escapes" controls:SectionState.Key="CaseEnc_EncodingsEscapes" Style="{StaticResource SectionExpanderStyle}">
                                         <UniformGrid Columns="2">
-                                            <Button Content="🌐 URL Encode" Command="{Binding ActionCommand}" CommandParameter="UrlEncode" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔓 URL Decode" Command="{Binding ActionCommand}" CommandParameter="UrlDecode" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔐 Base64 Encode" Command="{Binding ActionCommand}" CommandParameter="Base64Encode" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔓 Base64 Decode" Command="{Binding ActionCommand}" CommandParameter="Base64Decode" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🏷️ HTML Encode" Command="{Binding ActionCommand}" CommandParameter="HtmlEncode" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔓 HTML Decode" Command="{Binding ActionCommand}" CommandParameter="HtmlDecode" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="💻 C# Escape" Command="{Binding ActionCommand}" CommandParameter="EscapeCSharp" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="💻 C# Unescape" Command="{Binding ActionCommand}" CommandParameter="UnescapeCSharp" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ JSON Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ YAML Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ XML Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatXml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 JSON ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}"/>
-                                            <Button Content="🔑 JWT Decode" Command="{Binding ActionCommand}" CommandParameter="JwtDecode" Style="{StaticResource ToolButtonStyle}"/>
+                                            <Button Content="🌐 URL Encode" Command="{Binding ActionCommand}" CommandParameter="UrlEncode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔓 URL Decode" Command="{Binding ActionCommand}" CommandParameter="UrlDecode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔐 Base64 Encode" Command="{Binding ActionCommand}" CommandParameter="Base64Encode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔓 Base64 Decode" Command="{Binding ActionCommand}" CommandParameter="Base64Decode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🏷️ HTML Encode" Command="{Binding ActionCommand}" CommandParameter="HtmlEncode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔓 HTML Decode" Command="{Binding ActionCommand}" CommandParameter="HtmlDecode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="💻 C# Escape" Command="{Binding ActionCommand}" CommandParameter="EscapeCSharp" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="💻 C# Unescape" Command="{Binding ActionCommand}" CommandParameter="UnescapeCSharp" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ JSON Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ YAML Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ XML Beautify" Command="{Binding ActionCommand}" CommandParameter="FormatXml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 JSON ➔ YAML" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔄 YAML ➔ JSON" Command="{Binding ActionCommand}" CommandParameter="YamlToJson" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🔑 JWT Decode" Command="{Binding ActionCommand}" CommandParameter="JwtDecode" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>
                                 </StackPanel>
