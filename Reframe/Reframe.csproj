@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
@@ -7,6 +7,7 @@
         <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reframe</RootNamespace>
+        <ApplicationIcon>..\..\sandbox\Reframe\favicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>

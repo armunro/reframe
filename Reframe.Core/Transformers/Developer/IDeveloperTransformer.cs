@@ -40,6 +40,7 @@ public interface IDeveloperTransformer
     string StructuredToCsv(string? text, char delimiter = ',');
     string StructuredToTsv(string? text);
     string StructuredToMarkdown(string? text);
+    string StructuredToHtml(string? text);
     string ToTypeScriptInterfaces(string? text, string rootName = "Root");
     string ToCSharpClasses(string? text, string rootName = "Root");
     string ToJsonSchema(string? text, string title = "Schema");

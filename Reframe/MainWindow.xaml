@@ -122,7 +122,7 @@
 
                 <!-- Brand / Logo & Detected Format -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
-                    <ui:SymbolIcon Symbol="Code24" FontSize="18" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <ui:SymbolIcon Symbol="Code20" FontSize="18" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <Border Background="#20007ACC" BorderBrush="#40007ACC" BorderThickness="1" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Format: " Foreground="{DynamicResource MutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
@@ -1601,6 +1601,7 @@
                                             <Button Content="📊 → CSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToCsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             <Button Content="📊 → TSV" Command="{Binding ActionCommand}" CommandParameter="StructuredToTsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             <Button Content="📝 → Markdown" Command="{Binding ActionCommand}" CommandParameter="StructuredToMarkdown" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            <Button Content="🌐 → HTML Table" Command="{Binding ActionCommand}" CommandParameter="StructuredToHtml" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                             <Button Content="✨ Auto Beautify" Command="{Binding ActionCommand}" CommandParameter="Beautify" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </UniformGrid>
                                     </Expander>

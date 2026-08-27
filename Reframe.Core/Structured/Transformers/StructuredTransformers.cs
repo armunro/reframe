@@ -1774,6 +1774,12 @@ public static class StructuredTransformers
         return table != null ? TabularConverter.ToMarkdownTable(table) : string.Empty;
     }
 
+    public static string ToHtmlTable(string? text)
+    {
+        var table = StructuredToTabular(text);
+        return table != null ? TabularConverter.ToHtmlTable(table) : string.Empty;
+    }
+
     public static TabularData? StructuredToTabular(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;

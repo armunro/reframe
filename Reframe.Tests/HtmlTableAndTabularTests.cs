@@ -510,4 +510,29 @@ EndFragment:0000000753
         var result = TextAnalyzer.Analyze(input);
         Assert.Equal(expectedIsTabular, result.IsTabular);
     }
+
+    [Fact]
+    public void MainViewModel_ToHtmlTableAndExtractSelectedToHtml_ConvertsToHtmlTable()
+    {
+        var vm = new Reframe.ViewModels.MainViewModel();
+        vm.InputText = "id,name,role\n1,Alice,Dev\n2,Bob,QA";
+
+        // Whole table to HTML
+        vm.ActionCommand.Execute("ToHtmlTable");
+        Assert.Contains("<table class=\"table\">", vm.OutputText);
+        Assert.Contains("<th>id</th>", vm.OutputText);
+        Assert.Contains("<td>Alice</td>", vm.OutputText);
+        Assert.Equal("HTML", vm.EffectiveOutputSyntax);
+
+        // Column selection to HTML
+        vm.ColumnItems[0].IsSelected = false; // deselect 'id'
+        vm.ColumnItems[1].IsSelected = true;  // select 'name'
+        vm.ColumnItems[2].IsSelected = false; // deselect 'role'
+        vm.ActionCommand.Execute("ExtractSelectedToHtml");
+        Assert.Contains("<table class=\"table\">", vm.OutputText);
+        Assert.Contains("<th>name</th>", vm.OutputText);
+        Assert.DoesNotContain("<th>id</th>", vm.OutputText);
+        Assert.Contains("<td>Alice</td>", vm.OutputText);
+        Assert.Equal("HTML", vm.EffectiveOutputSyntax);
+    }
 }

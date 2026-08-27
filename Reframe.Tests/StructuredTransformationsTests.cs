@@ -195,6 +195,23 @@ public class StructuredTransformationsTests
     }
 
     [Fact]
+    public void StructuredToHtml_ConvertsJsonArrayToHtmlTable()
+    {
+        string jsonArray = """
+        [
+          {"id": 1, "name": "Alice"},
+          {"id": 2, "name": "Bob"}
+        ]
+        """;
+        string html = StructuredTransformers.ToHtmlTable(jsonArray);
+        Assert.Contains("<table class=\"table\">", html);
+        Assert.Contains("<th>id</th>", html);
+        Assert.Contains("<th>name</th>", html);
+        Assert.Contains("<td>Alice</td>", html);
+        Assert.Contains("<td>Bob</td>", html);
+    }
+
+    [Fact]
     public void ToTypeScriptInterfaces_GeneratesValidInterfaces()
     {
         string ts = StructuredTransformers.ToTypeScriptInterfaces(SampleJson, "User");

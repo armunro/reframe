@@ -325,6 +325,7 @@ public class DeveloperTransformerService : IDeveloperTransformer
     public string StructuredToCsv(string? text, char delimiter = ',') => StructuredTransformers.ToCsv(text, delimiter);
     public string StructuredToTsv(string? text) => StructuredTransformers.ToTsv(text);
     public string StructuredToMarkdown(string? text) => StructuredTransformers.ToMarkdownTable(text);
+    public string StructuredToHtml(string? text) => StructuredTransformers.ToHtmlTable(text);
     public string ToTypeScriptInterfaces(string? text, string rootName = "Root") => StructuredTransformers.ToTypeScriptInterfaces(text, rootName);
     public string ToCSharpClasses(string? text, string rootName = "Root") => StructuredTransformers.ToCSharpClasses(text, rootName);
     public string ToJsonSchema(string? text, string title = "Schema") => StructuredTransformers.ToJsonSchema(text, title);

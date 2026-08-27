@@ -256,6 +256,15 @@ public static class ActionRegistry
             targetSidebarTab: 1),
 
         new ActionItem(
+            id: "ExtractSelectedToHtml",
+            title: "Selected Columns ➔ HTML Table",
+            category: "Tabular",
+            description: "Extract checked columns into clean HTML table structure",
+            keywords: ["extract html", "selected columns html", "extract html table"],
+            icon: "🌐",
+            targetSidebarTab: 1),
+
+        new ActionItem(
             id: "ExtractSelectedToJson",
             title: "Selected Columns ➔ JSON",
             category: "Tabular",
@@ -517,6 +526,15 @@ public static class ActionRegistry
             description: "Convert JSON/YAML/XML records into Markdown table",
             keywords: ["structured to markdown", "json to markdown", "json to table"],
             icon: "📋",
+            targetSidebarTab: 2),
+
+        new ActionItem(
+            id: "StructuredToHtml",
+            title: "Structured ➔ HTML Table",
+            category: "Structured",
+            description: "Convert JSON/YAML/XML records into HTML table",
+            keywords: ["structured to html", "json to html", "json to html table", "xml to html", "yaml to html"],
+            icon: "🌐",
             targetSidebarTab: 2),
 
         new ActionItem(

@@ -51,6 +51,7 @@ public static class EncodingTransformers
     public static string StructuredToCsv(string? text, char delimiter = ',') => Instance.StructuredToCsv(text, delimiter);
     public static string StructuredToTsv(string? text) => Instance.StructuredToTsv(text);
     public static string StructuredToMarkdown(string? text) => Instance.StructuredToMarkdown(text);
+    public static string StructuredToHtml(string? text) => Instance.StructuredToHtml(text);
     public static string ToTypeScriptInterfaces(string? text, string rootName = "Root") => Instance.ToTypeScriptInterfaces(text, rootName);
     public static string ToCSharpClasses(string? text, string rootName = "Root") => Instance.ToCSharpClasses(text, rootName);
     public static string ToJsonSchema(string? text, string title = "Schema") => Instance.ToJsonSchema(text, title);
