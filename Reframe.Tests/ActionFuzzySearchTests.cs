@@ -267,4 +267,68 @@ public class ActionFuzzySearchTests
         Assert.Equal("HELLO WORLD", vm.InputText);
         Assert.Equal("Copied output to input", vm.StatusMessage);
     }
+
+    [Fact]
+    public void MainViewModel_InputAndOutputWordWrap_AreDistinctAndIndependent()
+    {
+        var vm = new MainViewModel();
+
+        // Initially both false
+        Assert.False(vm.IsInputWordWrap);
+        Assert.False(vm.IsOutputWordWrap);
+
+        // Track property changed events
+        var changedProps = new System.Collections.Generic.List<string>();
+        vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName != null)
+                changedProps.Add(e.PropertyName);
+        };
+
+        // Enable input wrap only
+        vm.IsInputWordWrap = true;
+        Assert.True(vm.IsInputWordWrap);
+        Assert.False(vm.IsOutputWordWrap);
+        Assert.Contains(nameof(MainViewModel.IsInputWordWrap), changedProps);
+
+        changedProps.Clear();
+
+        // Enable output wrap only
+        vm.IsOutputWordWrap = true;
+        Assert.True(vm.IsInputWordWrap);
+        Assert.True(vm.IsOutputWordWrap);
+        Assert.Contains(nameof(MainViewModel.IsOutputWordWrap), changedProps);
+
+        // Disable input wrap
+        vm.IsInputWordWrap = false;
+        Assert.False(vm.IsInputWordWrap);
+        Assert.True(vm.IsOutputWordWrap);
+    }
+
+    [Fact]
+    public void MainViewModel_ExecuteActionItem_TogglesInputAndOutputWordWrapIndependently()
+    {
+        var vm = new MainViewModel();
+
+        var toggleInputWrapAction = ActionRegistry.AllActions.First(a => a.Id == "ToggleInputWordWrap");
+        var toggleOutputWrapAction = ActionRegistry.AllActions.First(a => a.Id == "ToggleOutputWordWrap");
+
+        // Toggle input wrap
+        vm.ExecuteActionItemCommand.Execute(toggleInputWrapAction);
+        Assert.True(vm.IsInputWordWrap);
+        Assert.False(vm.IsOutputWordWrap);
+        Assert.Contains("Input word wrap enabled", vm.StatusMessage);
+
+        // Toggle output wrap
+        vm.ExecuteActionItemCommand.Execute(toggleOutputWrapAction);
+        Assert.True(vm.IsInputWordWrap);
+        Assert.True(vm.IsOutputWordWrap);
+        Assert.Contains("Output word wrap enabled", vm.StatusMessage);
+
+        // Toggle input wrap off
+        vm.ExecuteActionItemCommand.Execute(toggleInputWrapAction);
+        Assert.False(vm.IsInputWordWrap);
+        Assert.True(vm.IsOutputWordWrap);
+        Assert.Contains("Input word wrap disabled", vm.StatusMessage);
+    }
 }

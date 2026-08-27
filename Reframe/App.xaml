@@ -24,6 +24,7 @@
             <SolidColorBrush x:Key="SurfaceHeaderBackgroundBrush" Color="#242735" />
             <SolidColorBrush x:Key="SurfaceDarkBackgroundBrush" Color="#181924" />
             <SolidColorBrush x:Key="SurfaceCardBackgroundBrush" Color="#242735" />
+            <SolidColorBrush x:Key="EditorBackgroundBrush" Color="#15161A" />
 
             <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#242735" />
             <SolidColorBrush x:Key="CardBackgroundFillColorSecondaryBrush" Color="#1E2030" />
@@ -65,6 +66,13 @@
             <SolidColorBrush x:Key="TabItemUnselectedBackgroundBrush" Color="#202330" />
             <SolidColorBrush x:Key="TabItemHoverBackgroundBrush" Color="#272B3B" />
             <SolidColorBrush x:Key="TabItemSelectedBackgroundBrush" Color="#242735" />
+
+            <!-- DataGrid Banded Row & Contrast Brushes -->
+            <SolidColorBrush x:Key="DataGridRowBackgroundBrush" Color="#181A24" />
+            <SolidColorBrush x:Key="DataGridAlternatingRowBackgroundBrush" Color="#282D42" />
+            <SolidColorBrush x:Key="DataGridHeaderBackgroundBrush" Color="#232738" />
+            <SolidColorBrush x:Key="DataGridSelectedRowBackgroundBrush" Color="#3A4E70" />
+            <SolidColorBrush x:Key="DataGridHoverRowBackgroundBrush" Color="#2F364B" />
 
             <!-- Custom Mono Font for Developer Text Boxes -->
             <FontFamily x:Key="EditorFontFamily">Cascadia Code, Consolas, Courier New, monospace</FontFamily>
@@ -410,6 +418,136 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+            </Style>
+
+            <!-- ======================================================== -->
+            <!-- DataGrid Column Header Style -->
+            <!-- ======================================================== -->
+            <Style TargetType="{x:Type DataGridColumnHeader}">
+                <Setter Property="Background" Value="{DynamicResource DataGridHeaderBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,1,1" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Grid.Column="0"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                      RecognizesAccessKey="True"
+                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    <Path x:Name="SortArrow"
+                                          Grid.Column="1"
+                                          Width="8"
+                                          Height="6"
+                                          Margin="6,0,0,0"
+                                          Stretch="Fill"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Center"
+                                          Fill="{DynamicResource AccentSuccessBrush}"
+                                          Visibility="Collapsed" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="SortDirection" Value="Ascending">
+                                    <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="SortArrow" Property="Data" Value="M 0 6 L 4 0 L 8 6 Z" />
+                                </Trigger>
+                                <Trigger Property="SortDirection" Value="Descending">
+                                    <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 6 L 8 0 Z" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource ControlStrongFillColorDefaultBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- ======================================================== -->
+            <!-- DataGrid Cell Style -->
+            <!-- ======================================================== -->
+            <Style TargetType="{x:Type DataGridCell}">
+                <Setter Property="Padding" Value="8,4" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                            <Border Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="#FFFFFF" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- ======================================================== -->
+            <!-- DataGrid Row Style -->
+            <!-- ======================================================== -->
+            <Style TargetType="{x:Type DataGridRow}">
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="MinHeight" Value="28" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource DataGridHoverRowBackgroundBrush}" />
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource DataGridSelectedRowBackgroundBrush}" />
+                        <Setter Property="Foreground" Value="#FFFFFF" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- ======================================================== -->
+            <!-- Global DataGrid Style -->
+            <!-- ======================================================== -->
+            <Style TargetType="{x:Type DataGrid}">
+                <Setter Property="Background" Value="{DynamicResource DataGridRowBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="RowBackground" Value="{DynamicResource DataGridRowBackgroundBrush}" />
+                <Setter Property="AlternatingRowBackground" Value="{DynamicResource DataGridAlternatingRowBackgroundBrush}" />
+                <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
+                <Setter Property="GridLinesVisibility" Value="Horizontal" />
+                <Setter Property="RowHeight" Value="28" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="AutoGenerateColumns" Value="False" />
+                <Setter Property="CanUserAddRows" Value="False" />
+                <Setter Property="CanUserDeleteRows" Value="False" />
+                <Setter Property="EnableRowVirtualization" Value="True" />
+                <Setter Property="EnableColumnVirtualization" Value="True" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

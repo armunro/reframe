@@ -5,7 +5,9 @@ namespace Reframe.Core.Tabular.Parsers;
 
 public static class MarkdownTableParser
 {
-    private static readonly Regex SeparatorRowRegex = new(@"^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$", RegexOptions.Compiled);
+    private static readonly Regex SeparatorRowRegex = new(
+        @"^\s*(?:\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?|:?-+:?\s*(\|\s*:?-+:?\s*)+\|?|:?-+:?\s*\|\s*)\s*$",
+        RegexOptions.Compiled);
 
     public static bool IsMarkdownTable(string? text)
     {

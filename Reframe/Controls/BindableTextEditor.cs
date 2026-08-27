@@ -31,8 +31,8 @@ public class BindableTextEditor : TextEditor
 
     public BindableTextEditor()
     {
-        // Setup Dark Navy Theme Defaults rgb(30, 32, 48)
-        Background = new SolidColorBrush(Color.FromRgb(0x1E, 0x20, 0x30));
+        // Setup Dark Neutral Gray Theme Defaults rgb(21, 22, 26) / #15161A
+        Background = new SolidColorBrush(Color.FromRgb(0x15, 0x16, 0x1A));
         Foreground = new SolidColorBrush(Color.FromRgb(0xDC, 0xE1, 0xEB));
         LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x60, 0x68, 0x7A));
         ShowLineNumbers = true;

@@ -146,6 +146,72 @@ public class TransformerTests
     }
 
     [Fact]
+    public void Tabular_SingleColumnMarkdownTableParsingAndDetection()
+    {
+        string md = @"| Type                  | 
+| --------------------- | 
+| CompletionList        | 
+| CompletionListBox     | 
+| CompletionWindow      | 
+| CompletionWindowBase  | 
+| ICompletionData       | 
+| InsightWindow         | 
+| IOverloadProvider     | 
+| OverloadInsightWindow | 
+| OverloadViewer        | ";
+
+        Assert.True(MarkdownTableParser.IsMarkdownTable(md));
+        var table = MarkdownTableParser.Parse(md);
+        Assert.Single(table.Columns);
+        Assert.Equal("Type", table.Columns[0]);
+        Assert.Equal(9, table.Rows.Count);
+        Assert.Equal("CompletionList", table.Rows[0][0]);
+        Assert.Equal("OverloadViewer", table.Rows[8][0]);
+
+        var analyzer = new DefaultTextAnalyzer();
+        var analysis = analyzer.Analyze(md);
+        Assert.Equal(DetectedFormat.MarkdownTable, analysis.Format);
+        Assert.True(analysis.IsTabular);
+        Assert.Equal(1, analysis.ColumnCount);
+        Assert.Equal(9, analysis.RowCount);
+        Assert.Equal(new[] { "Type" }, analysis.SampleHeaders.ToArray());
+
+        var parsedViaService = TabularParser.DetectAndParse(md);
+        Assert.NotNull(parsedViaService);
+        Assert.Single(parsedViaService.Columns);
+        Assert.Equal("Type", parsedViaService.Columns[0]);
+        Assert.Equal(9, parsedViaService.Rows.Count);
+    }
+
+    [Theory]
+    [InlineData("| Header |\n| --- |\n| Val1 |\n| Val2 |", "Header", 2)]
+    [InlineData("| Header |\n| :--- |\n| Val1 |", "Header", 1)]
+    [InlineData("| Header |\n| :---: |\n| Val1 |", "Header", 1)]
+    [InlineData("| Header |\n| ---: |\n| Val1 |", "Header", 1)]
+    [InlineData("Header |\n---| \nVal1 |", "Header", 1)]
+    [InlineData("| Header\n| ---\n| Val1", "Header", 1)]
+    [InlineData("| Server Name  | \n| ------------ | \n| web-prod-01  | \n| web-prod-02  | \n| db-prod-01   | \n| api-stage-01 | ", "Server Name", 4)]
+    public void Tabular_SingleColumnMarkdownTable_VariousFormats(string md, string expectedHeader, int expectedRows)
+    {
+        Assert.True(MarkdownTableParser.IsMarkdownTable(md));
+        var table = MarkdownTableParser.Parse(md);
+        Assert.Single(table.Columns);
+        Assert.Equal(expectedHeader, table.Columns[0]);
+        Assert.Equal(expectedRows, table.Rows.Count);
+
+        var detected = TabularParser.DetectAndParse(md);
+        Assert.NotNull(detected);
+        Assert.Single(detected.Columns);
+        Assert.Equal(expectedHeader, detected.Columns[0]);
+        Assert.Equal(expectedRows, detected.Rows.Count);
+
+        string exportedMd = TabularConverter.ToMarkdownTable(detected);
+        Assert.Contains(expectedHeader, exportedMd);
+        Assert.DoesNotContain("Column 1", exportedMd);
+        Assert.DoesNotContain("Column 3", exportedMd);
+    }
+
+    [Fact]
     public void Tabular_Transpose()
     {
         string csv = "Col1,Col2\nA,B\nC,D";

@@ -39,7 +39,8 @@ public class MainViewModel : INotifyPropertyChanged
     private string _outputText = string.Empty;
     private string _statusMessage = "Ready";
     private bool _isRealTimeTransform = true;
-    private bool _isWordWrap = false;
+    private bool _isInputWordWrap = false;
+    private bool _isOutputWordWrap = false;
     private bool _autoSendOutputToInput = false;
     private bool _isAutoSendingOutput = false;
     private bool _watchClipboard = false;
@@ -262,16 +263,41 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool IsWordWrap
+    public bool IsInputWordWrap
     {
-        get => _isWordWrap;
+        get => _isInputWordWrap;
         set
         {
-            if (_isWordWrap != value)
+            if (_isInputWordWrap != value)
             {
-                _isWordWrap = value;
+                _isInputWordWrap = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsWordWrap));
             }
+        }
+    }
+
+    public bool IsOutputWordWrap
+    {
+        get => _isOutputWordWrap;
+        set
+        {
+            if (_isOutputWordWrap != value)
+            {
+                _isOutputWordWrap = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsWordWrap));
+            }
+        }
+    }
+
+    public bool IsWordWrap
+    {
+        get => _isInputWordWrap && _isOutputWordWrap;
+        set
+        {
+            IsInputWordWrap = value;
+            IsOutputWordWrap = value;
         }
     }
 
@@ -1702,9 +1728,21 @@ public class MainViewModel : INotifyPropertyChanged
                 StatusMessage = AutoSendOutputToInput ? "Auto Output ➔ Input enabled" : "Auto Output ➔ Input disabled";
                 break;
 
+            case "ToggleInputWordWrap":
+                IsInputWordWrap = !IsInputWordWrap;
+                StatusMessage = IsInputWordWrap ? "Input word wrap enabled" : "Input word wrap disabled";
+                break;
+
+            case "ToggleOutputWordWrap":
+                IsOutputWordWrap = !IsOutputWordWrap;
+                StatusMessage = IsOutputWordWrap ? "Output word wrap enabled" : "Output word wrap disabled";
+                break;
+
             case "ToggleWordWrap":
-                IsWordWrap = !IsWordWrap;
-                StatusMessage = IsWordWrap ? "Word wrap enabled" : "Word wrap disabled";
+                bool newWrap = !(IsInputWordWrap && IsOutputWordWrap);
+                IsInputWordWrap = newWrap;
+                IsOutputWordWrap = newWrap;
+                StatusMessage = newWrap ? "Word wrap enabled for both panes" : "Word wrap disabled for both panes";
                 break;
 
             case "ShowLinesTab":

@@ -236,16 +236,13 @@
                                 <TextBlock Text="Syntax:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                           SelectedItem="{Binding SelectedInputSyntax, UpdateSourceTrigger=PropertyChanged}"
-                                          Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
+                                          Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <CheckBox Content="Wrap" IsChecked="{Binding IsInputWordWrap, Mode=TwoWay}" FontSize="10" VerticalAlignment="Center" ToolTip="Wrap lines in input editor"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                <ui:Button Appearance="Secondary" Command="{Binding LoadFileCommand}" ToolTip="Load from file (Ctrl+O)" Padding="6,2" FontSize="11" Margin="0,0,4,0">
-                                    <TextBlock Text="Open" FontSize="10"/>
-                                </ui:Button>
                                 <ui:Button Appearance="Primary" Command="{Binding PasteInputCommand}" Padding="6,2" FontSize="11" Margin="0,0,4,0">
                                     <TextBlock Text="Paste" FontSize="10"/>
                                 </ui:Button>
-                             
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -257,10 +254,10 @@
                             <controls:BindableTextEditor x:Name="InputEditor"
                                                          BoundText="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                                                          SyntaxLanguage="{Binding EffectiveInputSyntax}"
-                                                         WordWrap="{Binding IsWordWrap}"
+                                                         WordWrap="{Binding IsInputWordWrap}"
                                                          FontFamily="{StaticResource EditorFontFamily}"
                                                          FontSize="13"
-                                                         Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                         Background="{DynamicResource EditorBackgroundBrush}"
                                                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                         </TabItem>
 
@@ -456,11 +453,15 @@
                                           SelectionUnit="FullRow"
                                           IsReadOnly="True"
                                           Sorting="PreviewDataGrid_Sorting"
+                                          FontSize="13"
+                                          RowHeight="28"
+                                          GridLinesVisibility="Horizontal"
+                                          HorizontalGridLinesBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
                                           BorderThickness="0"
-                                          Background="{DynamicResource SurfaceBackgroundBrush}"
+                                          Background="{DynamicResource DataGridRowBackgroundBrush}"
                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                          RowBackground="{DynamicResource SurfaceBackgroundBrush}"
-                                          AlternatingRowBackground="{DynamicResource SurfaceHeaderBackgroundBrush}"/>
+                                          RowBackground="{DynamicResource DataGridRowBackgroundBrush}"
+                                          AlternatingRowBackground="{DynamicResource DataGridAlternatingRowBackgroundBrush}"/>
                             </Grid>
                         </TabItem>
 
@@ -712,9 +713,6 @@
                                                       DisplayMemberPath="Name" Padding="4,4"
                                                       Width="180" Height="26" FontSize="11" VerticalAlignment="Center"
                                                       ToolTip="Select from common tested regex patterns"/>
-                                            <Button Content="🧪 Sample" Command="{Binding LoadRegexSampleTextCommand}"
-                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="4,0,0,0" Padding="6,3" FontSize="10"
-                                                    ToolTip="Load sample text for selected regex pattern into input"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -730,23 +728,24 @@
                                         <!-- Options Toggles -->
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <TextBlock Text="Flags:" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <CheckBox Content="Aa IgnoreCase (i)" IsChecked="{Binding RegexIgnoreCase, Mode=TwoWay}" FontSize="11" Margin="0,0,10,0" ToolTip="Case-insensitive matching"/>
-                                            <CheckBox Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="11" Margin="0,0,10,0" ToolTip="^ and $ match line starts and ends"/>
-                                            <CheckBox Content=". Singleline (s)" IsChecked="{Binding RegexSingleline, Mode=TwoWay}" FontSize="11" Margin="0,0,10,0" ToolTip=". matches any character including newline"/>
-                                            <CheckBox Content="# IgnoreWhitespace (x)" IsChecked="{Binding RegexIgnoreWhitespace, Mode=TwoWay}" FontSize="11" ToolTip="Ignore unescaped whitespace in pattern"/>
+                                            <CheckBox Content="Aa IgnoreCase (i)" IsChecked="{Binding RegexIgnoreCase, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Case-insensitive matching"/>
+                                            <CheckBox Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="^ and $ match line starts and ends"/>
+                                            <CheckBox Content=". Singleline (s)" IsChecked="{Binding RegexSingleline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip=". matches any character including newline"/>
+                                            <CheckBox Content="# IgnoreWhitespace (x)" IsChecked="{Binding RegexIgnoreWhitespace, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Ignore unescaped whitespace in pattern"/>
                                         </StackPanel>
 
-                                        <!-- Extract Actions -->
+                                        <!-- Extract & Clear Actions -->
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Button Content="📋 Extract Matches" Command="{Binding ExtractRegexMatchesCommand}"
-                                                    Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
-                                                    ToolTip="Send all matching strings to text output pane"/>
-                                            <Button Content="📊 Extract TSV Table" Command="{Binding ExtractRegexGroupsTableCommand}"
-                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
-                                                    ToolTip="Send extracted group table as TSV to text output pane"/>
-                                            <Button Content="📦 Extract JSON" Command="{Binding ExtractRegexGroupsJsonCommand}"
-                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
-                                                    ToolTip="Send matches and capture groups as JSON array to output pane"/>
+                                            <ui:DropDownButton Appearance="Primary" Padding="8,3" Margin="0,0,4,0" ToolTip="Extract regex results to output pane">
+                                                <TextBlock Text="📋 Extract" FontSize="10"/>
+                                                <ui:DropDownButton.Flyout>
+                                                    <ContextMenu Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
+                                                        <MenuItem Header="📋 Extract Matches" Command="{Binding ExtractRegexMatchesCommand}" ToolTip="Send all matching strings to text output pane"/>
+                                                        <MenuItem Header="📊 Extract TSV Table" Command="{Binding ExtractRegexGroupsTableCommand}" ToolTip="Send extracted group table as TSV to text output pane"/>
+                                                        <MenuItem Header="📦 Extract JSON" Command="{Binding ExtractRegexGroupsJsonCommand}" ToolTip="Send matches and capture groups as JSON array to output pane"/>
+                                                    </ContextMenu>
+                                                </ui:DropDownButton.Flyout>
+                                            </ui:DropDownButton>
                                             <Button Content="✕ Clear" Command="{Binding ClearRegexPatternCommand}"
                                                     Style="{DynamicResource SecondaryToolButtonStyle}" Padding="6,3" FontSize="10"
                                                     ToolTip="Clear pattern input"/>
@@ -804,11 +803,15 @@
                                               SelectionMode="Single"
                                               SelectionUnit="FullRow"
                                               IsReadOnly="True"
+                                              FontSize="13"
+                                              RowHeight="28"
+                                              GridLinesVisibility="Horizontal"
+                                              HorizontalGridLinesBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
                                               BorderThickness="0"
-                                              Background="{DynamicResource SurfaceBackgroundBrush}"
+                                              Background="{DynamicResource DataGridRowBackgroundBrush}"
                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                              RowBackground="{DynamicResource SurfaceBackgroundBrush}"
-                                              AlternatingRowBackground="{DynamicResource SurfaceHeaderBackgroundBrush}"/>
+                                              RowBackground="{DynamicResource DataGridRowBackgroundBrush}"
+                                              AlternatingRowBackground="{DynamicResource DataGridAlternatingRowBackgroundBrush}"/>
 
                                     <!-- Splitter between table and cheat sheet -->
                                     <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" Background="Transparent"/>
@@ -1010,7 +1013,7 @@
                                                                          SyntaxLanguage="C#"
                                                                          FontFamily="{StaticResource EditorFontFamily}"
                                                                          FontSize="13"
-                                                                         Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                                         Background="{DynamicResource EditorBackgroundBrush}"
                                                                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                         </Grid>
                                     </Border>
@@ -1051,7 +1054,7 @@
                                                                          IsReadOnly="True"
                                                                          FontFamily="{StaticResource EditorFontFamily}"
                                                                          FontSize="13"
-                                                                         Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                                         Background="{DynamicResource EditorBackgroundBrush}"
                                                                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                         </Grid>
                                     </Border>
@@ -1086,16 +1089,15 @@
                                     <TextBlock Text="Syntax:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                     <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                               SelectedItem="{Binding SelectedOutputSyntax, UpdateSourceTrigger=PropertyChanged}"
-                                              Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center"/>
+                                              Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <CheckBox Content="Wrap" IsChecked="{Binding IsOutputWordWrap, Mode=TwoWay}" FontSize="10" VerticalAlignment="Center" ToolTip="Wrap lines in output editor"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                                     <ui:Button Appearance="Success" Command="{Binding SendToInputCommand}" IsEnabled="{Binding CanSendOutputToInput}" ToolTip="Send output directly to input editor (Ctrl+Shift+I / Alt+I / F4)" Padding="12,3" Margin="0,0,6,0" Icon="{ui:SymbolIcon Symbol=ArrowUp24}">
                                         <TextBlock Text="Send to Input" FontWeight="SemiBold" FontSize="11"/>
                                     </ui:Button>
                                     <ui:Button Appearance="Primary" Command="{Binding CopyOutputCommand}" IsEnabled="{Binding CanSendOutputToInput}" ToolTip="Copy transformed text to Clipboard" Padding="8,3" Margin="0,0,4,0" Icon="{ui:SymbolIcon Symbol=Copy24}">
-                                        <TextBlock Text="Copy" FontSize="10"/>
                                     </ui:Button>
-                                   
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -1105,10 +1107,10 @@
                                                      Grid.Row="1"
                                                      BoundText="{Binding OutputText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      SyntaxLanguage="{Binding EffectiveOutputSyntax}"
-                                                     WordWrap="{Binding IsWordWrap}"
+                                                     WordWrap="{Binding IsOutputWordWrap}"
                                                      FontFamily="{StaticResource EditorFontFamily}"
                                                      FontSize="13"
-                                                     Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                     Background="{DynamicResource EditorBackgroundBrush}"
                                                      Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
                         <!-- Output Footer / Stats -->
@@ -1960,11 +1962,10 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center"/>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <ui:ToggleSwitch Content="⚡ Real-time Transform" IsChecked="{Binding IsRealTimeTransform, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <ui:ToggleSwitch Content="📋 Watch Clipboard" IsChecked="{Binding WatchClipboard, Mode=TwoWay}" ToolTip="Automatically watch for new clipboard items and add them to the input" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <ui:ToggleSwitch Content="🔁 Auto Output → Input" IsChecked="{Binding AutoSendOutputToInput, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <ui:ToggleSwitch Content="↩ Word Wrap" IsChecked="{Binding IsWordWrap, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center"/>
+                    <ui:ToggleSwitch Content="🔁 Auto Output → Input" IsChecked="{Binding AutoSendOutputToInput, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>

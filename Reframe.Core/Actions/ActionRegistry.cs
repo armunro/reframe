@@ -1139,10 +1139,26 @@ public static class ActionRegistry
             icon: "🔁"),
 
         new ActionItem(
-            id: "ToggleWordWrap",
-            title: "Toggle Word Wrap",
+            id: "ToggleInputWordWrap",
+            title: "Toggle Input Word Wrap",
             category: "Navigation & Workflow",
-            description: "Toggle text wrapping across editors",
+            description: "Toggle text wrapping in the input editor",
+            keywords: ["word wrap", "input wrap", "wrap input", "toggle wrap"],
+            icon: "↩"),
+
+        new ActionItem(
+            id: "ToggleOutputWordWrap",
+            title: "Toggle Output Word Wrap",
+            category: "Navigation & Workflow",
+            description: "Toggle text wrapping in the output editor",
+            keywords: ["word wrap", "output wrap", "wrap output", "toggle wrap"],
+            icon: "↩"),
+
+        new ActionItem(
+            id: "ToggleWordWrap",
+            title: "Toggle Word Wrap (Both Panes)",
+            category: "Navigation & Workflow",
+            description: "Toggle text wrapping across both input and output editors",
             keywords: ["word wrap", "wrap text", "toggle wrap"],
             icon: "↩"),
 
