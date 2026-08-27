@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -12,6 +13,7 @@ using Reframe.Core.Analysis.Analyzers;
 using Reframe.Core.Analysis.Models;
 using Reframe.Core.History;
 using Reframe.Core.Recipes;
+using Reframe.Core.RegexLab;
 using Reframe.Core.Structured;
 using Reframe.Core.Structured.Models;
 using Reframe.Core.Structured.Parsers;
@@ -156,6 +158,20 @@ public class MainViewModel : INotifyPropertyChanged
     private string _pipelineStatusText = "Pipeline ready";
     private bool _isRecipesTabHighlighted;
 
+    // Regex Lab & Live Match Inspector
+    private readonly RegexLabEngine _regexLabEngine = new();
+    private string _regexLabPattern = @"\b(?<user>[a-zA-Z0-9._%+-]+)@(?<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b";
+    private bool _regexIgnoreCase = true;
+    private bool _regexMultiline = false;
+    private bool _regexSingleline = false;
+    private bool _regexIgnoreWhitespace = false;
+    private RegexLabResult _regexLabResult = RegexLabResult.Empty;
+    private RegexPatternPreset? _selectedRegexPreset;
+    private RegexMatchItem? _selectedRegexMatch;
+    private ObservableCollection<RegexPatternPreset> _regexPresets = new(RegexLibraryCatalog.Presets);
+    private string _regexPresetSearchQuery = string.Empty;
+    private ICollectionView? _filteredRegexPresets;
+
     public ObservableCollection<TransformationRecipe> SavedRecipes { get; } = new();
     public ObservableCollection<RecipeStep> CurrentPipelineSteps { get; } = new();
     public IReadOnlyList<RecipeCatalogItem> CatalogItems { get; } = RecipeCatalog.GetAllCatalogItems();
@@ -164,6 +180,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         InitializeCommands();
         InitializeRecipes();
+        InitializeRegexLab();
         UpdateActionSearchResults();
         // Set sample text initially
         InputText = "1001\n1002\n1003\n1004\n1005";
@@ -496,13 +513,13 @@ public class MainViewModel : INotifyPropertyChanged
         return action switch
         {
             "ToCsv" or "ExtractSelectedToCsv" => "CSV",
-            "ToTsv" or "ExtractSelectedToTsv" => "TSV",
+            "ToTsv" or "ExtractSelectedToTsv" or "ExtractRegexGroupsTable" => "TSV",
             "ToYaml" or "ToYamlObjects" or "ToYamlArrays" or "ToYamlArray" or "ToYamlList" or "KvToYaml" or "JsonToYaml" or "FormatYaml" or "TableToKeyValueYaml" or "TableToKeyValueYamlRest" or "ExtractSelectedToYaml" => "YAML",
             "SqlIn" or "SqlInMultiLine" or "ExtractSqlIn" or "ExtractSelectedToSqlIn" or "ToSqlInserts" => "SQL",
             "ToCSharpArray" or "ToCSharpList" or "EscapeCSharp" or "UnescapeCSharp" or "ExtractCSharpArray" or "ExtractSelectedToCodeArray" => "C#",
             "ToTypeScriptArray" => "TypeScript",
             "ToPythonList" => "Python",
-            "ToJsonArray" or "ToJsonObjects" or "ToJsonArrays" or "ExtractSelectedToJson" or "KvToJson" or "TableToKeyValueJson" or "TableToKeyValueJsonRest" or "YamlToJson" or "FormatJson" or "JwtDecode" or "ExtractJsonMap" => "JSON",
+            "ToJsonArray" or "ToJsonObjects" or "ToJsonArrays" or "ExtractSelectedToJson" or "KvToJson" or "TableToKeyValueJson" or "TableToKeyValueJsonRest" or "YamlToJson" or "FormatJson" or "JwtDecode" or "ExtractJsonMap" or "ExtractRegexGroupsJson" => "JSON",
             "FormatXml" => "XML",
             "ToMarkdownTable" or "ExtractSelectedToMarkdown" => "Markdown",
             "ToHtmlTable" => "HTML",
@@ -776,6 +793,149 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    // Regex Lab & Live Match Inspector Properties
+    public string RegexLabPattern
+    {
+        get => _regexLabPattern;
+        set
+        {
+            if (_regexLabPattern != value)
+            {
+                _regexLabPattern = value;
+                OnPropertyChanged();
+                UpdateRegexLab();
+            }
+        }
+    }
+
+    public bool RegexIgnoreCase
+    {
+        get => _regexIgnoreCase;
+        set
+        {
+            if (_regexIgnoreCase != value)
+            {
+                _regexIgnoreCase = value;
+                OnPropertyChanged();
+                UpdateRegexLab();
+            }
+        }
+    }
+
+    public bool RegexMultiline
+    {
+        get => _regexMultiline;
+        set
+        {
+            if (_regexMultiline != value)
+            {
+                _regexMultiline = value;
+                OnPropertyChanged();
+                UpdateRegexLab();
+            }
+        }
+    }
+
+    public bool RegexSingleline
+    {
+        get => _regexSingleline;
+        set
+        {
+            if (_regexSingleline != value)
+            {
+                _regexSingleline = value;
+                OnPropertyChanged();
+                UpdateRegexLab();
+            }
+        }
+    }
+
+    public bool RegexIgnoreWhitespace
+    {
+        get => _regexIgnoreWhitespace;
+        set
+        {
+            if (_regexIgnoreWhitespace != value)
+            {
+                _regexIgnoreWhitespace = value;
+                OnPropertyChanged();
+                UpdateRegexLab();
+            }
+        }
+    }
+
+    public RegexLabResult RegexLabResult => _regexLabResult;
+    public DataTable? RegexGroupDataTable => _regexLabResult.GroupTable;
+    public IReadOnlyList<RegexMatchItem> RegexMatches => _regexLabResult.Matches;
+    public bool HasRegexMatches => _regexLabResult.Matches.Count > 0;
+    public bool RegexHasError => !_regexLabResult.IsValid;
+    public string RegexErrorMessage => _regexLabResult.ErrorMessage ?? string.Empty;
+    public int RegexMatchCount => _regexLabResult.TotalMatches;
+    public int RegexGroupCount => _regexLabResult.TotalGroups;
+    public double RegexExecutionTimeMs => _regexLabResult.ExecutionTimeMs;
+
+    public string RegexStatusMessage
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_regexLabPattern))
+                return "Enter a regular expression pattern to evaluate matches.";
+            if (!_regexLabResult.IsValid)
+                return $"Syntax Error: {_regexLabResult.ErrorMessage}";
+            if (_regexLabResult.Matches.Count == 0)
+                return $"0 matches found in {RegexExecutionTimeMs:F2}ms";
+            return $"{_regexLabResult.Matches.Count} {(_regexLabResult.Matches.Count == 1 ? "match" : "matches")} ({_regexLabResult.TotalGroups} groups captured) in {RegexExecutionTimeMs:F2}ms";
+        }
+    }
+
+    public RegexMatchItem? SelectedRegexMatch
+    {
+        get => _selectedRegexMatch;
+        set
+        {
+            if (_selectedRegexMatch != value)
+            {
+                _selectedRegexMatch = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public ObservableCollection<RegexPatternPreset> RegexPresets => _regexPresets;
+
+    public RegexPatternPreset? SelectedRegexPreset
+    {
+        get => _selectedRegexPreset;
+        set
+        {
+            if (_selectedRegexPreset != value)
+            {
+                _selectedRegexPreset = value;
+                OnPropertyChanged();
+                if (value != null)
+                {
+                    ApplyRegexPreset(value, loadSample: false);
+                }
+            }
+        }
+    }
+
+    public string RegexPresetSearchQuery
+    {
+        get => _regexPresetSearchQuery;
+        set
+        {
+            if (_regexPresetSearchQuery != value)
+            {
+                _regexPresetSearchQuery = value;
+                OnPropertyChanged();
+                _filteredRegexPresets?.Refresh();
+            }
+        }
+    }
+
+    public ICollectionView FilteredRegexPresets => _filteredRegexPresets ?? CollectionViewSource.GetDefaultView(_regexPresets);
 
     private bool _hasHeaders = true;
     public bool HasHeaders
@@ -1259,6 +1419,15 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand ExportAllRecipesCommand { get; private set; } = null!;
     public ICommand ImportRecipesCommand { get; private set; } = null!;
 
+    // Regex Lab & Live Match Inspector Commands
+    public ICommand ApplyRegexPresetCommand { get; private set; } = null!;
+    public ICommand LoadRegexSampleTextCommand { get; private set; } = null!;
+    public ICommand ExtractRegexMatchesCommand { get; private set; } = null!;
+    public ICommand ExtractRegexGroupsTableCommand { get; private set; } = null!;
+    public ICommand ExtractRegexGroupsJsonCommand { get; private set; } = null!;
+    public ICommand ClearRegexPatternCommand { get; private set; } = null!;
+    public ICommand OpenRegexLabCommand { get; private set; } = null!;
+
     public void UpdateActionSearchResults()
     {
         var matches = ActionRegistry.Search(_actionSearchQuery);
@@ -1296,6 +1465,43 @@ public class MainViewModel : INotifyPropertyChanged
         if (string.Equals(item.Id, "ExecuteActivePipeline", StringComparison.OrdinalIgnoreCase))
         {
             ExecuteCurrentPipeline();
+            return;
+        }
+
+        if (item.Id.StartsWith("RegexPreset:", StringComparison.OrdinalIgnoreCase))
+        {
+            string presetId = item.Id.Substring("RegexPreset:".Length);
+            var preset = RegexLibraryCatalog.FindById(presetId);
+            if (preset != null)
+            {
+                SelectedCenterTabIndex = 3;
+                ApplyRegexPreset(preset, loadSample: false);
+            }
+            return;
+        }
+
+        if (string.Equals(item.Id, "OpenRegexLab", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(item.Id, "ShowRegexLabTab", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectedCenterTabIndex = 3;
+            return;
+        }
+
+        if (string.Equals(item.Id, "ExtractRegexMatches", StringComparison.OrdinalIgnoreCase))
+        {
+            ExtractRegexMatchesCommand.Execute(null);
+            return;
+        }
+
+        if (string.Equals(item.Id, "ExtractRegexGroupsTable", StringComparison.OrdinalIgnoreCase))
+        {
+            ExtractRegexGroupsTableCommand.Execute(null);
+            return;
+        }
+
+        if (string.Equals(item.Id, "ExtractRegexGroupsJson", StringComparison.OrdinalIgnoreCase))
+        {
+            ExtractRegexGroupsJsonCommand.Execute(null);
             return;
         }
 
@@ -1933,6 +2139,82 @@ public class MainViewModel : INotifyPropertyChanged
             string? json = p as string;
             ImportRecipes(json);
         });
+
+        // Regex Lab & Live Match Inspector Commands
+        ApplyRegexPresetCommand = new RelayCommand(p =>
+        {
+            if (p is RegexPatternPreset preset)
+            {
+                ApplyRegexPreset(preset);
+            }
+            else if (SelectedRegexPreset != null)
+            {
+                ApplyRegexPreset(SelectedRegexPreset);
+            }
+        });
+
+        LoadRegexSampleTextCommand = new RelayCommand(p =>
+        {
+            var preset = p as RegexPatternPreset ?? SelectedRegexPreset;
+            if (preset != null && !string.IsNullOrEmpty(preset.SampleText))
+            {
+                InputText = preset.SampleText;
+                RecordHistory(InputText, $"Sample ({preset.Name})");
+                StatusMessage = $"Loaded sample for {preset.Name}";
+            }
+        });
+
+        ExtractRegexMatchesCommand = new RelayCommand(_ =>
+        {
+            if (_regexLabResult.Matches.Count > 0)
+            {
+                OutputText = _regexLabEngine.ExtractMatches(_regexLabResult);
+                StatusMessage = $"Extracted {_regexLabResult.Matches.Count} matches to output";
+            }
+            else
+            {
+                OutputText = string.Empty;
+                StatusMessage = "No matches to extract";
+            }
+        });
+
+        ExtractRegexGroupsTableCommand = new RelayCommand(_ =>
+        {
+            if (_regexLabResult.Matches.Count > 0)
+            {
+                OutputText = _regexLabEngine.ExtractGroupsAsDelimited(_regexLabResult, "\t");
+                StatusMessage = $"Extracted {_regexLabResult.Matches.Count} match rows as TSV table to output";
+            }
+            else
+            {
+                OutputText = string.Empty;
+                StatusMessage = "No match groups to extract";
+            }
+        });
+
+        ExtractRegexGroupsJsonCommand = new RelayCommand(_ =>
+        {
+            if (_regexLabResult.Matches.Count > 0)
+            {
+                OutputText = _regexLabEngine.ExtractGroupsAsJson(_regexLabResult, true);
+                StatusMessage = $"Extracted {_regexLabResult.Matches.Count} matches as JSON array to output";
+            }
+            else
+            {
+                OutputText = "[]";
+                StatusMessage = "No match groups to extract";
+            }
+        });
+
+        ClearRegexPatternCommand = new RelayCommand(_ =>
+        {
+            RegexLabPattern = string.Empty;
+        });
+
+        OpenRegexLabCommand = new RelayCommand(_ =>
+        {
+            SelectedCenterTabIndex = 3;
+        });
     }
 
     public void InitializeRecipes()
@@ -2265,6 +2547,88 @@ public class MainViewModel : INotifyPropertyChanged
         return count;
     }
 
+    // -------------------------------------------------------------
+    // Regex Lab & Live Match Inspector Methods
+    // -------------------------------------------------------------
+    public void InitializeRegexLab()
+    {
+        _regexPresets = new ObservableCollection<RegexPatternPreset>(RegexLibraryCatalog.Presets);
+        _filteredRegexPresets = CollectionViewSource.GetDefaultView(_regexPresets);
+        _filteredRegexPresets.Filter = FilterRegexPresetItem;
+        _selectedRegexPreset = _regexPresets.FirstOrDefault();
+        if (_selectedRegexPreset != null)
+        {
+            _regexLabPattern = _selectedRegexPreset.Pattern;
+            _regexIgnoreCase = (_selectedRegexPreset.DefaultOptions & RegexOptions.IgnoreCase) != 0;
+            _regexMultiline = (_selectedRegexPreset.DefaultOptions & RegexOptions.Multiline) != 0;
+            _regexSingleline = (_selectedRegexPreset.DefaultOptions & RegexOptions.Singleline) != 0;
+            _regexIgnoreWhitespace = (_selectedRegexPreset.DefaultOptions & RegexOptions.IgnorePatternWhitespace) != 0;
+        }
+        UpdateRegexLab();
+    }
+
+    private bool FilterRegexPresetItem(object obj)
+    {
+        if (obj is not RegexPatternPreset preset) return false;
+        if (string.IsNullOrWhiteSpace(_regexPresetSearchQuery)) return true;
+
+        string query = _regexPresetSearchQuery.Trim();
+        return preset.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               preset.Category.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               preset.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               preset.Pattern.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void ApplyRegexPreset(RegexPatternPreset preset, bool loadSample = false)
+    {
+        _selectedRegexPreset = preset;
+        _regexLabPattern = preset.Pattern;
+        _regexIgnoreCase = (preset.DefaultOptions & RegexOptions.IgnoreCase) != 0;
+        _regexMultiline = (preset.DefaultOptions & RegexOptions.Multiline) != 0;
+        _regexSingleline = (preset.DefaultOptions & RegexOptions.Singleline) != 0;
+        _regexIgnoreWhitespace = (preset.DefaultOptions & RegexOptions.IgnorePatternWhitespace) != 0;
+
+        OnPropertyChanged(nameof(SelectedRegexPreset));
+        OnPropertyChanged(nameof(RegexLabPattern));
+        OnPropertyChanged(nameof(RegexIgnoreCase));
+        OnPropertyChanged(nameof(RegexMultiline));
+        OnPropertyChanged(nameof(RegexSingleline));
+        OnPropertyChanged(nameof(RegexIgnoreWhitespace));
+
+        if (loadSample && !string.IsNullOrEmpty(preset.SampleText))
+        {
+            InputText = preset.SampleText;
+            RecordHistory(InputText, $"Sample ({preset.Name})");
+        }
+
+        UpdateRegexLab();
+        StatusMessage = $"Loaded regex pattern: {preset.Name}";
+    }
+
+    public void UpdateRegexLab()
+    {
+        var options = RegexOptions.None;
+        if (_regexIgnoreCase) options |= RegexOptions.IgnoreCase;
+        if (_regexMultiline) options |= RegexOptions.Multiline;
+        if (_regexSingleline) options |= RegexOptions.Singleline;
+        if (_regexIgnoreWhitespace) options |= RegexOptions.IgnorePatternWhitespace;
+
+        _regexLabResult = _regexLabEngine.Evaluate(_inputText, _regexLabPattern, options);
+        _selectedRegexMatch = _regexLabResult.Matches.FirstOrDefault();
+
+        OnPropertyChanged(nameof(RegexLabResult));
+        OnPropertyChanged(nameof(RegexGroupDataTable));
+        OnPropertyChanged(nameof(RegexMatches));
+        OnPropertyChanged(nameof(SelectedRegexMatch));
+        OnPropertyChanged(nameof(RegexStatusMessage));
+        OnPropertyChanged(nameof(RegexHasError));
+        OnPropertyChanged(nameof(RegexErrorMessage));
+        OnPropertyChanged(nameof(RegexMatchCount));
+        OnPropertyChanged(nameof(RegexGroupCount));
+        OnPropertyChanged(nameof(RegexExecutionTimeMs));
+        OnPropertyChanged(nameof(HasRegexMatches));
+    }
+
     public void ExpandAllStructuredNodes()
     {
         foreach (var node in _structuredNodes)
@@ -2341,8 +2705,13 @@ public class MainViewModel : INotifyPropertyChanged
         UpdateColumnsAndPreviewFromCurrentTable();
 
         AnalyzeStructuredData();
+        UpdateRegexLab();
 
-        if (HasTabularData)
+        if (SelectedCenterTabIndex == 3)
+        {
+            // Keep user on Regex Lab tab if currently active
+        }
+        else if (HasTabularData)
         {
             SelectedCenterTabIndex = 0; // Table Grid View
         }
@@ -2700,6 +3069,9 @@ public class MainViewModel : INotifyPropertyChanged
                 "ExtractIps" => LineTransformers.ExtractRegex(InputText, @"\b(?:\d{1,3}\.){3}\d{1,3}\b"),
                 "ExtractGuids" => LineTransformers.ExtractRegex(InputText, @"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b"),
                 "ExtractNumbers" => LineTransformers.ExtractRegex(InputText, @"[-+]?\d*\.?\d+"),
+                "ExtractRegexMatches" => _regexLabEngine.ExtractMatches(_regexLabResult),
+                "ExtractRegexGroupsTable" => _regexLabEngine.ExtractGroupsAsDelimited(_regexLabResult, "\t"),
+                "ExtractRegexGroupsJson" => _regexLabEngine.ExtractGroupsAsJson(_regexLabResult, true),
 
                 // Encodings & Formatting
                 "UrlEncode" => EncodingTransformers.UrlEncode(InputText),

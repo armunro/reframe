@@ -1217,6 +1217,145 @@ public static class ActionRegistry
             keywords: ["history tab", "timeline tab", "snapshots tab", "switch to history"],
             icon: "🕒",
             targetSidebarTab: 6),
+
+        // -------------------------------------------------------------
+        // Regex Lab & Inspector
+        // -------------------------------------------------------------
+        new ActionItem(
+            id: "OpenRegexLab",
+            title: "🧪 Open Regex Lab & Match Inspector",
+            category: "Regex Lab",
+            description: "Interactive regex tester, group extraction table, and pattern cheat sheet",
+            keywords: ["regex", "regular expression", "pattern", "matcher", "match inspector", "groups", "capture", "cheat sheet"],
+            icon: "🧪"),
+
+        new ActionItem(
+            id: "ExtractRegexMatches",
+            title: "Extract Regex Matches to Output",
+            category: "Regex Lab",
+            description: "Extract all text matching the current Regex Lab pattern as individual lines",
+            keywords: ["regex extract", "extract matches", "regex filter", "regex output"],
+            icon: "📋"),
+
+        new ActionItem(
+            id: "ExtractRegexGroupsTable",
+            title: "Extract Regex Groups as TSV Table",
+            category: "Regex Lab",
+            description: "Extract all capture groups from matches into a structured TSV table",
+            keywords: ["regex groups", "group extraction table", "regex tsv", "regex table"],
+            icon: "📊"),
+
+        new ActionItem(
+            id: "ExtractRegexGroupsJson",
+            title: "Extract Regex Groups as JSON",
+            category: "Regex Lab",
+            description: "Extract structured match objects and captured named groups as JSON",
+            keywords: ["regex json", "groups json", "regex objects", "serialize matches"],
+            icon: "📦"),
+
+        new ActionItem(
+            id: "RegexPreset:iso-8601-date",
+            title: "Regex: ISO 8601 Date & Timestamp",
+            category: "Regex Lab",
+            description: "Load ISO 8601 date & timestamp pattern into Regex Lab",
+            keywords: ["iso date", "timestamp regex", "date pattern", "iso8601"],
+            icon: "📅"),
+
+        new ActionItem(
+            id: "RegexPreset:email-address",
+            title: "Regex: Email Address",
+            category: "Regex Lab",
+            description: "Load RFC 5322 email address validation & extraction pattern",
+            keywords: ["email regex", "email address", "extract emails", "mail pattern"],
+            icon: "✉️"),
+
+        new ActionItem(
+            id: "RegexPreset:semver",
+            title: "Regex: Semantic Version (SemVer)",
+            category: "Regex Lab",
+            description: "Load SemVer 2.0 version pattern into Regex Lab",
+            keywords: ["semver", "semantic version", "version regex", "release tag"],
+            icon: "🏷️"),
+
+        new ActionItem(
+            id: "RegexPreset:uuid-guid",
+            title: "Regex: UUID / GUID",
+            category: "Regex Lab",
+            description: "Load UUID / GUID hex identifier pattern into Regex Lab",
+            keywords: ["uuid regex", "guid regex", "unique identifier"],
+            icon: "🔑"),
+
+        new ActionItem(
+            id: "RegexPreset:jwt-token",
+            title: "Regex: JWT Token (JSON Web Token)",
+            category: "Regex Lab",
+            description: "Load JWT header.payload.signature pattern into Regex Lab",
+            keywords: ["jwt regex", "json web token", "bearer token", "auth token"],
+            icon: "🛡️"),
+
+        new ActionItem(
+            id: "RegexPreset:ipv4-address",
+            title: "Regex: IPv4 Address",
+            category: "Regex Lab",
+            description: "Load dotted decimal IPv4 network address pattern into Regex Lab",
+            keywords: ["ipv4", "ip address", "network ip", "ip regex"],
+            icon: "🌐"),
+
+        new ActionItem(
+            id: "RegexPreset:ipv6-address",
+            title: "Regex: IPv6 Address",
+            category: "Regex Lab",
+            description: "Load IPv6 address pattern into Regex Lab",
+            keywords: ["ipv6", "ip address", "hex ip", "ipv6 regex"],
+            icon: "🌐"),
+
+        new ActionItem(
+            id: "RegexPreset:connection-string",
+            title: "Regex: Connection String (Key-Value)",
+            category: "Regex Lab",
+            description: "Load database connection string key-value extraction pattern into Regex Lab",
+            keywords: ["connection string", "sql connection", "db config", "key value regex"],
+            icon: "🗄️"),
+
+        new ActionItem(
+            id: "RegexPreset:url-http-https",
+            title: "Regex: URL / URI (HTTP & HTTPS)",
+            category: "Regex Lab",
+            description: "Load web URL protocol, domain, path, and query extraction pattern",
+            keywords: ["url regex", "uri pattern", "http link", "https regex", "extract urls"],
+            icon: "🔗"),
+
+        new ActionItem(
+            id: "RegexPreset:hex-color",
+            title: "Regex: Hex Color Code (#RGB / #RRGGBB)",
+            category: "Regex Lab",
+            description: "Load hexadecimal color code pattern into Regex Lab",
+            keywords: ["hex color", "css color", "color regex", "#hex"],
+            icon: "🎨"),
+
+        new ActionItem(
+            id: "RegexPreset:phone-number",
+            title: "Regex: Phone Number (US & International)",
+            category: "Regex Lab",
+            description: "Load phone number pattern into Regex Lab",
+            keywords: ["phone regex", "telephone", "phone number", "mobile"],
+            icon: "📞"),
+
+        new ActionItem(
+            id: "RegexPreset:markdown-links",
+            title: "Regex: Markdown Links [Text](URL)",
+            category: "Regex Lab",
+            description: "Load Markdown hyperlink syntax pattern into Regex Lab",
+            keywords: ["markdown link", "md link", "markdown url", "extract markdown"],
+            icon: "📝"),
+
+        new ActionItem(
+            id: "RegexPreset:key-value-query",
+            title: "Regex: Key-Value Query Parameters",
+            category: "Regex Lab",
+            description: "Load key=value query string parameter pattern into Regex Lab",
+            keywords: ["query params", "key value", "query string", "url params"],
+            icon: "🔍"),
     };
 
     private static readonly List<ActionItem> _dynamicActions = new();

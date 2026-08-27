@@ -673,6 +673,221 @@
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
+
+                        <!-- Tab 4: Regex Lab & Live Match Inspector -->
+                        <TabItem Header="🧪 Regex Lab">
+                            <Grid Background="{DynamicResource SurfaceBackgroundBrush}">
+                                <Grid.RowDefinitions>
+                                    <!-- Row 0: Pattern input bar and library presets -->
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- Row 1: Options & Action Toolbar -->
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- Row 2: Status & Diagnostics Message -->
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- Row 3: Matches & Group Extraction Table with Side Inspector -->
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- ROW 0: PATTERN INPUT & PRESETS -->
+                                <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,6" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="Pattern:" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlueBadgeBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                                        <ui:TextBox Grid.Column="1"
+                                                    Text="{Binding RegexLabPattern, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="Enter regular expression (e.g. \b(?&lt;user&gt;[a-zA-Z0-9._%+-]+)@(?&lt;domain&gt;[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b)"
+                                                    FontFamily="{StaticResource EditorFontFamily}"
+                                                    FontSize="12"
+                                                    ClearButtonEnabled="True"
+                                                    VerticalAlignment="Center"/>
+
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                            <TextBlock Text="📚 Preset:" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                            <ComboBox ItemsSource="{Binding FilteredRegexPresets}"
+                                                      SelectedItem="{Binding SelectedRegexPreset, Mode=TwoWay}"
+                                                      DisplayMemberPath="Name"
+                                                      Width="180" Height="26" FontSize="11" VerticalAlignment="Center"
+                                                      ToolTip="Select from common tested regex patterns"/>
+                                            <Button Content="🧪 Sample" Command="{Binding LoadRegexSampleTextCommand}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="4,0,0,0" Padding="6,3" FontSize="10"
+                                                    ToolTip="Load sample text for selected regex pattern into input"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- ROW 1: OPTIONS & ACTION BUTTONS -->
+                                <Border Grid.Row="1" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Options Toggles -->
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="Flags:" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <CheckBox Content="Aa IgnoreCase (i)" IsChecked="{Binding RegexIgnoreCase, Mode=TwoWay}" FontSize="11" Margin="0,0,10,0" ToolTip="Case-insensitive matching"/>
+                                            <CheckBox Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="11" Margin="0,0,10,0" ToolTip="^ and $ match line starts and ends"/>
+                                            <CheckBox Content=". Singleline (s)" IsChecked="{Binding RegexSingleline, Mode=TwoWay}" FontSize="11" Margin="0,0,10,0" ToolTip=". matches any character including newline"/>
+                                            <CheckBox Content="# IgnoreWhitespace (x)" IsChecked="{Binding RegexIgnoreWhitespace, Mode=TwoWay}" FontSize="11" ToolTip="Ignore unescaped whitespace in pattern"/>
+                                        </StackPanel>
+
+                                        <!-- Extract Actions -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="📋 Extract Matches" Command="{Binding ExtractRegexMatchesCommand}"
+                                                    Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
+                                                    ToolTip="Send all matching strings to text output pane"/>
+                                            <Button Content="📊 Extract TSV Table" Command="{Binding ExtractRegexGroupsTableCommand}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
+                                                    ToolTip="Send extracted group table as TSV to text output pane"/>
+                                            <Button Content="📦 Extract JSON" Command="{Binding ExtractRegexGroupsJsonCommand}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
+                                                    ToolTip="Send matches and capture groups as JSON array to output pane"/>
+                                            <Button Content="✕ Clear" Command="{Binding ClearRegexPatternCommand}"
+                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Padding="6,3" FontSize="10"
+                                                    ToolTip="Clear pattern input"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- ROW 2: STATUS & DIAGNOSTICS BAR -->
+                                <Border Grid.Row="2" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,3" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <!-- If valid -->
+                                            <TextBlock Text="{Binding RegexStatusMessage}"
+                                                       FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentSuccessBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RegexHasError}" Value="True">
+                                                                <Setter Property="Foreground" Value="#FF6B6B"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1" Text="{Binding SelectedRegexPreset.Description}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="350"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- ROW 3: MATCH & GROUP EXTRACTION TABLE + CHEAT SHEET DRAWER -->
+                                <Grid Grid.Row="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="1*" MinWidth="180" MaxWidth="350"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Group Extraction Table (DataGrid) -->
+                                    <DataGrid x:Name="RegexGroupDataGrid"
+                                              Grid.Column="0"
+                                              ItemsSource="{Binding RegexGroupDataTable}"
+                                              AutoGenerateColumns="True"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              CanUserSortColumns="True"
+                                              CanUserReorderColumns="True"
+                                              CanUserResizeColumns="True"
+                                              SelectionMode="Single"
+                                              SelectionUnit="FullRow"
+                                              IsReadOnly="True"
+                                              BorderThickness="0"
+                                              Background="{DynamicResource SurfaceBackgroundBrush}"
+                                              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                              RowBackground="{DynamicResource SurfaceBackgroundBrush}"
+                                              AlternatingRowBackground="{DynamicResource SurfaceHeaderBackgroundBrush}"/>
+
+                                    <!-- Splitter between table and cheat sheet -->
+                                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" Background="Transparent"/>
+
+                                    <!-- Right: Match Inspector & Regex Cheat Sheet -->
+                                    <Border Grid.Column="2" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1,0,0,0">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+                                            <StackPanel>
+                                                <!-- Selected Match Inspector -->
+                                                <TextBlock Text="Match Inspector" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,0,6"/>
+
+                                                <ItemsControl ItemsSource="{Binding RegexMatches}" Margin="0,0,0,12">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6" Margin="0,0,0,4">
+                                                                <StackPanel>
+                                                                    <Grid>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <TextBlock Text="{Binding Value, StringFormat='# {0}'}" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                                                        <TextBlock Grid.Column="1" Text="{Binding Index, StringFormat='offset {0}'}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10"/>
+                                                                    </Grid>
+                                                                    <!-- Groups breakdown -->
+                                                                    <ItemsControl ItemsSource="{Binding Groups}" Margin="4,4,0,0">
+                                                                        <ItemsControl.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Grid Margin="0,1" Visibility="{Binding Success, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="Auto"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <TextBlock Text="{Binding DisplayName, StringFormat='{}{0}: '}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" Margin="0,0,4,0"/>
+                                                                                    <TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                                                                                </Grid>
+                                                                            </DataTemplate>
+                                                                        </ItemsControl.ItemTemplate>
+                                                                    </ItemsControl>
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <!-- Regex Cheat Sheet -->
+                                                <TextBlock Text="Regex Cheat Sheet" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,0,6"/>
+                                                <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6">
+                                                    <StackPanel TextElement.FontSize="10">
+                                                        <TextBlock Text="Character Classes" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,0,0,2"/>
+                                                        <TextBlock Text=". = any character (except \n)" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="\d = digit [0-9] | \D = non-digit" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="\w = word char [a-zA-Z0-9_]" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="\s = whitespace | \S = non-space" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                                                        <TextBlock Text="Anchors &amp; Boundaries" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,6,0,2"/>
+                                                        <TextBlock Text="^ = line start | $ = line end" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="\b = word boundary | \B = non-boundary" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                                                        <TextBlock Text="Quantifiers" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,6,0,2"/>
+                                                        <TextBlock Text="+ = 1 or more | * = 0 or more" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="? = 0 or 1 | {n,m} = between n and m" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="+? or *? = lazy / non-greedy" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                                                        <TextBlock Text="Groups &amp; Lookaround" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,6,0,2"/>
+                                                        <TextBlock Text="(?&lt;name&gt;...) = named capture group" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="(?:...) = non-capturing group" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="(?=...) = positive lookahead" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                        <TextBlock Text="(?!...) = negative lookahead" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
                     </TabControl>
                 </Border>
 
