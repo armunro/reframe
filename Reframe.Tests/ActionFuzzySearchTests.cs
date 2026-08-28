@@ -331,4 +331,117 @@ public class ActionFuzzySearchTests
         Assert.True(vm.IsOutputWordWrap);
         Assert.Contains("Input word wrap disabled", vm.StatusMessage);
     }
+
+    [Fact]
+    public void ActionItem_ParameterRequirementProperties_ReturnCorrectBadgesAndToolTips()
+    {
+        var paramAction = new ActionItem(
+            id: "JoinLines",
+            title: "Join Lines into Single Row",
+            category: "Lines",
+            requiresParameters: true,
+            targetSectionKey: "Lines_JoinLines");
+
+        var directAction = new ActionItem(
+            id: "TrimLines",
+            title: "Trim & Clean Lines",
+            category: "Lines",
+            requiresParameters: false);
+
+        Assert.True(paramAction.RequiresParameters);
+        Assert.Equal("⚙ Parameters", paramAction.ParameterRequirementBadgeText);
+        Assert.Contains("parameters configured", paramAction.ParameterRequirementToolTip);
+
+        Assert.False(directAction.RequiresParameters);
+        Assert.Equal("⚡ Direct", directAction.ParameterRequirementBadgeText);
+        Assert.Contains("without additional parameters", directAction.ParameterRequirementToolTip);
+    }
+
+    [Theory]
+    [InlineData("JoinLines", true, 0, "Lines_JoinLines")]
+    [InlineData("QuoteLines", true, 0, "Lines_QuoteLines")]
+    [InlineData("SplitLine", true, 0, "Lines_SplitDelimitedLine")]
+    [InlineData("PrefixSuffix", true, 0, "Lines_PrefixSuffix")]
+    [InlineData("ReplaceInLines", true, 0, "Lines_FindReplace")]
+    [InlineData("ToSqlInserts", true, 1, "Tabular_SqlInsertStatements")]
+    [InlineData("ExtractColumn", true, 1, "Tabular_ColumnSelectionExtract")]
+    [InlineData("TableToKeyValueJson", true, 1, "Tabular_KeyValueGenerator")]
+    [InlineData("QueryStructuredPath", true, 2, "Structured_QueryExtraction")]
+    [InlineData("PickStructuredKeys", true, 2, "Structured_KeyFiltering")]
+    [InlineData("OmitStructuredKeys", true, 2, "Structured_KeyFiltering")]
+    [InlineData("TrimLines", false, 0, "Lines_FilterTrimNumber")]
+    [InlineData("ToCsv", false, 1, "Tabular_FullTableConversions")]
+    [InlineData("FormatJson", false, 2, "Structured_FormatMinify")]
+    [InlineData("SqlIn", false, 3, "Code_SqlQueries")]
+    [InlineData("CamelCase", false, 4, "CaseEnc_CaseConversions")]
+    public void ActionRegistry_ParameterizedVsDirectActions_ConfiguredAccurately(
+        string actionId,
+        bool expectedRequiresParams,
+        int expectedSidebarTab,
+        string expectedTargetSectionKey)
+    {
+        var action = ActionRegistry.AllActions.FirstOrDefault(a => a.Id == actionId);
+        Assert.NotNull(action);
+        Assert.Equal(expectedRequiresParams, action.RequiresParameters);
+        Assert.Equal(expectedSidebarTab, action.TargetSidebarTab);
+        Assert.Equal(expectedTargetSectionKey, action.TargetSectionKey);
+    }
+
+    [Fact]
+    public void MainViewModel_ExecuteActionItem_ParameterizedAction_NavigatesToTabAndRequestsHighlight()
+    {
+        var vm = new MainViewModel
+        {
+            IsRealTimeTransform = false,
+            InputText = "apple\nbanana\ncherry",
+            OutputText = "placeholder output",
+            SelectedSidebarTabIndex = 3,
+            IsCommandPaletteOpen = true
+        };
+
+        string? requestedHighlightKey = null;
+        vm.HighlightSectionRequested += (s, key) =>
+        {
+            requestedHighlightKey = key;
+        };
+
+        var joinLinesAction = ActionRegistry.AllActions.First(a => a.Id == "JoinLines");
+        Assert.True(joinLinesAction.RequiresParameters);
+
+        vm.ExecuteActionItemCommand.Execute(joinLinesAction);
+
+        // Should switch to tab 0 (Lines), request highlight on Lines_JoinLines, and close palette
+        Assert.Equal(0, vm.SelectedSidebarTabIndex);
+        Assert.Equal("Lines_JoinLines", requestedHighlightKey);
+        Assert.False(vm.IsCommandPaletteOpen);
+        // Should not have executed a transform or altered the output
+        Assert.Equal("placeholder output", vm.OutputText);
+    }
+
+    [Fact]
+    public void MainViewModel_ExecuteActionItem_DirectAction_ExecutesImmediatelyAndClosesPalette()
+    {
+        var vm = new MainViewModel
+        {
+            InputText = "apple\nbanana\ncherry",
+            SelectedSidebarTabIndex = 0,
+            IsCommandPaletteOpen = true
+        };
+
+        string? requestedHighlightKey = null;
+        vm.HighlightSectionRequested += (s, key) =>
+        {
+            requestedHighlightKey = key;
+        };
+
+        var sqlInAction = ActionRegistry.AllActions.First(a => a.Id == "SqlIn");
+        Assert.False(sqlInAction.RequiresParameters);
+
+        vm.ExecuteActionItemCommand.Execute(sqlInAction);
+
+        // Should execute transformation immediately, close palette, and not request highlight
+        Assert.False(vm.IsCommandPaletteOpen);
+        Assert.Null(requestedHighlightKey);
+        Assert.Equal("IN ('apple', 'banana', 'cherry')", vm.OutputText);
+    }
 }

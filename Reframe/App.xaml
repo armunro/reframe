@@ -196,7 +196,9 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Expander">
                             <Border Background="{TemplateBinding Background}"
-                                    BorderThickness="0"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4"
                                     SnapsToDevicePixels="True">
                                 <DockPanel>
                                     <ToggleButton x:Name="HeaderSite"

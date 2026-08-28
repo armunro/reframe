@@ -2062,6 +2062,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Icon / Emoji -->
@@ -2073,13 +2074,42 @@
                                         <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
 
+                                    <!-- Parameter Requirement Badge -->
+                                    <Border Grid.Column="2" BorderThickness="1" CornerRadius="3" Padding="5,1.5" VerticalAlignment="Center" Margin="0,0,6,0" ToolTip="{Binding ParameterRequirementToolTip}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#15007ACC"/>
+                                                <Setter Property="BorderBrush" Value="#40007ACC"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RequiresParameters}" Value="True">
+                                                        <Setter Property="Background" Value="#25D3869B"/>
+                                                        <Setter Property="BorderBrush" Value="#50D3869B"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding ParameterRequirementBadgeText}" FontSize="9.5">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AccentBlueBadgeBrush}"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RequiresParameters}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FFAF70"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+
                                     <!-- Category Badge -->
-                                    <Border Grid.Column="2" Background="#20FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="3" Padding="6,2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                    <Border Grid.Column="3" Background="#20FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="3" Padding="6,2" VerticalAlignment="Center" Margin="0,0,8,0">
                                         <TextBlock Text="{Binding Category}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                                     </Border>
 
                                     <!-- Shortcut Badge (if any) -->
-                                    <Border Grid.Column="3" Background="#33000000" BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="3" Padding="4,1" VerticalAlignment="Center"
+                                    <Border Grid.Column="4" Background="#33000000" BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="3" Padding="4,1" VerticalAlignment="Center"
                                             Visibility="{Binding Shortcut, Converter={StaticResource StringToVisibilityConverter}}">
                                         <TextBlock Text="{Binding Shortcut}" FontSize="9" FontFamily="Consolas" Foreground="#AAAAAA"/>
                                     </Border>

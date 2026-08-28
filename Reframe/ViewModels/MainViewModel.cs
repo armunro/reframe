@@ -1566,6 +1566,8 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand ApplyScriptPresetCommand { get; private set; } = null!;
     public ICommand LoadScriptSampleInputCommand { get; private set; } = null!;
 
+    public event EventHandler<string>? HighlightSectionRequested;
+
     public void UpdateActionSearchResults()
     {
         var matches = ActionRegistry.Search(_actionSearchQuery);
@@ -1583,6 +1585,19 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (item == null) return;
         IsCommandPaletteOpen = false;
+
+        if (item.RequiresParameters)
+        {
+            if (item.TargetSidebarTab.HasValue)
+            {
+                SelectedSidebarTabIndex = item.TargetSidebarTab.Value;
+            }
+            if (!string.IsNullOrEmpty(item.TargetSectionKey))
+            {
+                HighlightSectionRequested?.Invoke(this, item.TargetSectionKey);
+            }
+            return;
+        }
 
         if (item.TargetSidebarTab.HasValue)
         {

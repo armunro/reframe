@@ -16,7 +16,9 @@ public static class ActionRegistry
             description: "Join multiple lines into a single line with custom delimiters and quotes",
             keywords: ["join", "combine", "merge", "concat", "single line", "delimiter", "comma"],
             icon: "🔗",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_JoinLines"),
 
         new ActionItem(
             id: "QuoteLines",
@@ -25,7 +27,9 @@ public static class ActionRegistry
             description: "Wrap all lines in single quotes, double quotes, backticks, or brackets",
             keywords: ["quote", "wrap", "single quote", "double quote", "backtick", "brackets", "parens"],
             icon: "💬",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_QuoteLines"),
 
         new ActionItem(
             id: "SplitLine",
@@ -34,7 +38,9 @@ public static class ActionRegistry
             description: "Split delimited text or regex pattern into multiple lines",
             keywords: ["split", "delimit", "csv to lines", "tokenize", "break lines", "explode"],
             icon: "✂️",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_SplitDelimitedLine"),
 
         new ActionItem(
             id: "PrefixSuffix",
@@ -43,7 +49,9 @@ public static class ActionRegistry
             description: "Prepend prefix and/or append suffix to all lines",
             keywords: ["prefix", "suffix", "prepend", "append", "surround", "add to start", "add to end"],
             icon: "➕",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_PrefixSuffix"),
 
         new ActionItem(
             id: "ReplaceInLines",
@@ -52,7 +60,9 @@ public static class ActionRegistry
             description: "Search and replace text or regex patterns across lines",
             keywords: ["replace", "find", "search", "substitute", "regex"],
             icon: "🔍",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_FindReplace"),
 
         new ActionItem(
             id: "TrimLines",
@@ -61,7 +71,9 @@ public static class ActionRegistry
             description: "Trim whitespace, collapse spaces, and remove empty lines",
             keywords: ["trim", "clean", "strip", "whitespace", "empty lines", "collapse spaces"],
             icon: "🧹",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: false,
+            targetSectionKey: "Lines_FilterTrimNumber"),
 
         new ActionItem(
             id: "SortLines",
@@ -70,7 +82,9 @@ public static class ActionRegistry
             description: "Sort lines naturally, alphabetically, by length, or reversed",
             keywords: ["sort", "order", "alphabetical", "natural numeric", "ascending", "descending", "reverse"],
             icon: "🔀",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_SortDeduplicate"),
 
         new ActionItem(
             id: "SortAlphabetical",
@@ -79,7 +93,9 @@ public static class ActionRegistry
             description: "Sort lines alphabetically in ascending order",
             keywords: ["sort alphabetical", "sort a-z", "abc"],
             icon: "🔤",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: false,
+            targetSectionKey: "Lines_SortDeduplicate"),
 
         new ActionItem(
             id: "SortNatural",
@@ -88,7 +104,9 @@ public static class ActionRegistry
             description: "Sort lines with natural numeric ordering",
             keywords: ["sort natural", "natural sort", "numeric sort"],
             icon: "🔢",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: false,
+            targetSectionKey: "Lines_SortDeduplicate"),
 
         new ActionItem(
             id: "Deduplicate",
@@ -97,7 +115,9 @@ public static class ActionRegistry
             description: "Remove duplicate lines or filter for duplicates only",
             keywords: ["deduplicate", "distinct", "unique", "duplicates", "remove dupes", "dedup"],
             icon: "✨",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: false,
+            targetSectionKey: "Lines_SortDeduplicate"),
 
         new ActionItem(
             id: "NumberLines",
@@ -106,7 +126,9 @@ public static class ActionRegistry
             description: "Add line numbering with custom format and start index",
             keywords: ["number", "line number", "index", "counter", "enumerate"],
             icon: "🔢",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_FilterTrimNumber"),
 
         new ActionItem(
             id: "FilterLines",
@@ -115,7 +137,9 @@ public static class ActionRegistry
             description: "Keep or remove lines matching text or regular expression",
             keywords: ["filter", "grep", "match", "exclude", "include", "regex filter"],
             icon: "🎯",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_FilterTrimNumber"),
 
         new ActionItem(
             id: "RegexExtract",
@@ -124,7 +148,9 @@ public static class ActionRegistry
             description: "Extract matching regex patterns or capture groups into lines",
             keywords: ["regex", "extract", "capture", "pattern", "matches", "regexp"],
             icon: "⚡",
-            targetSidebarTab: 0),
+            targetSidebarTab: 0,
+            requiresParameters: true,
+            targetSectionKey: "Lines_FilterTrimNumber"),
 
         // -------------------------------------------------------------
         // Tabular & Table Conversions (Tab 1)
@@ -136,7 +162,9 @@ public static class ActionRegistry
             description: "Convert tabular dataset or markdown/html table into CSV",
             keywords: ["csv", "comma separated", "export csv", "table to csv"],
             icon: "📊",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToTsv",
@@ -145,7 +173,9 @@ public static class ActionRegistry
             description: "Convert tabular dataset or table into tab-separated values",
             keywords: ["tsv", "tab separated", "excel", "table to tsv"],
             icon: "📑",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToMarkdownTable",
@@ -154,7 +184,9 @@ public static class ActionRegistry
             description: "Convert data into aligned Markdown table with headers",
             keywords: ["markdown", "md table", "pipes", "table to markdown", "gfm"],
             icon: "📋",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToHtmlTable",
@@ -163,7 +195,9 @@ public static class ActionRegistry
             description: "Convert tabular data into clean HTML <table> structure",
             keywords: ["html", "table", "html table", "web table", "confluence"],
             icon: "🌐",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToJsonObjects",
@@ -172,7 +206,9 @@ public static class ActionRegistry
             description: "Convert table rows into JSON array of keyed objects",
             keywords: ["json", "json objects", "table to json", "array of objects", "records"],
             icon: "📦",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToJsonArrays",
@@ -181,7 +217,9 @@ public static class ActionRegistry
             description: "Convert table rows into 2D JSON array of value arrays",
             keywords: ["json arrays", "2d array", "matrix", "table to array"],
             icon: "📦",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToYaml",
@@ -190,7 +228,9 @@ public static class ActionRegistry
             description: "Convert table rows into YAML array of key-value objects",
             keywords: ["yaml", "table to yaml", "yaml objects", "yml"],
             icon: "📄",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToYamlArrays",
@@ -199,7 +239,9 @@ public static class ActionRegistry
             description: "Convert table rows into 2D YAML sequences",
             keywords: ["yaml sequences", "yaml arrays", "table to yaml"],
             icon: "📄",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_FullTableConversions"),
 
         new ActionItem(
             id: "ToSqlInserts",
@@ -208,7 +250,9 @@ public static class ActionRegistry
             description: "Generate SQL INSERT INTO statements from table data",
             keywords: ["sql", "insert", "sql inserts", "database", "insert into", "dml", "table"],
             icon: "🗄️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_SqlInsertStatements"),
 
         new ActionItem(
             id: "TransposeTable",
@@ -217,7 +261,9 @@ public static class ActionRegistry
             description: "Flip table rows and columns (transpose grid)",
             keywords: ["transpose", "swap", "rotate", "pivot", "rows to columns", "flip table"],
             icon: "🔄",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_TableStructureFilter"),
 
         new ActionItem(
             id: "ExtractColumn",
@@ -226,7 +272,9 @@ public static class ActionRegistry
             description: "Extract single selected column data into lines",
             keywords: ["extract column", "single column", "column values"],
             icon: "📑",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToCsv",
@@ -235,7 +283,9 @@ public static class ActionRegistry
             description: "Extract checked columns into CSV format",
             keywords: ["extract csv", "selected columns csv"],
             icon: "📊",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToTsv",
@@ -244,7 +294,9 @@ public static class ActionRegistry
             description: "Extract checked columns into TSV format",
             keywords: ["extract tsv", "selected columns tsv"],
             icon: "📑",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToMarkdown",
@@ -253,7 +305,9 @@ public static class ActionRegistry
             description: "Extract checked columns into Markdown table",
             keywords: ["extract markdown", "selected columns md"],
             icon: "📋",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToHtml",
@@ -262,7 +316,9 @@ public static class ActionRegistry
             description: "Extract checked columns into clean HTML table structure",
             keywords: ["extract html", "selected columns html", "extract html table"],
             icon: "🌐",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToJson",
@@ -271,7 +327,9 @@ public static class ActionRegistry
             description: "Extract checked columns into JSON objects",
             keywords: ["extract json", "selected columns json"],
             icon: "📦",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToYaml",
@@ -280,7 +338,9 @@ public static class ActionRegistry
             description: "Extract checked columns into YAML",
             keywords: ["extract yaml", "selected columns yaml"],
             icon: "📄",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToLines",
@@ -289,7 +349,9 @@ public static class ActionRegistry
             description: "Extract checked columns as joined lines",
             keywords: ["extract lines", "selected columns lines"],
             icon: "📐",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToSqlIn",
@@ -298,7 +360,9 @@ public static class ActionRegistry
             description: "Extract checked columns directly into SQL IN clause",
             keywords: ["extract sql in", "selected columns sql in", "sql clause"],
             icon: "🗄️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ExtractSelectedToCodeArray",
@@ -307,7 +371,9 @@ public static class ActionRegistry
             description: "Extract checked columns into C#/TS/Python array",
             keywords: ["extract code array", "selected columns code array"],
             icon: "💻",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "TableToKeyValueJson",
@@ -316,7 +382,9 @@ public static class ActionRegistry
             description: "Map Key Column to Value Column as JSON dictionary object",
             keywords: ["table to kv json", "map", "dictionary", "key value json"],
             icon: "🗺️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_KeyValueGenerator"),
 
         new ActionItem(
             id: "TableToKeyValueYaml",
@@ -325,7 +393,9 @@ public static class ActionRegistry
             description: "Map Key Column to Value Column as YAML dictionary mapping",
             keywords: ["table to kv yaml", "map", "yaml map", "key value yaml"],
             icon: "🗺️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_KeyValueGenerator"),
 
         new ActionItem(
             id: "TableToKeyValueQuery",
@@ -334,7 +404,9 @@ public static class ActionRegistry
             description: "Map Key Column to Value Column as URL query string",
             keywords: ["table to query string", "query string", "key value query"],
             icon: "🗺️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_KeyValueGenerator"),
 
         new ActionItem(
             id: "GenerateSurrogateHeaders",
@@ -343,7 +415,9 @@ public static class ActionRegistry
             description: "Auto-generate sequential Col1, Col2... header names",
             keywords: ["surrogate headers", "generate headers", "auto headers", "col1 col2"],
             icon: "🏷️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ApplySurrogateHeaders",
@@ -352,7 +426,9 @@ public static class ActionRegistry
             description: "Apply custom surrogate headers to table",
             keywords: ["apply headers", "override headers", "custom headers"],
             icon: "🏷️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "ClearSurrogateHeaders",
@@ -361,7 +437,9 @@ public static class ActionRegistry
             description: "Reset custom surrogate headers",
             keywords: ["clear headers", "reset headers"],
             icon: "🧹",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Tabular_ColumnSelectionExtract"),
 
         new ActionItem(
             id: "KeepOnlySelectedColumns",
@@ -370,7 +448,9 @@ public static class ActionRegistry
             description: "Remove unchecked columns from the current table",
             keywords: ["keep columns", "pick columns", "select columns"],
             icon: "✂️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_TableStructureFilter"),
 
         new ActionItem(
             id: "DropSelectedColumns",
@@ -379,7 +459,9 @@ public static class ActionRegistry
             description: "Remove checked columns from the current table",
             keywords: ["drop columns", "remove columns", "delete columns"],
             icon: "🗑️",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_TableStructureFilter"),
 
         new ActionItem(
             id: "SortTableByColumn",
@@ -388,7 +470,9 @@ public static class ActionRegistry
             description: "Sort entire tabular dataset by selected column",
             keywords: ["sort table", "order by column", "sort by column"],
             icon: "🔀",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_TableStructureFilter"),
 
         new ActionItem(
             id: "FilterTableByColumn",
@@ -397,7 +481,9 @@ public static class ActionRegistry
             description: "Filter rows where selected column matches query",
             keywords: ["filter table", "where column", "filter rows"],
             icon: "🎯",
-            targetSidebarTab: 1),
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_TableStructureFilter"),
 
         // -------------------------------------------------------------
         // Structured Data: JSON / YAML / XML (Tab 2)
@@ -409,7 +495,9 @@ public static class ActionRegistry
             description: "Format, indent, and prettify JSON text",
             keywords: ["format json", "beautify json", "prettify json", "indent json", "pretty json"],
             icon: "✨",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatMinify"),
 
         new ActionItem(
             id: "FormatXml",
@@ -418,7 +506,9 @@ public static class ActionRegistry
             description: "Format, indent, and prettify XML documents",
             keywords: ["format xml", "beautify xml", "prettify xml", "indent xml"],
             icon: "✨",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatMinify"),
 
         new ActionItem(
             id: "FormatYaml",
@@ -427,7 +517,9 @@ public static class ActionRegistry
             description: "Format, indent, and clean YAML documents",
             keywords: ["format yaml", "beautify yaml", "prettify yaml", "indent yaml"],
             icon: "✨",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatMinify"),
 
         new ActionItem(
             id: "MinifyJson",
@@ -436,7 +528,9 @@ public static class ActionRegistry
             description: "Strip whitespace and newlines for compact JSON payload",
             keywords: ["minify json", "compact json", "compress json", "strip json"],
             icon: "🗜️",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatMinify"),
 
         new ActionItem(
             id: "MinifyXml",
@@ -445,7 +539,9 @@ public static class ActionRegistry
             description: "Strip whitespace and newlines for compact XML document",
             keywords: ["minify xml", "compact xml", "compress xml", "strip xml"],
             icon: "🗜️",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatMinify"),
 
         new ActionItem(
             id: "JsonToYaml",
@@ -454,7 +550,9 @@ public static class ActionRegistry
             description: "Convert JSON document to formatted YAML",
             keywords: ["json to yaml", "json2yaml", "json yaml converter", "yml"],
             icon: "🔄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "YamlToJson",
@@ -463,7 +561,9 @@ public static class ActionRegistry
             description: "Convert YAML document to formatted JSON",
             keywords: ["yaml to json", "yaml2json", "yaml json converter"],
             icon: "🔄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "XmlToJson",
@@ -472,7 +572,9 @@ public static class ActionRegistry
             description: "Convert XML document to structured JSON (preserves @attributes)",
             keywords: ["xml to json", "xml2json", "convert xml"],
             icon: "🔄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "JsonToXml",
@@ -481,7 +583,9 @@ public static class ActionRegistry
             description: "Convert JSON document to structured XML",
             keywords: ["json to xml", "json2xml", "convert json to xml"],
             icon: "🔄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "XmlToYaml",
@@ -490,7 +594,9 @@ public static class ActionRegistry
             description: "Convert XML document to formatted YAML",
             keywords: ["xml to yaml", "xml2yaml"],
             icon: "🔄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "YamlToXml",
@@ -499,7 +605,9 @@ public static class ActionRegistry
             description: "Convert YAML document to structured XML",
             keywords: ["yaml to xml", "yaml2xml"],
             icon: "🔄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "StructuredToCsv",
@@ -508,7 +616,9 @@ public static class ActionRegistry
             description: "Convert JSON/YAML/XML records into CSV format",
             keywords: ["structured to csv", "json to csv", "xml to csv", "yaml to csv"],
             icon: "📊",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "StructuredToTsv",
@@ -517,7 +627,9 @@ public static class ActionRegistry
             description: "Convert JSON/YAML/XML records into TSV format",
             keywords: ["structured to tsv", "json to tsv", "xml to tsv", "yaml to tsv"],
             icon: "📑",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "StructuredToMarkdown",
@@ -526,7 +638,9 @@ public static class ActionRegistry
             description: "Convert JSON/YAML/XML records into Markdown table",
             keywords: ["structured to markdown", "json to markdown", "json to table"],
             icon: "📋",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "StructuredToHtml",
@@ -535,7 +649,9 @@ public static class ActionRegistry
             description: "Convert JSON/YAML/XML records into HTML table",
             keywords: ["structured to html", "json to html", "json to html table", "xml to html", "yaml to html"],
             icon: "🌐",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_FormatConversions"),
 
         new ActionItem(
             id: "FlattenStructured",
@@ -544,7 +660,9 @@ public static class ActionRegistry
             description: "Flatten nested structure to dot-notation / bracket paths (a.b[0].c = val)",
             keywords: ["flatten", "dot notation", "paths", "flatten json", "flatten xml"],
             icon: "🌲",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_SortFlatten"),
 
         new ActionItem(
             id: "FlattenToFlatJson",
@@ -553,7 +671,9 @@ public static class ActionRegistry
             description: "Flatten nested structure to flat JSON object with dot-keys",
             keywords: ["flatten json", "flat json", "dot keys"],
             icon: "📦",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_SortFlatten"),
 
         new ActionItem(
             id: "UnflattenToJson",
@@ -562,7 +682,9 @@ public static class ActionRegistry
             description: "Reconstruct nested JSON structure from dot-notation paths",
             keywords: ["unflatten", "unflatten json", "expand paths", "reconstruct"],
             icon: "🌳",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_SortFlatten"),
 
         new ActionItem(
             id: "UnflattenToYaml",
@@ -571,7 +693,9 @@ public static class ActionRegistry
             description: "Reconstruct nested YAML structure from dot-notation paths",
             keywords: ["unflatten yaml", "expand paths yaml"],
             icon: "🌳",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_SortFlatten"),
 
         new ActionItem(
             id: "SortStructuredKeysAsc",
@@ -580,7 +704,9 @@ public static class ActionRegistry
             description: "Recursively sort all object/mapping keys alphabetically ascending",
             keywords: ["sort keys", "deep sort", "alphabetical keys", "sort json keys", "sort yaml keys"],
             icon: "🔤",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_SortFlatten"),
 
         new ActionItem(
             id: "SortStructuredKeysDesc",
@@ -589,7 +715,9 @@ public static class ActionRegistry
             description: "Recursively sort all object/mapping keys alphabetically descending",
             keywords: ["sort keys desc", "deep sort desc", "reverse sort keys"],
             icon: "🔤",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_SortFlatten"),
 
         new ActionItem(
             id: "QueryStructuredPath",
@@ -598,7 +726,9 @@ public static class ActionRegistry
             description: "Evaluate JSONPath expression (e.g. $.store.books[*].title)",
             keywords: ["jsonpath", "query json", "json selector", "extract jsonpath"],
             icon: "🔍",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: true,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "QueryXPath",
@@ -607,7 +737,9 @@ public static class ActionRegistry
             description: "Evaluate full XPath query across XML/JSON/YAML documents",
             keywords: ["xpath", "xml query", "xpath expression", "xpath filter", "query xml"],
             icon: "🔍",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: true,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "ExtractXPathValues",
@@ -616,7 +748,9 @@ public static class ActionRegistry
             description: "Extract matched XPath inner values/text into clean line list",
             keywords: ["xpath values", "extract xpath", "xpath text"],
             icon: "📝",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: true,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "ExtractXPathAttributes",
@@ -625,7 +759,9 @@ public static class ActionRegistry
             description: "Extract matched XPath attributes as @attr=\"value\" lines",
             keywords: ["xpath attributes", "extract attributes", "@attr"],
             icon: "🏷️",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: true,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "ExtractStructuredPaths",
@@ -634,7 +770,9 @@ public static class ActionRegistry
             description: "Extract list of all distinct paths/JSONPaths across document",
             keywords: ["all paths", "extract paths", "json paths list"],
             icon: "🗺️",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "ExtractStructuredKeys",
@@ -643,7 +781,9 @@ public static class ActionRegistry
             description: "Extract list of all unique property and element names",
             keywords: ["all keys", "extract keys", "property names", "unique keys"],
             icon: "🔑",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "ExtractStructuredValues",
@@ -652,7 +792,9 @@ public static class ActionRegistry
             description: "Extract list of all scalar values into lines",
             keywords: ["all values", "extract values", "scalar values"],
             icon: "📄",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_QueryExtraction"),
 
         new ActionItem(
             id: "StructuredCamelCase",
@@ -661,7 +803,9 @@ public static class ActionRegistry
             description: "Recursively convert all object property keys to camelCase",
             keywords: ["camelcase keys", "json camelcase", "casing keys"],
             icon: "🔡",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_KeyCasing"),
 
         new ActionItem(
             id: "StructuredPascalCase",
@@ -670,7 +814,9 @@ public static class ActionRegistry
             description: "Recursively convert all object property keys to PascalCase",
             keywords: ["pascalcase keys", "json pascalcase"],
             icon: "🔠",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_KeyCasing"),
 
         new ActionItem(
             id: "StructuredSnakeCase",
@@ -679,7 +825,9 @@ public static class ActionRegistry
             description: "Recursively convert all object property keys to snake_case",
             keywords: ["snakecase keys", "json snakecase"],
             icon: "🐍",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_KeyCasing"),
 
         new ActionItem(
             id: "StructuredKebabCase",
@@ -688,7 +836,9 @@ public static class ActionRegistry
             description: "Recursively convert all object property keys to kebab-case",
             keywords: ["kebabcase keys", "json kebabcase"],
             icon: "🍢",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_KeyCasing"),
 
         new ActionItem(
             id: "StructuredConstantCase",
@@ -697,7 +847,9 @@ public static class ActionRegistry
             description: "Recursively convert all object property keys to CONSTANT_CASE",
             keywords: ["constantcase keys", "screaming snake keys"],
             icon: "📢",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_KeyCasing"),
 
         new ActionItem(
             id: "PickStructuredKeys",
@@ -706,7 +858,9 @@ public static class ActionRegistry
             description: "Keep only specified keys across nested objects",
             keywords: ["pick keys", "keep keys", "whitelist keys", "filter keys"],
             icon: "🎯",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: true,
+            targetSectionKey: "Structured_KeyFiltering"),
 
         new ActionItem(
             id: "OmitStructuredKeys",
@@ -715,7 +869,9 @@ public static class ActionRegistry
             description: "Strip specified sensitive or unwanted keys across objects",
             keywords: ["omit keys", "remove keys", "blacklist keys", "strip keys", "censor"],
             icon: "🚫",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: true,
+            targetSectionKey: "Structured_KeyFiltering"),
 
         new ActionItem(
             id: "RemoveNullsAndEmpty",
@@ -724,7 +880,9 @@ public static class ActionRegistry
             description: "Recursively strip null values, empty strings, and empty objects",
             keywords: ["remove nulls", "strip null", "clean json", "remove empty"],
             icon: "🧹",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_KeyFiltering"),
 
         new ActionItem(
             id: "ToTypeScriptInterfaces",
@@ -733,7 +891,9 @@ public static class ActionRegistry
             description: "Infer typed TypeScript interface definitions from JSON/YAML",
             keywords: ["typescript", "ts", "interface", "type", "d.ts", "types", "generate ts"],
             icon: "🟦",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_CodeSchemaGen"),
 
         new ActionItem(
             id: "ToCSharpClasses",
@@ -742,7 +902,9 @@ public static class ActionRegistry
             description: "Infer typed C# class definitions with properties from JSON/YAML",
             keywords: ["c#", "csharp", "poco", "class", "dto", "model", "generate c#", "c# classes"],
             icon: "🟩",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_CodeSchemaGen"),
 
         new ActionItem(
             id: "ToJsonSchema",
@@ -751,7 +913,9 @@ public static class ActionRegistry
             description: "Infer draft-07 JSON Schema definition from structured data",
             keywords: ["json schema", "schema", "validation", "draft-07"],
             icon: "📐",
-            targetSidebarTab: 2),
+            targetSidebarTab: 2,
+            requiresParameters: false,
+            targetSectionKey: "Structured_CodeSchemaGen"),
 
         // -------------------------------------------------------------
         // Code & Developer Tools (Tab 3)
@@ -763,7 +927,9 @@ public static class ActionRegistry
             description: "Format items into single-line SQL IN ('a', 'b', 'c') clause",
             keywords: ["sql", "in", "sql in", "where in", "sql clause", "database query"],
             icon: "🗄️",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_SqlQueries"),
 
         new ActionItem(
             id: "SqlInMultiLine",
@@ -772,7 +938,9 @@ public static class ActionRegistry
             description: "Format items into indented multi-line SQL IN clause",
             keywords: ["sql in multiline", "sql multiline", "where in multi"],
             icon: "🗄️",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_SqlQueries"),
 
         new ActionItem(
             id: "ToCSharpArray",
@@ -781,7 +949,9 @@ public static class ActionRegistry
             description: "Convert lines into C# new string[] { ... } literal",
             keywords: ["c# array", "csharp array", "string array", "code array"],
             icon: "💻",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_CodeArrayLiterals"),
 
         new ActionItem(
             id: "ToCSharpList",
@@ -790,7 +960,9 @@ public static class ActionRegistry
             description: "Convert lines into C# new List<string> { ... } literal",
             keywords: ["c# list", "csharp list", "list string"],
             icon: "💻",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_CodeArrayLiterals"),
 
         new ActionItem(
             id: "ToTypeScriptArray",
@@ -799,7 +971,9 @@ public static class ActionRegistry
             description: "Convert lines into TypeScript const items: string[] = [...]",
             keywords: ["typescript array", "ts array", "js array", "javascript array"],
             icon: "💻",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_CodeArrayLiterals"),
 
         new ActionItem(
             id: "ToPythonList",
@@ -808,7 +982,9 @@ public static class ActionRegistry
             description: "Convert lines into Python items = [...] list literal",
             keywords: ["python list", "py list", "python array"],
             icon: "💻",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_CodeArrayLiterals"),
 
         new ActionItem(
             id: "ToJsonArray",
@@ -817,7 +993,9 @@ public static class ActionRegistry
             description: "Convert lines into standard JSON [\"a\", \"b\"] array",
             keywords: ["json array", "json list", "to json array"],
             icon: "📦",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_CodeArrayLiterals"),
 
         new ActionItem(
             id: "ToYamlArray",
@@ -826,7 +1004,9 @@ public static class ActionRegistry
             description: "Convert lines into YAML - item sequence list",
             keywords: ["yaml list", "yaml sequence", "to yaml array", "yaml array"],
             icon: "📄",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_CodeArrayLiterals"),
 
         new ActionItem(
             id: "QueryStringToKv",
@@ -835,7 +1015,9 @@ public static class ActionRegistry
             description: "Parse URL query string parameters into key=value lines",
             keywords: ["query string to kv", "url params", "query params", "decode query"],
             icon: "🔗",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_WebParameters"),
 
         new ActionItem(
             id: "KvToQueryString",
@@ -844,7 +1026,9 @@ public static class ActionRegistry
             description: "Encode key=value lines into URL query string (?k=v&...)",
             keywords: ["kv to query string", "url encode query", "params to url"],
             icon: "🔗",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_WebParameters"),
 
         new ActionItem(
             id: "KvToJson",
@@ -853,7 +1037,9 @@ public static class ActionRegistry
             description: "Convert key=value lines into JSON dictionary object",
             keywords: ["kv to json", "key value to json", "properties to json"],
             icon: "📦",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_WebParameters"),
 
         new ActionItem(
             id: "KvToYaml",
@@ -862,7 +1048,9 @@ public static class ActionRegistry
             description: "Convert key=value lines into YAML mapping",
             keywords: ["kv to yaml", "key value to yaml"],
             icon: "📄",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false,
+            targetSectionKey: "Code_WebParameters"),
 
         new ActionItem(
             id: "ExtractEmails",
@@ -871,7 +1059,8 @@ public static class ActionRegistry
             description: "Find and extract all email addresses from text",
             keywords: ["emails", "extract email", "mail", "find emails", "addresses"],
             icon: "✉️",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false),
 
         new ActionItem(
             id: "ExtractUrls",
@@ -880,7 +1069,8 @@ public static class ActionRegistry
             description: "Find and extract all web URLs and links from text",
             keywords: ["urls", "links", "extract urls", "http", "https", "web"],
             icon: "🌐",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false),
 
         new ActionItem(
             id: "ExtractIps",
@@ -889,7 +1079,8 @@ public static class ActionRegistry
             description: "Find and extract all IPv4 IP addresses from text",
             keywords: ["ip", "ipv4", "extract ip", "network", "ip addresses"],
             icon: "🌐",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false),
 
         new ActionItem(
             id: "ExtractGuids",
@@ -898,7 +1089,8 @@ public static class ActionRegistry
             description: "Find and extract all GUIDs / UUIDs from text",
             keywords: ["guid", "uuid", "extract guid", "unique identifier"],
             icon: "🆔",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false),
 
         new ActionItem(
             id: "ExtractNumbers",
@@ -907,7 +1099,8 @@ public static class ActionRegistry
             description: "Find and extract all integer and decimal numbers from text",
             keywords: ["numbers", "extract numbers", "digits", "integers", "decimals"],
             icon: "🔢",
-            targetSidebarTab: 3),
+            targetSidebarTab: 3,
+            requiresParameters: false),
 
         // -------------------------------------------------------------
         // Case Conversion (Tab 4)
@@ -919,7 +1112,9 @@ public static class ActionRegistry
             description: "Convert words/lines to camelCase (e.g. myVariableName)",
             keywords: ["camelcase", "camel", "casing", "variable name"],
             icon: "🔡",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "PascalCase",
@@ -928,7 +1123,9 @@ public static class ActionRegistry
             description: "Convert words/lines to PascalCase (e.g. MyClassName)",
             keywords: ["pascalcase", "pascal", "title case", "type name"],
             icon: "🔠",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "SnakeCase",
@@ -937,7 +1134,9 @@ public static class ActionRegistry
             description: "Convert words/lines to snake_case (e.g. my_variable_name)",
             keywords: ["snakecase", "snake", "underscore"],
             icon: "🐍",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "KebabCase",
@@ -946,7 +1145,9 @@ public static class ActionRegistry
             description: "Convert words/lines to kebab-case (e.g. my-css-class)",
             keywords: ["kebabcase", "kebab", "dash", "hyphen"],
             icon: "🍢",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "ConstantCase",
@@ -955,7 +1156,9 @@ public static class ActionRegistry
             description: "Convert words/lines to CONSTANT_CASE (e.g. MAX_BUFFER_SIZE)",
             keywords: ["constantcase", "screaming snake", "uppercase snake", "constants"],
             icon: "📢",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "TitleCase",
@@ -964,7 +1167,9 @@ public static class ActionRegistry
             description: "Capitalize the first letter of each word",
             keywords: ["titlecase", "title case", "capitalize words", "heading"],
             icon: "📝",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "UpperCase",
@@ -973,7 +1178,9 @@ public static class ActionRegistry
             description: "Convert all characters to uppercase",
             keywords: ["uppercase", "all caps", "upper", "caps"],
             icon: "🔠",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         new ActionItem(
             id: "LowerCase",
@@ -982,7 +1189,9 @@ public static class ActionRegistry
             description: "Convert all characters to lowercase",
             keywords: ["lowercase", "all lower", "lower", "small letters"],
             icon: "🔡",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_CaseConversions"),
 
         // -------------------------------------------------------------
         // Encodings & Formatting (Tab 4)
@@ -994,7 +1203,9 @@ public static class ActionRegistry
             description: "Encode special characters for URLs (%20, etc.)",
             keywords: ["url encode", "percent encode", "uri encode", "escape url"],
             icon: "🔒",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "UrlDecode",
@@ -1003,7 +1214,9 @@ public static class ActionRegistry
             description: "Decode percent-encoded URL text",
             keywords: ["url decode", "percent decode", "uri decode", "unescape url"],
             icon: "🔓",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "Base64Encode",
@@ -1012,7 +1225,9 @@ public static class ActionRegistry
             description: "Encode text into Base64 format",
             keywords: ["base64", "b64", "base64 encode", "b64 encode", "binary to base64"],
             icon: "🔒",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "Base64Decode",
@@ -1021,7 +1236,9 @@ public static class ActionRegistry
             description: "Decode Base64 string to plain text (with auto-padding)",
             keywords: ["base64", "b64", "base64 decode", "b64 decode", "decode base64"],
             icon: "🔓",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "HtmlEncode",
@@ -1030,7 +1247,9 @@ public static class ActionRegistry
             description: "Encode HTML special characters (&lt;, &gt;, &amp;, etc.)",
             keywords: ["html encode", "html entities", "escape html"],
             icon: "🌐",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "HtmlDecode",
@@ -1039,7 +1258,9 @@ public static class ActionRegistry
             description: "Decode HTML entities into characters",
             keywords: ["html decode", "unescape html", "decode html"],
             icon: "🌐",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "EscapeCSharp",
@@ -1048,7 +1269,9 @@ public static class ActionRegistry
             description: "Escape special characters (\\n, \\r, \\t, \\\") for C# string literals",
             keywords: ["escape c#", "escape csharp", "escape string", "c# literal"],
             icon: "💻",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "UnescapeCSharp",
@@ -1057,7 +1280,9 @@ public static class ActionRegistry
             description: "Unescape C# string literal backslashes",
             keywords: ["unescape c#", "unescape csharp", "unescape string"],
             icon: "💻",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "JwtDecode",
@@ -1066,7 +1291,9 @@ public static class ActionRegistry
             description: "Inspect JSON Web Token Header, Payload, and Signature",
             keywords: ["jwt", "jwt decode", "json web token", "bearer token", "oauth", "token"],
             icon: "🎟️",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         new ActionItem(
             id: "Beautify",
@@ -1075,7 +1302,9 @@ public static class ActionRegistry
             description: "Auto-detect and format JSON, XML, HTML, or YAML",
             keywords: ["beautify", "format", "prettify", "auto format", "indent"],
             icon: "✨",
-            targetSidebarTab: 4),
+            targetSidebarTab: 4,
+            requiresParameters: false,
+            targetSectionKey: "CaseEnc_EncodingsEscapes"),
 
         // -------------------------------------------------------------
         // Navigation, Timeline & Productivity Tools
@@ -1232,7 +1461,9 @@ public static class ActionRegistry
             description: "Open Recipes and Visual Pipeline builder tab in sidebar",
             keywords: ["recipes tab", "pipelines tab", "custom presets", "visual pipeline", "switch to recipes"],
             icon: "⚡",
-            targetSidebarTab: 5),
+            targetSidebarTab: 5,
+            requiresParameters: false,
+            targetSectionKey: "Recipes_PipelineBuilder"),
 
         new ActionItem(
             id: "ExecuteActivePipeline",
@@ -1241,7 +1472,10 @@ public static class ActionRegistry
             description: "Run all enabled steps in the visual pipeline against current input",
             keywords: ["run pipeline", "execute pipeline", "chain", "pipeline"],
             icon: "▶",
-            shortcut: "F5"),
+            shortcut: "F5",
+            targetSidebarTab: 5,
+            requiresParameters: false,
+            targetSectionKey: "Recipes_PipelineBuilder"),
 
         new ActionItem(
             id: "ShowHistoryTab",

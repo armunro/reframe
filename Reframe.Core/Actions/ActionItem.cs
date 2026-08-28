@@ -14,6 +14,13 @@ public class ActionItem
     public string Icon { get; init; } = "⚡";
     public string? Shortcut { get; init; }
     public int? TargetSidebarTab { get; init; }
+    public bool RequiresParameters { get; init; } = false;
+    public string? TargetSectionKey { get; init; }
+
+    public string ParameterRequirementBadgeText => RequiresParameters ? "⚙ Parameters" : "⚡ Direct";
+    public string ParameterRequirementToolTip => RequiresParameters
+        ? "Requires parameters configured in the transform pane before running"
+        : "Runs immediately without additional parameters";
 
     public ActionItem()
     {
@@ -27,7 +34,9 @@ public class ActionItem
         IEnumerable<string>? keywords = null,
         string icon = "⚡",
         string? shortcut = null,
-        int? targetSidebarTab = null)
+        int? targetSidebarTab = null,
+        bool requiresParameters = false,
+        string? targetSectionKey = null)
     {
         Id = id;
         Title = title;
@@ -37,6 +46,8 @@ public class ActionItem
         Icon = icon;
         Shortcut = shortcut;
         TargetSidebarTab = targetSidebarTab;
+        RequiresParameters = requiresParameters;
+        TargetSectionKey = targetSectionKey;
     }
 
     public override string ToString() => $"{Title} [{Category}]";

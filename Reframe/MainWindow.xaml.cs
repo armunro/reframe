@@ -33,6 +33,7 @@ public partial class MainWindow : FluentWindow
             if (e.OldValue is MainViewModel oldVm)
             {
                 oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+                oldVm.HighlightSectionRequested -= OnHighlightSectionRequested;
                 oldVm.ClipboardWatcher = null;
             }
             if (e.NewValue is MainViewModel newVm)
@@ -71,6 +72,7 @@ public partial class MainWindow : FluentWindow
     private void AttachViewModel(MainViewModel vm)
     {
         vm.PropertyChanged += OnViewModelPropertyChanged;
+        vm.HighlightSectionRequested += OnHighlightSectionRequested;
         RebuildDataGridColumns(vm.PreviewDataTable);
 
         if (_clipboardWatcher == null)
@@ -92,6 +94,14 @@ public partial class MainWindow : FluentWindow
         }
 
         vm.ClipboardWatcher = _clipboardWatcher;
+    }
+
+    private void OnHighlightSectionRequested(object? sender, string sectionKey)
+    {
+        if (!string.IsNullOrEmpty(sectionKey))
+        {
+            Reframe.Controls.SectionState.Highlight(sectionKey);
+        }
     }
 
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
