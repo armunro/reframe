@@ -7,7 +7,7 @@
         <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reframe</RootNamespace>
-        <ApplicationIcon>..\..\sandbox\Reframe\favicon.ico</ApplicationIcon>
+        <ApplicationIcon>favicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
