@@ -31,17 +31,17 @@ public class BindableTextEditor : TextEditor
 
     public BindableTextEditor()
     {
-        // Setup Dark Neutral Gray Theme Defaults rgb(21, 22, 26) / #15161A
-        Background = new SolidColorBrush(Color.FromRgb(0x15, 0x16, 0x1A));
-        Foreground = new SolidColorBrush(Color.FromRgb(0xDC, 0xE1, 0xEB));
-        LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x60, 0x68, 0x7A));
+        // Setup Dark Neutral Gray Theme Defaults rgb(24, 24, 24) / #181818
+        Background = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x18));
+        Foreground = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
+        LineNumbersForeground = new SolidColorBrush(Color.FromRgb(0x68, 0x68, 0x68));
         ShowLineNumbers = true;
         FontFamily = new FontFamily("Consolas, Cascadia Code, JetBrains Mono, Courier New, monospace");
         FontSize = 13;
         BorderThickness = new Thickness(0);
         Padding = new Thickness(8);
 
-        // Configure TextArea colors for Dark Navy Theme
+        // Configure TextArea colors for Dark Gray Theme
         if (TextArea != null)
         {
             TextArea.SelectionBrush = new SolidColorBrush(Color.FromArgb(0x66, 0x46, 0x5E, 0x8A));

@@ -11,45 +11,45 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- ======================================================== -->
-            <!-- Desaturated Dark Navy Palette (Base: rgb(30, 32, 48) / #1E2030) -->
+            <!-- Neutral Dark Charcoal Gray Palette -->
             <!-- ======================================================== -->
-            <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="#181924" />
-            <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="#181924" />
-            <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="#181924" />
-            <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="#15161F" />
-            <SolidColorBrush x:Key="SolidBackgroundFillColorQuarternaryBrush" Color="#121319" />
+            <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="#1E1E1E" />
+            <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="#1E1E1E" />
+            <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="#1E1E1E" />
+            <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="#181818" />
+            <SolidColorBrush x:Key="SolidBackgroundFillColorQuarternaryBrush" Color="#141414" />
 
             <!-- Surface Brushes -->
-            <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#1E2030" />
-            <SolidColorBrush x:Key="SurfaceHeaderBackgroundBrush" Color="#242735" />
-            <SolidColorBrush x:Key="SurfaceDarkBackgroundBrush" Color="#181924" />
-            <SolidColorBrush x:Key="SurfaceCardBackgroundBrush" Color="#242735" />
-            <SolidColorBrush x:Key="EditorBackgroundBrush" Color="#15161A" />
+            <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#222222" />
+            <SolidColorBrush x:Key="SurfaceHeaderBackgroundBrush" Color="#282828" />
+            <SolidColorBrush x:Key="SurfaceDarkBackgroundBrush" Color="#1A1A1A" />
+            <SolidColorBrush x:Key="SurfaceCardBackgroundBrush" Color="#282828" />
+            <SolidColorBrush x:Key="EditorBackgroundBrush" Color="#181818" />
 
-            <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#242735" />
-            <SolidColorBrush x:Key="CardBackgroundFillColorSecondaryBrush" Color="#1E2030" />
-            <SolidColorBrush x:Key="CardBackgroundFillColorTertiaryBrush" Color="#181924" />
+            <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#282828" />
+            <SolidColorBrush x:Key="CardBackgroundFillColorSecondaryBrush" Color="#222222" />
+            <SolidColorBrush x:Key="CardBackgroundFillColorTertiaryBrush" Color="#1A1A1A" />
 
-            <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="#232635" />
-            <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="#282C3C" />
-            <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="#1E212E" />
-            <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="#181A24" />
+            <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="#2A2A2A" />
+            <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="#303030" />
+            <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="#242424" />
+            <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="#1C1C1C" />
 
-            <SolidColorBrush x:Key="ControlStrongFillColorDefaultBrush" Color="#2C3142" />
+            <SolidColorBrush x:Key="ControlStrongFillColorDefaultBrush" Color="#363636" />
 
-            <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#343849" />
-            <SolidColorBrush x:Key="ControlStrokeColorSecondaryBrush" Color="#465472" />
-            <SolidColorBrush x:Key="ControlElevationBorderBrush" Color="#343849" />
-            <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#343849" />
-            <SolidColorBrush x:Key="SurfaceStrokeColorDefaultBrush" Color="#343849" />
-            <SolidColorBrush x:Key="DividerStrokeColorDefaultBrush" Color="#2B2E3C" />
+            <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#3C3C3C" />
+            <SolidColorBrush x:Key="ControlStrokeColorSecondaryBrush" Color="#505050" />
+            <SolidColorBrush x:Key="ControlElevationBorderBrush" Color="#3C3C3C" />
+            <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#3C3C3C" />
+            <SolidColorBrush x:Key="SurfaceStrokeColorDefaultBrush" Color="#3C3C3C" />
+            <SolidColorBrush x:Key="DividerStrokeColorDefaultBrush" Color="#333333" />
 
-            <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#DCE1EB" />
-            <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#A6ADB9" />
-            <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#727888" />
-            <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="#525866" />
-            <SolidColorBrush x:Key="MutedTextBrush" Color="#828896" />
-            <SolidColorBrush x:Key="DimTextBrush" Color="#646A78" />
+            <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#E0E0E0" />
+            <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#B0B0B0" />
+            <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#808080" />
+            <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="#585858" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#888888" />
+            <SolidColorBrush x:Key="DimTextBrush" Color="#686868" />
 
             <!-- Calmer Slate-Blue Accents -->
             <SolidColorBrush x:Key="SystemAccentColorBrush" Color="#668BC4" />
@@ -62,17 +62,17 @@
             <SolidColorBrush x:Key="AccentBlueBadgeBrush" Color="#007ACC" />
 
             <!-- Tab Brushes -->
-            <SolidColorBrush x:Key="TabStripBackgroundBrush" Color="#181A24" />
-            <SolidColorBrush x:Key="TabItemUnselectedBackgroundBrush" Color="#202330" />
-            <SolidColorBrush x:Key="TabItemHoverBackgroundBrush" Color="#272B3B" />
-            <SolidColorBrush x:Key="TabItemSelectedBackgroundBrush" Color="#242735" />
+            <SolidColorBrush x:Key="TabStripBackgroundBrush" Color="#1A1A1A" />
+            <SolidColorBrush x:Key="TabItemUnselectedBackgroundBrush" Color="#222222" />
+            <SolidColorBrush x:Key="TabItemHoverBackgroundBrush" Color="#2E2E2E" />
+            <SolidColorBrush x:Key="TabItemSelectedBackgroundBrush" Color="#282828" />
 
             <!-- DataGrid Banded Row & Contrast Brushes -->
-            <SolidColorBrush x:Key="DataGridRowBackgroundBrush" Color="#181A24" />
-            <SolidColorBrush x:Key="DataGridAlternatingRowBackgroundBrush" Color="#282D42" />
-            <SolidColorBrush x:Key="DataGridHeaderBackgroundBrush" Color="#232738" />
-            <SolidColorBrush x:Key="DataGridSelectedRowBackgroundBrush" Color="#3A4E70" />
-            <SolidColorBrush x:Key="DataGridHoverRowBackgroundBrush" Color="#2F364B" />
+            <SolidColorBrush x:Key="DataGridRowBackgroundBrush" Color="#1E1E1E" />
+            <SolidColorBrush x:Key="DataGridAlternatingRowBackgroundBrush" Color="#252525" />
+            <SolidColorBrush x:Key="DataGridHeaderBackgroundBrush" Color="#2A2A2A" />
+            <SolidColorBrush x:Key="DataGridSelectedRowBackgroundBrush" Color="#373D48" />
+            <SolidColorBrush x:Key="DataGridHoverRowBackgroundBrush" Color="#2E2E2E" />
 
             <!-- Custom Mono Font for Developer Text Boxes -->
             <FontFamily x:Key="EditorFontFamily">Cascadia Code, Consolas, Courier New, monospace</FontFamily>
