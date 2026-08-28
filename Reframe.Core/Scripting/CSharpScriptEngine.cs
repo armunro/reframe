@@ -31,6 +31,8 @@ public class CSharpScriptEngine
 
     public CSharpScriptEngine()
     {
+        var references = GetDefaultReferences();
+
         _scriptOptions = ScriptOptions.Default
             .WithImports(
                 "System",
@@ -42,15 +44,96 @@ public class CSharpScriptEngine
                 "System.Text.Json",
                 "System.Globalization",
                 "System.IO")
-            .WithReferences(
-                typeof(object).Assembly,
-                typeof(Enumerable).Assembly,
-                typeof(Regex).Assembly,
-                typeof(JsonSerializer).Assembly,
-                typeof(ScriptGlobals).Assembly,
-                Assembly.Load("System.Runtime"),
-                Assembly.Load("System.Collections"),
-                Assembly.Load("System.Linq.Expressions"));
+            .WithReferences(references);
+    }
+
+    private static List<MetadataReference> GetDefaultReferences()
+    {
+        var assemblies = new HashSet<Assembly>
+        {
+            typeof(object).Assembly,
+            typeof(Enumerable).Assembly,
+            typeof(Regex).Assembly,
+            typeof(JsonSerializer).Assembly,
+            typeof(ScriptGlobals).Assembly
+        };
+
+        void TryAddAssembly(string name)
+        {
+            try
+            {
+                var asm = Assembly.Load(name);
+                if (asm != null) assemblies.Add(asm);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        TryAddAssembly("System.Runtime");
+        TryAddAssembly("System.Collections");
+        TryAddAssembly("System.Linq");
+        TryAddAssembly("System.Linq.Expressions");
+        TryAddAssembly("System.Text.RegularExpressions");
+        TryAddAssembly("System.Text.Json");
+        TryAddAssembly("System.Globalization");
+        TryAddAssembly("System.IO");
+        TryAddAssembly("netstandard");
+
+        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (!asm.IsDynamic && !string.IsNullOrEmpty(asm.FullName))
+            {
+                assemblies.Add(asm);
+            }
+        }
+
+        var references = new List<MetadataReference>();
+        foreach (var assembly in assemblies)
+        {
+            var reference = CreateMetadataReference(assembly);
+            if (reference != null)
+            {
+                references.Add(reference);
+            }
+        }
+
+        return references;
+    }
+
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("SingleFile", "IL3000:AvoidAccessingAssemblyLocation",
+        Justification = "Assembly.Location is checked with fallback to in-memory raw metadata for single-file publishing.")]
+    private static MetadataReference? CreateMetadataReference(Assembly assembly)
+    {
+        if (assembly.IsDynamic)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(assembly.Location))
+        {
+            try
+            {
+                return MetadataReference.CreateFromFile(assembly.Location);
+            }
+            catch
+            {
+                // Fall back to raw metadata if location fails
+            }
+        }
+
+        unsafe
+        {
+            if (System.Reflection.Metadata.AssemblyExtensions.TryGetRawMetadata(assembly, out byte* blob, out int length))
+            {
+                var moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
+                var assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
+                return assemblyMetadata.GetReference();
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

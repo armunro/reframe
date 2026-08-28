@@ -200,4 +200,13 @@ public class CSharpScriptingTests
         Assert.Equal(4, vm.SelectedCenterTabIndex);
         Assert.Contains("lines.Select", vm.CSharpScript);
     }
+
+    [Fact]
+    public void CSharpScriptEngine_ConstructsAndEvaluatesWithoutAssemblyLocationRequirement()
+    {
+        var engine = new CSharpScriptEngine();
+        var result = engine.Evaluate("1 + 2 + 3", string.Empty);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("6", result.Output);
+    }
 }

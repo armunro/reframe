@@ -56,12 +56,20 @@ jobs:
         run: |
           dotnet publish Reframe/Reframe.csproj -c Release -r win-x64 --self-contained true -o ./publish/win-x64
 
+      - name: Publish Single-File Executable (win-x64 self-contained)
+        run: |
+          dotnet publish Reframe/Reframe.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o ./publish/single-file
+
       - name: Package Release Assets
         shell: pwsh
         run: |
           $zipName = "Reframe-${{ env.RELEASE_VERSION }}-win-x64.zip"
           Compress-Archive -Path ./publish/win-x64/* -DestinationPath "./$zipName"
           Write-Host "Created $zipName"
+
+          $singleExeName = "Reframe-${{ env.RELEASE_VERSION }}-win-x64.exe"
+          Copy-Item -Path ./publish/single-file/Reframe.exe -Destination "./$singleExeName"
+          Write-Host "Created $singleExeName"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -73,5 +81,6 @@ jobs:
           generate_release_notes: true
           files: |
             Reframe-*-win-x64.zip
+            Reframe-*-win-x64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
