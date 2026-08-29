@@ -121,6 +121,17 @@ public partial class MainWindow : FluentWindow
                 }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }
+        else if (e.PropertyName == nameof(MainViewModel.IsWebRequestDialogOpen) && sender is MainViewModel vmWeb)
+        {
+            if (vmWeb.IsWebRequestDialogOpen)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    WebRequestUrlTextBox.Focus();
+                    WebRequestUrlTextBox.SelectAll();
+                }), System.Windows.Threading.DispatcherPriority.Input);
+            }
+        }
         else if (e.PropertyName == nameof(MainViewModel.SelectedAction) && sender is MainViewModel vm3)
         {
             if (vm3.SelectedAction != null)
@@ -135,6 +146,31 @@ public partial class MainWindow : FluentWindow
         if (DataContext is MainViewModel vm)
         {
             vm.IsCommandPaletteOpen = false;
+        }
+    }
+
+    private void WebRequestBackdrop_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            vm.IsWebRequestDialogOpen = false;
+        }
+    }
+
+
+    private void WebRequestUrlTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainViewModel vm) return;
+
+        if (e.Key == Key.Enter)
+        {
+            vm.ExecuteWebRequestCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            vm.CloseWebRequestDialogCommand.Execute(null);
+            e.Handled = true;
         }
     }
 
@@ -198,17 +234,66 @@ public partial class MainWindow : FluentWindow
             // For DataRowView / DataTable, property paths with special characters like '/', '.', '[', '(', etc.
             // fail when bound directly as PropertyPath. Escape with indexer syntax: [ColumnName].
             // In WPF PropertyPath indexers, '^', '[', and ']' are escaped with '^'.
-            string escapedPropName = column.ColumnName
+            string colName = column.ColumnName;
+            string escapedPropName = colName
                 .Replace("^", "^^")
                 .Replace("[", "^[")
                 .Replace("]", "^]");
 
+            var removeMenuItem = new System.Windows.Controls.MenuItem
+            {
+                Header = $"🗑️ Remove Column '{colName}'"
+            };
+            removeMenuItem.Click += (s, e) =>
+            {
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.RemoveColumnCommand.Execute(colName);
+                }
+            };
+
+            var copyColMenuItem = new System.Windows.Controls.MenuItem
+            {
+                Header = $"📋 Extract Column '{colName}'"
+            };
+            copyColMenuItem.Click += (s, e) =>
+            {
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.SelectedColumn = colName;
+                    vm.ActionCommand.Execute("ExtractColumn");
+                }
+            };
+
+            var headerContextMenu = new ContextMenu();
+            headerContextMenu.Items.Add(removeMenuItem);
+            headerContextMenu.Items.Add(copyColMenuItem);
+
+            var baseHeaderStyle = PreviewDataGrid.TryFindResource(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader)) as Style
+                                  ?? System.Windows.Application.Current?.TryFindResource(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader)) as Style;
+
+            var headerStyle = baseHeaderStyle != null
+                ? new Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader), baseHeaderStyle)
+                : new Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader));
+
+            headerStyle.Setters.Add(new Setter(FrameworkElement.ContextMenuProperty, headerContextMenu));
+
+            var cellElementStyle = PreviewDataGrid.TryFindResource("DataGridTextCellElementStyle") as Style
+                                  ?? System.Windows.Application.Current?.TryFindResource("DataGridTextCellElementStyle") as Style;
+
             var boundColumn = new DataGridTextColumn
             {
-                Header = string.IsNullOrEmpty(column.Caption) ? column.ColumnName : column.Caption,
+                Header = string.IsNullOrEmpty(column.Caption) ? colName : column.Caption,
                 Binding = new Binding($"[{escapedPropName}]"),
-                SortMemberPath = column.ColumnName
+                SortMemberPath = colName,
+                HeaderStyle = headerStyle
             };
+
+            if (cellElementStyle != null)
+            {
+                boundColumn.ElementStyle = cellElementStyle;
+            }
+
             PreviewDataGrid.Columns.Add(boundColumn);
         }
     }

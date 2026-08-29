@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Reframe.Core.Tabular.Formulas;
 using Reframe.Core.Transformers.Line;
 
 namespace Reframe.Core.Tabular.Models;
@@ -102,6 +103,122 @@ public class TabularData
         var dropSet = new HashSet<int>(columnIndicesToDrop);
         var keepIndices = Enumerable.Range(0, Columns.Count).Where(i => !dropSet.Contains(i)).ToList();
         return SelectColumns(keepIndices);
+    }
+
+    /// <summary>
+    /// Removes a single column by index and returns a new TabularData.
+    /// </summary>
+    public TabularData RemoveColumn(int columnIndex)
+    {
+        if (columnIndex < 0 || columnIndex >= Columns.Count) return Clone();
+        return DropColumns(new[] { columnIndex });
+    }
+
+    /// <summary>
+    /// Removes a single column by name (case-insensitive) and returns a new TabularData.
+    /// </summary>
+    public TabularData RemoveColumn(string columnName)
+    {
+        if (string.IsNullOrWhiteSpace(columnName)) return Clone();
+        int idx = Columns.FindIndex(c => string.Equals(c, columnName, StringComparison.OrdinalIgnoreCase));
+        if (idx < 0) return Clone();
+        return RemoveColumn(idx);
+    }
+
+    /// <summary>
+    /// Removes multiple columns by names (case-insensitive) and returns a new TabularData.
+    /// </summary>
+    public TabularData RemoveColumns(IEnumerable<string> columnNames)
+    {
+        var nameSet = new HashSet<string>(columnNames, StringComparer.OrdinalIgnoreCase);
+        var dropIndices = new List<int>();
+        for (int i = 0; i < Columns.Count; i++)
+        {
+            if (nameSet.Contains(Columns[i]))
+            {
+                dropIndices.Add(i);
+            }
+        }
+        return DropColumns(dropIndices);
+    }
+
+    /// <summary>
+    /// Adds a new column with a default or constant value at the optional insertIndex.
+    /// </summary>
+    public TabularData AddColumn(string columnName, string defaultValue = "", int? insertIndex = null)
+    {
+        var result = Clone();
+        string cleanColName = string.IsNullOrWhiteSpace(columnName)
+            ? $"Column_{result.Columns.Count + 1}"
+            : columnName.Trim();
+
+        int targetIndex = insertIndex.HasValue
+            ? Math.Clamp(insertIndex.Value, 0, result.Columns.Count)
+            : result.Columns.Count;
+
+        result.Columns.Insert(targetIndex, cleanColName);
+
+        for (int r = 0; r < result.Rows.Count; r++)
+        {
+            if (targetIndex < result.Rows[r].Count)
+            {
+                result.Rows[r].Insert(targetIndex, defaultValue);
+            }
+            else
+            {
+                while (result.Rows[r].Count < targetIndex)
+                {
+                    result.Rows[r].Add(string.Empty);
+                }
+                result.Rows[r].Add(defaultValue);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Adds a new column computed by a custom row function at the optional insertIndex.
+    /// </summary>
+    public TabularData AddColumn(string columnName, Func<IReadOnlyList<string>, int, string> rowValueProvider, int? insertIndex = null)
+    {
+        var result = Clone();
+        string cleanColName = string.IsNullOrWhiteSpace(columnName)
+            ? $"Column_{result.Columns.Count + 1}"
+            : columnName.Trim();
+
+        int targetIndex = insertIndex.HasValue
+            ? Math.Clamp(insertIndex.Value, 0, result.Columns.Count)
+            : result.Columns.Count;
+
+        result.Columns.Insert(targetIndex, cleanColName);
+
+        for (int r = 0; r < result.Rows.Count; r++)
+        {
+            string val = rowValueProvider(result.Rows[r], r) ?? string.Empty;
+            if (targetIndex < result.Rows[r].Count)
+            {
+                result.Rows[r].Insert(targetIndex, val);
+            }
+            else
+            {
+                while (result.Rows[r].Count < targetIndex)
+                {
+                    result.Rows[r].Add(string.Empty);
+                }
+                result.Rows[r].Add(val);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Evaluates an Excel-like formula for each row and adds the calculated column.
+    /// </summary>
+    public TabularData AddCalculatedColumn(string columnName, string formula, int? insertIndex = null)
+    {
+        return TabularFormulaEngine.AddCalculatedColumn(this, columnName, formula, insertIndex);
     }
 
     public TabularData ReorderColumns(IEnumerable<int> newOrder)

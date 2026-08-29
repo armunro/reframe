@@ -152,6 +152,28 @@ public static class ActionRegistry
             requiresParameters: true,
             targetSectionKey: "Lines_FilterTrimNumber"),
 
+        new ActionItem(
+            id: "LinesToTable",
+            title: "Convert Lines / List to Table",
+            category: "Lines",
+            description: "Convert a list of numbers or text lines into a tabular dataset with columns and rows",
+            keywords: ["list to table", "lines to table", "convert to tabular", "convert list", "tabular data", "list to grid", "lines to csv", "convert to table"],
+            icon: "📊",
+            targetSidebarTab: 1,
+            requiresParameters: false,
+            targetSectionKey: "Lines_ConvertToTable"),
+
+        new ActionItem(
+            id: "SplitLinesToTable",
+            title: "Split Lines by Delimiter into Table Columns",
+            category: "Lines",
+            description: "Split lines into multiple table columns using a delimiter or regular expression",
+            keywords: ["split lines table", "split to columns", "lines to columns", "explode to table"],
+            icon: "✂️",
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Lines_SplitDelimitedLine"),
+
         // -------------------------------------------------------------
         // Tabular & Table Conversions (Tab 1)
         // -------------------------------------------------------------
@@ -440,6 +462,28 @@ public static class ActionRegistry
             targetSidebarTab: 1,
             requiresParameters: false,
             targetSectionKey: "Tabular_ColumnSelectionExtract"),
+
+        new ActionItem(
+            id: "AddCalculatedColumn",
+            title: "Add Calculated Column (Formula)",
+            category: "Tabular",
+            description: "Add a new calculated column to the table using Excel-like text and regex formulas",
+            keywords: ["add column", "calculate column", "formula", "calculated column", "new column", "excel formula", "concat column", "split column", "regex column"],
+            icon: "➕",
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_AddCalculatedColumn"),
+
+        new ActionItem(
+            id: "RemoveColumn",
+            title: "Remove Selected Column",
+            category: "Tabular",
+            description: "Remove the selected column(s) from the table grid",
+            keywords: ["remove column", "delete column", "drop column", "remove columns"],
+            icon: "🗑️",
+            targetSidebarTab: 1,
+            requiresParameters: true,
+            targetSectionKey: "Tabular_TableStructureFilter"),
 
         new ActionItem(
             id: "KeepOnlySelectedColumns",
@@ -1326,6 +1370,15 @@ public static class ActionRegistry
             keywords: ["open", "load file", "import", "open file", "browse"],
             icon: "📂",
             shortcut: "Ctrl+O"),
+
+        new ActionItem(
+            id: "FetchWebRequest",
+            title: "Fetch from Web / HTTP...",
+            category: "Navigation & Workflow",
+            description: "Fetch API response or web data using HTTP request into input or output",
+            keywords: ["web request", "http", "fetch", "api", "rest", "get", "post", "url", "download", "request", "endpoint", "c# httpclient"],
+            icon: "🌐",
+            shortcut: "Ctrl+U"),
 
         new ActionItem(
             id: "ClearInput",

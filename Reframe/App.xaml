@@ -56,10 +56,10 @@
             <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#465E8A" />
             <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="#56A5B8" />
 
-            <SolidColorBrush x:Key="AccentSuccessBrush" Color="#4EC9B0" />
-            <SolidColorBrush x:Key="AccentWarningBrush" Color="#CE9178" />
-            <SolidColorBrush x:Key="AccentInfoBrush" Color="#7DCFFF" />
-            <SolidColorBrush x:Key="AccentBlueBadgeBrush" Color="#007ACC" />
+            <SolidColorBrush x:Key="AccentSuccessBrush" Color="#10B981" />
+            <SolidColorBrush x:Key="AccentWarningBrush" Color="#FF9F1C" />
+            <SolidColorBrush x:Key="AccentInfoBrush" Color="#00D2FF" />
+            <SolidColorBrush x:Key="AccentBlueBadgeBrush" Color="#0084FF" />
 
             <!-- Tab Brushes -->
             <SolidColorBrush x:Key="TabStripBackgroundBrush" Color="#1A1A1A" />
@@ -431,8 +431,8 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
                 <Setter Property="BorderThickness" Value="0,0,1,1" />
                 <Setter Property="FontWeight" Value="SemiBold" />
-                <Setter Property="FontSize" Value="12" />
-                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="Padding" Value="6,4" />
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="Template">
@@ -484,10 +484,30 @@
             </Style>
 
             <!-- ======================================================== -->
+            <!-- DataGrid Text Cell Element Style -->
+            <!-- ======================================================== -->
+            <Style x:Key="DataGridTextCellElementStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="2,0" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- ======================================================== -->
             <!-- DataGrid Cell Style -->
             <!-- ======================================================== -->
             <Style TargetType="{x:Type DataGridCell}">
-                <Setter Property="Padding" Value="8,4" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="Padding" Value="6,2" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="Template">
@@ -507,6 +527,7 @@
                     <Trigger Property="IsSelected" Value="True">
                         <Setter Property="Background" Value="Transparent" />
                         <Setter Property="Foreground" Value="#FFFFFF" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -515,8 +536,9 @@
             <!-- DataGrid Row Style -->
             <!-- ======================================================== -->
             <Style TargetType="{x:Type DataGridRow}">
-                <Setter Property="FontSize" Value="13" />
-                <Setter Property="MinHeight" Value="28" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="MinHeight" Value="22" />
                 <Setter Property="SnapsToDevicePixels" Value="True" />
                 <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
                 <Style.Triggers>
@@ -542,8 +564,9 @@
                 <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
                 <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
                 <Setter Property="GridLinesVisibility" Value="Horizontal" />
-                <Setter Property="RowHeight" Value="28" />
-                <Setter Property="FontSize" Value="13" />
+                <Setter Property="RowHeight" Value="22" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="FontWeight" Value="Normal" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="AutoGenerateColumns" Value="False" />
                 <Setter Property="CanUserAddRows" Value="False" />

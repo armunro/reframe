@@ -12,6 +12,7 @@ using Reframe.Core.Analysis;
 using Reframe.Core.Analysis.Analyzers;
 using Reframe.Core.Analysis.Models;
 using Reframe.Core.History;
+using Reframe.Core.Http;
 using Reframe.Core.Recipes;
 using Reframe.Core.RegexLab;
 using Reframe.Core.Scripting;
@@ -20,6 +21,7 @@ using Reframe.Core.Structured.Models;
 using Reframe.Core.Structured.Parsers;
 using Reframe.Core.Tabular;
 using Reframe.Core.Tabular.Converters;
+using Reframe.Core.Tabular.Formulas;
 using Reframe.Core.Tabular.Models;
 using Reframe.Core.Tabular.Parsers;
 using Reframe.Core.Transformers;
@@ -122,6 +124,10 @@ public class MainViewModel : INotifyPropertyChanged
     private string _tableColumnReplaceWith = "";
     private string _tableFilterQuery = "";
     private SortOrder _tableSortOrder = SortOrder.NaturalNumericAsc;
+    private string _tableNewColumnName = "CalculatedCol";
+    private string _tableNewColumnFormula = "CONCAT([Col1], \" \", [Col2])";
+    private FormulaFunctionHelp? _selectedFormulaFunction;
+    private IReadOnlyList<FormulaFunctionHelp> _availableFormulaFunctions = TabularFormulaEngine.GetAvailableFunctions();
 
     // Structured Data Options
     private ObservableCollection<StructuredDataNode> _structuredNodes = new();
@@ -149,6 +155,22 @@ public class MainViewModel : INotifyPropertyChanged
     private string _actionSearchQuery = string.Empty;
     private ObservableCollection<ActionItem> _filteredActions = new();
     private ActionItem? _selectedAction;
+
+    // Web Request Dialog
+    private bool _isWebRequestDialogOpen = false;
+    private string _webRequestUrl = "https://jsonplaceholder.typicode.com/todos/1";
+    private string _webRequestMethod = "GET";
+    private string _webRequestHeaders = "Accept: application/json";
+    private string _webRequestBody = "";
+    private bool _isWebRequestLoading = false;
+    private string _webRequestStatusText = string.Empty;
+    private string _webRequestResponseSummary = string.Empty;
+    private string _webRequestDestination = "Input";
+    private HttpRequestExecutor? _requestExecutor;
+    private WebRequestHistoryItem? _selectedWebRequestHistoryItem;
+    private string _webRequestHistoryFilter = string.Empty;
+    private ICollectionView? _webRequestHistoryView;
+    private int _selectedWebRequestTabIndex = 0;
 
     // Recipes & Visual Pipelines
     private TransformationRecipe? _selectedRecipe;
@@ -194,6 +216,7 @@ public class MainViewModel : INotifyPropertyChanged
         InitializeRecipes();
         InitializeRegexLab();
         InitializeScripting();
+        InitializeWebRequestHistory();
         UpdateActionSearchResults();
         // Set sample text initially
         InputText = "1001\n1002\n1003\n1004\n1005";
@@ -389,6 +412,178 @@ public class MainViewModel : INotifyPropertyChanged
 
     public bool HasActionResults => _filteredActions.Count > 0;
     public string ActionResultsCountText => $"{_filteredActions.Count} actions";
+
+    // Web Request / cURL Dialog Properties
+    public bool IsWebRequestDialogOpen
+    {
+        get => _isWebRequestDialogOpen;
+        set
+        {
+            if (_isWebRequestDialogOpen != value)
+            {
+                _isWebRequestDialogOpen = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestUrl
+    {
+        get => _webRequestUrl;
+        set
+        {
+            if (_webRequestUrl != value)
+            {
+                _webRequestUrl = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestMethod
+    {
+        get => _webRequestMethod;
+        set
+        {
+            if (_webRequestMethod != value)
+            {
+                _webRequestMethod = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestHeaders
+    {
+        get => _webRequestHeaders;
+        set
+        {
+            if (_webRequestHeaders != value)
+            {
+                _webRequestHeaders = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestBody
+    {
+        get => _webRequestBody;
+        set
+        {
+            if (_webRequestBody != value)
+            {
+                _webRequestBody = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsWebRequestLoading
+    {
+        get => _isWebRequestLoading;
+        set
+        {
+            if (_isWebRequestLoading != value)
+            {
+                _isWebRequestLoading = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestStatusText
+    {
+        get => _webRequestStatusText;
+        set
+        {
+            if (_webRequestStatusText != value)
+            {
+                _webRequestStatusText = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestResponseSummary
+    {
+        get => _webRequestResponseSummary;
+        set
+        {
+            if (_webRequestResponseSummary != value)
+            {
+                _webRequestResponseSummary = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestDestination
+    {
+        get => _webRequestDestination;
+        set
+        {
+            if (_webRequestDestination != value)
+            {
+                _webRequestDestination = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public ObservableCollection<string> WebRequestAvailableMethods { get; } = new(["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]);
+
+    public ObservableCollection<WebRequestHistoryItem> WebRequestHistory { get; } = new();
+
+    public WebRequestHistoryItem? SelectedWebRequestHistoryItem
+    {
+        get => _selectedWebRequestHistoryItem;
+        set
+        {
+            if (_selectedWebRequestHistoryItem != value)
+            {
+                _selectedWebRequestHistoryItem = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WebRequestHistoryFilter
+    {
+        get => _webRequestHistoryFilter;
+        set
+        {
+            if (_webRequestHistoryFilter != value)
+            {
+                _webRequestHistoryFilter = value;
+                OnPropertyChanged();
+                RefreshWebRequestHistoryView();
+            }
+        }
+    }
+
+    public ICollectionView WebRequestHistoryView => _webRequestHistoryView ??= CreateWebRequestHistoryView();
+
+    public int SelectedWebRequestTabIndex
+    {
+        get => _selectedWebRequestTabIndex;
+        set
+        {
+            if (_selectedWebRequestTabIndex != value)
+            {
+                _selectedWebRequestTabIndex = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool HasWebRequestHistory => WebRequestHistory.Count > 0;
+
+    public HttpRequestExecutor RequestExecutor
+    {
+        get => _requestExecutor ??= new HttpRequestExecutor();
+        set => _requestExecutor = value;
+    }
 
     public IClipboardWatcher? ClipboardWatcher
     {
@@ -601,7 +796,9 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool HasTabularData => Analysis.IsTabular && _currentTable != null && _currentTable.Columns.Count > 0;
+    private bool _isTableModeActive;
+
+    public bool HasTabularData => (Analysis.IsTabular || _isTableModeActive) && _currentTable != null && _currentTable.Columns.Count > 0;
 
     private int _selectedCenterTabIndex = 0;
     public int SelectedCenterTabIndex
@@ -1243,6 +1440,56 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public string TableNewColumnName
+    {
+        get => _tableNewColumnName;
+        set
+        {
+            if (_tableNewColumnName != value)
+            {
+                _tableNewColumnName = value;
+                OnPropertyChanged();
+                TriggerRealTime("AddCalculatedColumn");
+            }
+        }
+    }
+
+    public string TableNewColumnFormula
+    {
+        get => _tableNewColumnFormula;
+        set
+        {
+            if (_tableNewColumnFormula != value)
+            {
+                _tableNewColumnFormula = value;
+                OnPropertyChanged();
+                TriggerRealTime("AddCalculatedColumn");
+            }
+        }
+    }
+
+    public IReadOnlyList<FormulaFunctionHelp> AvailableFormulaFunctions => _availableFormulaFunctions;
+
+    public FormulaFunctionHelp? SelectedFormulaFunction
+    {
+        get => _selectedFormulaFunction;
+        set
+        {
+            if (_selectedFormulaFunction != value)
+            {
+                _selectedFormulaFunction = value;
+                OnPropertyChanged();
+                if (value != null && !string.IsNullOrEmpty(value.Syntax))
+                {
+                    if (string.IsNullOrWhiteSpace(_tableNewColumnFormula) || _tableNewColumnFormula == "CONCAT([Col1], \" \", [Col2])")
+                    {
+                        TableNewColumnFormula = value.Example;
+                    }
+                }
+            }
+        }
+    }
+
     public string InputStats => $"{Analysis.CharacterCount} chars | {Analysis.LineCount} lines | {Analysis.WordCount} words | Format: {Analysis.FormatDescription}";
     public string OutputStats
     {
@@ -1522,6 +1769,11 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SelectAllColumnsCommand { get; private set; } = null!;
     public ICommand DeselectAllColumnsCommand { get; private set; } = null!;
     public ICommand InvertColumnsCommand { get; private set; } = null!;
+    public ICommand AddCalculatedColumnCommand { get; private set; } = null!;
+    public ICommand AddCalculatedColumnAndApplyCommand { get; private set; } = null!;
+    public ICommand RemoveColumnCommand { get; private set; } = null!;
+    public ICommand DropSelectedColumnsCommand { get; private set; } = null!;
+    public ICommand InsertFormulaPresetCommand { get; private set; } = null!;
 
     // Action Fuzzy Search & Command Palette Commands
     public ICommand OpenCommandPaletteCommand { get; private set; } = null!;
@@ -1565,6 +1817,18 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand OpenScriptingTabCommand { get; private set; } = null!;
     public ICommand ApplyScriptPresetCommand { get; private set; } = null!;
     public ICommand LoadScriptSampleInputCommand { get; private set; } = null!;
+
+    // Web Request Commands
+    public ICommand OpenWebRequestDialogCommand { get; private set; } = null!;
+    public ICommand CloseWebRequestDialogCommand { get; private set; } = null!;
+    public ICommand ToggleWebRequestDialogCommand { get; private set; } = null!;
+    public ICommand ExecuteWebRequestCommand { get; private set; } = null!;
+    public ICommand CopyCSharpFromRequestCommand { get; private set; } = null!;
+    public ICommand LoadWebRequestPresetCommand { get; private set; } = null!;
+    public ICommand LoadWebRequestHistoryItemCommand { get; private set; } = null!;
+    public ICommand ExecuteWebRequestHistoryItemCommand { get; private set; } = null!;
+    public ICommand DeleteWebRequestHistoryItemCommand { get; private set; } = null!;
+    public ICommand ClearWebRequestHistoryCommand { get; private set; } = null!;
 
     public event EventHandler<string>? HighlightSectionRequested;
 
@@ -1709,6 +1973,11 @@ public class MainViewModel : INotifyPropertyChanged
 
             case "LoadFile":
                 LoadFileCommand.Execute(null);
+                break;
+
+            case "FetchWebRequest":
+            case "CurlFetch":
+                OpenWebRequestDialogCommand.Execute(null);
                 break;
 
             case "ClearInput":
@@ -2089,6 +2358,41 @@ public class MainViewModel : INotifyPropertyChanged
             StatusMessage = "Column selection inverted";
         });
 
+        AddCalculatedColumnCommand = new RelayCommand(_ =>
+        {
+            _currentAction = "AddCalculatedColumn";
+            ExecuteCurrentAction();
+        });
+
+        AddCalculatedColumnAndApplyCommand = new RelayCommand(_ =>
+        {
+            AddCalculatedColumnAction(applyToInput: true);
+        });
+
+        RemoveColumnCommand = new RelayCommand(p =>
+        {
+            string? targetCol = p as string;
+            RemoveColumnAction(targetCol, applyToInput: true);
+        });
+
+        DropSelectedColumnsCommand = new RelayCommand(_ =>
+        {
+            _currentAction = "DropSelectedColumns";
+            ExecuteCurrentAction();
+        });
+
+        InsertFormulaPresetCommand = new RelayCommand(p =>
+        {
+            if (p is FormulaFunctionHelp help)
+            {
+                TableNewColumnFormula = help.Example;
+            }
+            else if (p is string formulaText)
+            {
+                TableNewColumnFormula = formulaText;
+            }
+        });
+
         // Structured Data Commands
         ExpandAllStructuredNodesCommand = new RelayCommand(_ => ExpandAllStructuredNodes());
         CollapseAllStructuredNodesCommand = new RelayCommand(_ => CollapseAllStructuredNodes());
@@ -2145,13 +2449,16 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 "html" => "<table class=\"confluenceTable\">\n  <thead>\n    <tr>\n      <th>ID</th>\n      <th>Full Name</th>\n      <th>Department</th>\n      <th>Email</th>\n      <th>Status</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>101</td>\n      <td>Alice Smith</td>\n      <td>Engineering</td>\n      <td>alice@example.com</td>\n      <td>Active</td>\n    </tr>\n    <tr>\n      <td>102</td>\n      <td>Bob Jones</td>\n      <td>Design</td>\n      <td>bob@example.com</td>\n      <td>Active</td>\n    </tr>\n    <tr>\n      <td>103</td>\n      <td>Charlie Brown</td>\n      <td>Engineering</td>\n      <td>charlie@example.com</td>\n      <td>Pending</td>\n    </tr>\n    <tr>\n      <td>104</td>\n      <td>Diana Prince</td>\n      <td>Marketing</td>\n      <td>diana@example.com</td>\n      <td>Inactive</td>\n    </tr>\n  </tbody>\n</table>",
                 "numbers" => "101\n102\n103\n104\n105\n106\n107\n108\n109\n110",
+                "emails" or "email" or "email_list" => "john.doe@example.com\njane.smith@corporate.org\nalice.wong@techinnovations.io\nbob.miller@freemail.net\ncharlie.brown@peanuts-gang.org\ndiana.prince@themyscira.gov\nevan.wright@media-group.co.uk\nfiona.gallagher@southside.edu\ngeorge.clark@enterprise-solutions.com\nhannah.abbott@hogwarts.ac.uk\nian.malcolm@ingen-research.com\njulia.roberts@hollywood-cast.net\nkevin.bacon@six-degrees.org\nlaura.croft@tomb-raider.co.uk\nmichael.scott@dunder-mifflin.com\nnatalie.portman@cinema-arts.org\noliver.queen@star-city.gov\npeter.parker@daily-bugle.com\nquinn.harley@arkham-rehab.org\nrachel.green@central-perk.com\nsteve.rogers@avengers-shield.gov\ntony.stark@stark-industries.com\nbruce.wayne@wayne-enterprises.com\nclark.kent@daily-planet.com\nbarry.allen@star-labs.org",
                 "csv" => "Id,Name,Role,Salary,Department\n1,Alice,Architect,120000,Engineering\n2,Bob,Developer,95000,Engineering\n3,Charlie,Designer,85000,Product\n4,Diana,Manager,110000,Sales\n5,Evan,DevOps,105000,Engineering",
+                "large_table" or "csv_large" or "table_100" or "csv_100" => GenerateLargeTableSample(),
                 "tsv" => "OrderId\tCustomer\tProduct\tQuantity\tPrice\n1001\tAcme Corp\tWidget A\t5\t19.99\n1002\tGlobex\tGadget Pro\t2\t49.99\n1003\tSoylent\tWidget A\t10\t19.99\n1004\tInitech\tService Plan\t1\t99.00",
                 "markdown" => "| ID | Server Name | IP Address | Environment | Status |\n|---|---|---|---|---|\n| 1 | web-prod-01 | 10.0.1.15 | Production | Online |\n| 2 | web-prod-02 | 10.0.1.16 | Production | Online |\n| 3 | db-prod-01 | 10.0.2.10 | Production | Online |\n| 4 | api-stage-01 | 10.0.3.5 | Staging | Maintenance |",
                 "json" or "structured_json" => "{\n  \"store\": {\n    \"name\": \"City Bookstore\",\n    \"isOpen\": true,\n    \"founded\": 1998,\n    \"location\": {\n      \"city\": \"Seattle\",\n      \"state\": \"WA\",\n      \"zip\": \"98101\"\n    },\n    \"books\": [\n      {\n        \"id\": 1,\n        \"title\": \"Designing Data-Intensive Applications\",\n        \"author\": \"Martin Kleppmann\",\n        \"price\": 39.99,\n        \"inStock\": true,\n        \"tags\": [\"database\", \"distributed systems\", \"architecture\"]\n      },\n      {\n        \"id\": 2,\n        \"title\": \"Clean Architecture\",\n        \"author\": \"Robert C. Martin\",\n        \"price\": 32.50,\n        \"inStock\": false,\n        \"tags\": [\"software design\", \"best practices\"]\n      }\n    ]\n  }\n}",
                 "yaml" => "- id: 1\n  name: Development\n  active: true\n  department: Engineering\n- id: 2\n  name: Staging\n  active: true\n  department: QA\n- id: 3\n  name: Production\n  active: false\n  department: Operations",
                 "structured_yaml" => "server:\n  host: api.reframe.dev\n  port: 8443\n  ssl:\n    enabled: true\n    certificate: /etc/ssl/certs/forge.crt\ndatabase:\n  provider: postgresql\n  connectionString: Server=db.internal;Port=5432;Database=reframe;User Id=app;\n  pool:\n    min: 5\n    max: 50\nfeatures:\n  - realTimeTransform\n  - syntaxHighlighting\n  - tabularView\n  - structuredTreeView\nendpoints:\n  - path: /api/v1/transform\n    rateLimit: 1000\n    authRequired: true\n  - path: /api/v1/health\n    rateLimit: 100\n    authRequired: false",
                 "xml" or "structured_xml" => "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<catalog>\n  <book id=\"bk101\">\n    <author>Gambardella, Matthew</author>\n    <title>XML Developer's Guide</title>\n    <genre>Computer</genre>\n    <price>44.95</price>\n    <publish_date>2000-10-01</publish_date>\n    <description>An in-depth look at creating applications with XML.</description>\n  </book>\n  <book id=\"bk102\">\n    <author>Ralls, Kim</author>\n    <title>Midnight Rain</title>\n    <genre>Fantasy</genre>\n    <price>5.95</price>\n    <publish_date>2000-12-16</publish_date>\n    <description>A former architect battles corporate zombies.</description>\n  </book>\n  <book id=\"bk103\">\n    <author>Corets, Eva</author>\n    <title>Maeve Ascendant</title>\n    <genre>Fantasy</genre>\n    <price>5.95</price>\n    <publish_date>2000-11-17</publish_date>\n    <description>After the collapse of a nanotechnology society the young survivors lay the foundation for a new society.</description>\n  </book>\n</catalog>",
+                "logs" or "server_logs" or "log" => "192.168.1.10 - - [28/Aug/2026:10:00:01 +0000] \"GET /api/v1/users HTTP/1.1\" 200 4523 \"https://app.example.com/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\"\n192.168.1.11 - - [28/Aug/2026:10:00:03 +0000] \"POST /api/v1/auth/login HTTP/1.1\" 200 128 \"https://app.example.com/login\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)\"\n10.0.2.15 - - [28/Aug/2026:10:00:15 +0000] \"GET /api/v1/products?category=electronics HTTP/1.1\" 200 8921 \"-\" \"curl/7.68.0\"\n172.16.0.42 - - [28/Aug/2026:10:00:22 +0000] \"GET /admin/dashboard HTTP/1.1\" 403 245 \"https://app.example.com/admin\" \"Mozilla/5.0 (X11; Linux x86_64)\"\n192.168.1.12 - - [28/Aug/2026:10:00:30 +0000] \"DELETE /api/v1/cache HTTP/1.1\" 204 0 \"-\" \"PostmanRuntime/7.29.0\"\n10.0.1.50 - - [28/Aug/2026:10:00:45 +0000] \"GET /health HTTP/1.1\" 200 15 \"-\" \"kube-probe/1.24\"",
                 "delimited" => "apple, banana, cherry, date, elderberry, fig, grape",
                 "query" => "userId=42&view=summary&filter=active&pageSize=50&sortBy=createdAt&sortDir=desc",
                 _ => "Item 1\nItem 2\nItem 3"
@@ -2481,6 +2788,377 @@ public class MainViewModel : INotifyPropertyChanged
                 ApplyScriptPreset(_selectedScriptPreset, loadSample: true);
             }
         });
+
+        // Web Request Commands
+        OpenWebRequestDialogCommand = new RelayCommand(_ =>
+        {
+            IsWebRequestDialogOpen = true;
+            WebRequestStatusText = "Enter a URL and request parameters, then click Fetch.";
+        });
+
+        CloseWebRequestDialogCommand = new RelayCommand(_ =>
+        {
+            IsWebRequestDialogOpen = false;
+        });
+
+        ToggleWebRequestDialogCommand = new RelayCommand(_ =>
+        {
+            IsWebRequestDialogOpen = !IsWebRequestDialogOpen;
+            if (IsWebRequestDialogOpen)
+            {
+                WebRequestStatusText = "Enter a URL and request parameters, then click Fetch.";
+            }
+        });
+
+        ExecuteWebRequestCommand = new RelayCommand(async _ =>
+        {
+            await ExecuteWebRequestAsync().ConfigureAwait(false);
+        });
+
+        CopyCSharpFromRequestCommand = new RelayCommand(_ =>
+        {
+            try
+            {
+                string cs = GenerateCurrentCSharpSnippet();
+                Clipboard.SetText(cs);
+                StatusMessage = "Copied C# HttpClient snippet to clipboard";
+                WebRequestStatusText = "Copied C# HttpClient snippet to clipboard";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Copy error: {ex.Message}";
+            }
+        });
+
+        LoadWebRequestPresetCommand = new RelayCommand(param =>
+        {
+            if (param is string preset)
+            {
+                LoadWebRequestPreset(preset);
+            }
+        });
+
+        LoadWebRequestHistoryItemCommand = new RelayCommand(p =>
+        {
+            var item = p as WebRequestHistoryItem ?? SelectedWebRequestHistoryItem;
+            if (item != null)
+            {
+                LoadWebRequestFromHistory(item);
+            }
+        });
+
+        ExecuteWebRequestHistoryItemCommand = new RelayCommand(async p =>
+        {
+            var item = p as WebRequestHistoryItem ?? SelectedWebRequestHistoryItem;
+            if (item != null)
+            {
+                LoadWebRequestFromHistory(item);
+                await ExecuteWebRequestAsync().ConfigureAwait(false);
+            }
+        });
+
+        DeleteWebRequestHistoryItemCommand = new RelayCommand(p =>
+        {
+            var item = p as WebRequestHistoryItem ?? SelectedWebRequestHistoryItem;
+            if (item != null)
+            {
+                WebRequestHistory.Remove(item);
+                if (SelectedWebRequestHistoryItem == item)
+                {
+                    SelectedWebRequestHistoryItem = WebRequestHistory.FirstOrDefault();
+                }
+                OnPropertyChanged(nameof(HasWebRequestHistory));
+                RefreshWebRequestHistoryView();
+            }
+        });
+
+        ClearWebRequestHistoryCommand = new RelayCommand(_ =>
+        {
+            WebRequestHistory.Clear();
+            SelectedWebRequestHistoryItem = null;
+            OnPropertyChanged(nameof(HasWebRequestHistory));
+            RefreshWebRequestHistoryView();
+        });
+    }
+
+    public HttpRequestDefinition BuildCurrentRequestDefinition()
+    {
+        var req = new HttpRequestDefinition
+        {
+            Method = string.IsNullOrWhiteSpace(WebRequestMethod) ? "GET" : WebRequestMethod.ToUpperInvariant(),
+            Url = WebRequestUrl?.Trim() ?? string.Empty,
+            Body = string.IsNullOrEmpty(WebRequestBody) ? null : WebRequestBody
+        };
+
+        if (!string.IsNullOrWhiteSpace(WebRequestHeaders))
+        {
+            var lines = WebRequestHeaders.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                int colon = line.IndexOf(':');
+                if (colon > 0)
+                {
+                    string k = line[..colon].Trim();
+                    string v = line[(colon + 1)..].Trim();
+                    req.Headers[k] = v;
+                }
+            }
+        }
+
+        return req;
+    }
+
+    public string GenerateCurrentCSharpSnippet()
+    {
+        var req = BuildCurrentRequestDefinition();
+        return req.ToCSharpSnippet();
+    }
+
+    public async Task<HttpResponseResult> ExecuteWebRequestAsync(string? directUrl = null)
+    {
+        IsWebRequestLoading = true;
+        WebRequestStatusText = "Sending request...";
+
+        try
+        {
+            HttpRequestDefinition req;
+            if (!string.IsNullOrWhiteSpace(directUrl))
+            {
+                WebRequestUrl = directUrl.Trim();
+                req = new HttpRequestDefinition
+                {
+                    Method = string.IsNullOrWhiteSpace(WebRequestMethod) ? "GET" : WebRequestMethod.ToUpperInvariant(),
+                    Url = WebRequestUrl
+                };
+            }
+            else
+            {
+                req = BuildCurrentRequestDefinition();
+            }
+
+            if (string.IsNullOrWhiteSpace(req.Url))
+            {
+                var errResult = new HttpResponseResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Please enter a valid URL."
+                };
+                WebRequestStatusText = errResult.ErrorMessage;
+                StatusMessage = errResult.ErrorMessage;
+                return errResult;
+            }
+
+            var result = await RequestExecutor.ExecuteAsync(req).ConfigureAwait(true);
+            AddWebRequestToHistory(req, result, WebRequestDestination);
+
+            if (result.IsSuccess)
+            {
+                if (string.Equals(WebRequestDestination, "Output", StringComparison.OrdinalIgnoreCase))
+                {
+                    OutputText = result.Content;
+                }
+                else
+                {
+                    InputText = TextBeautifier.Beautify(result.Content);
+                    string host = "Web";
+                    try
+                    {
+                        if (Uri.TryCreate(req.Url, UriKind.Absolute, out var u))
+                        {
+                            host = u.Host;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore
+                    }
+                    RecordHistory(InputText, $"Web: {req.Method} {host}");
+                }
+
+                StatusMessage = $"Fetched {req.Method} {req.Url} ({result.SummaryText})";
+                WebRequestResponseSummary = result.SummaryText;
+                WebRequestStatusText = $"Success: {result.SummaryText}";
+                IsWebRequestDialogOpen = false;
+            }
+            else
+            {
+                WebRequestResponseSummary = result.SummaryText;
+                string msg = result.ErrorMessage ?? result.StatusDescription;
+                WebRequestStatusText = $"Failed: {msg}";
+                StatusMessage = $"Web request failed: {msg}";
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            WebRequestStatusText = $"Error: {ex.Message}";
+            StatusMessage = $"Web request error: {ex.Message}";
+            return new HttpResponseResult
+            {
+                IsSuccess = false,
+                ErrorMessage = ex.Message
+            };
+        }
+        finally
+        {
+            IsWebRequestLoading = false;
+        }
+    }
+
+    public void LoadWebRequestPreset(string preset)
+    {
+        switch (preset?.ToLowerInvariant())
+        {
+            case "json_todo" or "todo":
+                WebRequestMethod = "GET";
+                WebRequestUrl = "https://jsonplaceholder.typicode.com/todos/1";
+                WebRequestHeaders = "Accept: application/json";
+                WebRequestBody = "";
+                break;
+            case "json_users" or "users":
+                WebRequestMethod = "GET";
+                WebRequestUrl = "https://jsonplaceholder.typicode.com/users";
+                WebRequestHeaders = "Accept: application/json";
+                WebRequestBody = "";
+                break;
+            case "httpbin_post" or "post_sample":
+                WebRequestMethod = "POST";
+                WebRequestUrl = "https://httpbin.org/post";
+                WebRequestHeaders = "Content-Type: application/json\nAccept: application/json";
+                WebRequestBody = "{\n  \"name\": \"Reframe\",\n  \"status\": \"active\"\n}";
+                break;
+            case "github_user" or "github":
+                WebRequestMethod = "GET";
+                WebRequestUrl = "https://api.github.com/users/octocat";
+                WebRequestHeaders = "Accept: application/vnd.github.v3+json\nUser-Agent: Reframe";
+                WebRequestBody = "";
+                break;
+            case "quotes" or "quote":
+                WebRequestMethod = "GET";
+                WebRequestUrl = "https://dummyjson.com/quotes/random";
+                WebRequestHeaders = "Accept: application/json";
+                WebRequestBody = "";
+                break;
+            case "ip_info" or "ip":
+                WebRequestMethod = "GET";
+                WebRequestUrl = "https://ipapi.co/json/";
+                WebRequestHeaders = "Accept: application/json";
+                WebRequestBody = "";
+                break;
+            default:
+                WebRequestMethod = "GET";
+                WebRequestUrl = preset ?? "https://jsonplaceholder.typicode.com/todos/1";
+                WebRequestHeaders = "Accept: application/json";
+                WebRequestBody = "";
+                break;
+        }
+        WebRequestStatusText = $"Loaded preset: {preset}";
+    }
+
+    public void InitializeWebRequestHistory()
+    {
+        WebRequestHistory.Add(new WebRequestHistoryItem
+        {
+            Method = "GET",
+            Url = "https://jsonplaceholder.typicode.com/todos/1",
+            Headers = "Accept: application/json",
+            Destination = "Input",
+            Timestamp = DateTime.Now.AddMinutes(-10),
+            IsSuccess = true,
+            StatusCode = 200,
+            StatusDescription = "OK",
+            ResponseSummary = "200 OK (83 B)",
+            DurationMs = 95
+        });
+        WebRequestHistory.Add(new WebRequestHistoryItem
+        {
+            Method = "GET",
+            Url = "https://jsonplaceholder.typicode.com/users",
+            Headers = "Accept: application/json",
+            Destination = "Input",
+            Timestamp = DateTime.Now.AddMinutes(-30),
+            IsSuccess = true,
+            StatusCode = 200,
+            StatusDescription = "OK",
+            ResponseSummary = "200 OK (5.6 KB)",
+            DurationMs = 142
+        });
+        SelectedWebRequestHistoryItem = WebRequestHistory.FirstOrDefault();
+        OnPropertyChanged(nameof(HasWebRequestHistory));
+    }
+
+    public void LoadWebRequestFromHistory(WebRequestHistoryItem item)
+    {
+        if (item == null) return;
+        WebRequestMethod = string.IsNullOrWhiteSpace(item.Method) ? "GET" : item.Method.ToUpperInvariant();
+        WebRequestUrl = item.Url ?? string.Empty;
+        WebRequestHeaders = item.Headers ?? string.Empty;
+        WebRequestBody = item.Body ?? string.Empty;
+        WebRequestDestination = string.IsNullOrWhiteSpace(item.Destination) ? "Input" : item.Destination;
+        SelectedWebRequestHistoryItem = item;
+        SelectedWebRequestTabIndex = 0;
+        WebRequestStatusText = $"Loaded from history: {item.Method} {item.Url}";
+    }
+
+    public void AddWebRequestToHistory(HttpRequestDefinition req, HttpResponseResult result, string destination)
+    {
+        var historyItem = new WebRequestHistoryItem
+        {
+            Method = req.Method ?? "GET",
+            Url = req.Url ?? string.Empty,
+            Headers = WebRequestHeaders ?? string.Empty,
+            Body = string.IsNullOrEmpty(WebRequestBody) ? null : WebRequestBody,
+            Destination = destination,
+            Timestamp = DateTime.Now,
+            IsSuccess = result.IsSuccess,
+            StatusCode = result.StatusCode,
+            StatusDescription = result.StatusDescription ?? string.Empty,
+            ResponseSummary = result.SummaryText ?? string.Empty,
+            DurationMs = (long)result.Elapsed.TotalMilliseconds
+        };
+
+        var existing = WebRequestHistory.FirstOrDefault(h =>
+            string.Equals(h.Url, historyItem.Url, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(h.Method, historyItem.Method, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(h.Headers, historyItem.Headers, StringComparison.Ordinal) &&
+            string.Equals(h.Body, historyItem.Body, StringComparison.Ordinal));
+        if (existing != null)
+        {
+            WebRequestHistory.Remove(existing);
+        }
+
+        WebRequestHistory.Insert(0, historyItem);
+        while (WebRequestHistory.Count > 100)
+        {
+            WebRequestHistory.RemoveAt(WebRequestHistory.Count - 1);
+        }
+
+        SelectedWebRequestHistoryItem = historyItem;
+        OnPropertyChanged(nameof(HasWebRequestHistory));
+        RefreshWebRequestHistoryView();
+    }
+
+    private ICollectionView CreateWebRequestHistoryView()
+    {
+        var view = CollectionViewSource.GetDefaultView(WebRequestHistory);
+        view.Filter = item =>
+        {
+            if (string.IsNullOrWhiteSpace(WebRequestHistoryFilter)) return true;
+            if (item is not WebRequestHistoryItem h) return true;
+            var query = WebRequestHistoryFilter.Trim();
+            return (h.Url != null && h.Url.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                   (h.Method != null && h.Method.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                   (!string.IsNullOrEmpty(h.ResponseSummary) && h.ResponseSummary.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                   (!string.IsNullOrEmpty(h.StatusDescription) && h.StatusDescription.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                   (!string.IsNullOrEmpty(h.Headers) && h.Headers.Contains(query, StringComparison.OrdinalIgnoreCase));
+        };
+        return view;
+    }
+
+    private void RefreshWebRequestHistoryView()
+    {
+        _webRequestHistoryView?.Refresh();
     }
 
     public void InitializeRecipes()
@@ -3022,6 +3700,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void AnalyzeInput()
     {
+        _isTableModeActive = false;
         // Update tabular preview with auto-detected headers
         _currentTable = TabularParser.DetectAndParse(_inputText);
         if (_currentTable != null)
@@ -3168,6 +3847,35 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         return false;
+    }
+
+    private static string GenerateLargeTableSample()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("ID,FirstName,LastName,Email,Department,JobTitle,Salary,City,Country,Status");
+        string[] firstNames = ["James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda", "David", "Elizabeth", "William", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen"];
+        string[] lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
+        string[] depts = ["Engineering", "Marketing", "Sales", "Finance", "Human Resources", "Product", "Legal", "Operations", "Customer Support", "Research"];
+        string[] titles = ["Senior Specialist", "Lead Engineer", "Manager", "Coordinator", "Director", "Associate", "Consultant", "Analyst", "Architect", "Vice President"];
+        string[] cities = ["New York", "London", "Tokyo", "San Francisco", "Berlin", "Toronto", "Sydney", "Paris", "Singapore", "Dublin"];
+        string[] countries = ["USA", "UK", "Japan", "USA", "Germany", "Canada", "Australia", "France", "Singapore", "Ireland"];
+        string[] statuses = ["Active", "Active", "Active", "Pending", "On Leave", "Active", "Active"];
+
+        for (int i = 1; i <= 125; i++)
+        {
+            string first = firstNames[(i * 7 + 3) % firstNames.Length];
+            string last = lastNames[(i * 11 + 5) % lastNames.Length];
+            string dept = depts[(i * 3 + 1) % depts.Length];
+            string title = titles[(i * 5 + 2) % titles.Length];
+            int locIdx = (i * 2 + 4) % cities.Length;
+            string city = cities[locIdx];
+            string country = countries[locIdx];
+            string status = statuses[i % statuses.Length];
+            int salary = 55000 + (i * 1237) % 95000;
+            string email = $"{first.ToLowerInvariant()}.{last.ToLowerInvariant()}{i}@example.com";
+            sb.AppendLine($"{i},{first},{last},{email},{dept},{title},{salary},{city},{country},{status}");
+        }
+        return sb.ToString().TrimEnd();
     }
 
     private void OnHeadersOptionChanged()
@@ -3340,6 +4048,8 @@ public class MainViewModel : INotifyPropertyChanged
                 "RemoveEmptyLines" => LineTransformers.TrimLines(InputText, false, false, removeEmptyLines: true, collapseWhitespace: false),
                 "ReplaceInLines" => LineTransformers.ReplaceInLines(InputText, LineFind, LineReplace, LineReplaceIsRegex, LineReplaceCaseSensitive, SkipEmptyLines),
                 "RegexExtract" => LineTransformers.ExtractRegex(InputText, RegexExtractPattern, RegexCaptureGroup),
+                "LinesToTable" or "ListToTable" => ConvertLinesToTableAction(),
+                "SplitLinesToTable" => SplitLinesToTableAction(),
 
                 // Tabular Whole Table Conversions
                 "ToMarkdownTable" => ConvertTabular(t => TabularConverter.ToMarkdownTable(t)),
@@ -3370,6 +4080,10 @@ public class MainViewModel : INotifyPropertyChanged
                 "ExtractSelectedToCodeArray" => ExtractSelectedColumnsAsCodeArray(),
                 "KeepOnlySelectedColumns" => KeepOnlySelectedColumns(),
                 "DropSelectedColumns" => DropSelectedColumns(),
+                "AddCalculatedColumn" or "AddColumnFormula" or "AddColumn" => AddCalculatedColumnAction(false),
+                "AddCalculatedColumnAndApply" => AddCalculatedColumnAction(true),
+                "RemoveColumn" or "RemoveSelectedColumn" => RemoveColumnAction(null, false),
+                "RemoveColumnAndApply" => RemoveColumnAction(null, true),
                 "SortTableByColumn" => SortTableBySelectedColumn(),
                 "FilterTableByColumn" => FilterTableBySelectedColumn(),
                 "TransformSelectedUpper" or "TransformSelectedUpperCase" => TransformSelectedColumns(s => s.ToUpperInvariant()),
@@ -3606,6 +4320,100 @@ public class MainViewModel : INotifyPropertyChanged
         return TabularConverter.ToMarkdownTable(subTable);
     }
 
+    private string AddCalculatedColumnAction(bool applyToInput = false)
+    {
+        var table = _currentTable?.Clone() ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
+        if (table == null || (table.Columns.Count == 0 && table.Rows.Count == 0))
+        {
+            var lines = InputText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length > 0)
+            {
+                table = new TabularData
+                {
+                    Columns = new List<string> { "Col1" },
+                    Rows = lines.Select(l => new List<string> { l.Trim() }).ToList(),
+                    HasHeaders = true
+                };
+            }
+            else
+            {
+                return InputText;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, table.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                table.OverrideHeaders(customHeaders);
+            }
+        }
+
+        string colName = string.IsNullOrWhiteSpace(TableNewColumnName)
+            ? $"Column_{table.Columns.Count + 1}"
+            : TableNewColumnName.Trim();
+
+        var newTable = table.AddCalculatedColumn(colName, TableNewColumnFormula);
+
+        string output;
+        if (newTable.Delimiter == '\t')
+            output = TabularConverter.ToTsv(newTable);
+        else if (newTable.Delimiter == '|')
+            output = TabularConverter.ToMarkdownTable(newTable);
+        else
+            output = TabularConverter.ToCsv(newTable, newTable.Delimiter ?? ',');
+
+        if (applyToInput)
+        {
+            InputText = output;
+            StatusMessage = $"Added calculated column '{colName}' to table";
+        }
+
+        return output;
+    }
+
+    private string RemoveColumnAction(string? specificColumnName = null, bool applyToInput = false)
+    {
+        var table = _currentTable?.Clone() ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
+        if (table == null || table.Columns.Count == 0) return InputText;
+
+        TabularData newTable;
+        if (!string.IsNullOrEmpty(specificColumnName))
+        {
+            newTable = table.RemoveColumn(specificColumnName);
+        }
+        else
+        {
+            var indices = GetSelectedColumnIndices();
+            if (indices.Count > 0)
+            {
+                newTable = table.DropColumns(indices);
+            }
+            else
+            {
+                int singleIdx = GetSelectedColumnIndex();
+                newTable = table.RemoveColumn(singleIdx);
+            }
+        }
+
+        string output;
+        if (newTable.Delimiter == '\t')
+            output = TabularConverter.ToTsv(newTable);
+        else if (newTable.Delimiter == '|')
+            output = TabularConverter.ToMarkdownTable(newTable);
+        else
+            output = TabularConverter.ToCsv(newTable, newTable.Delimiter ?? ',');
+
+        if (applyToInput)
+        {
+            InputText = output;
+            StatusMessage = "Removed column(s) from table";
+        }
+
+        return output;
+    }
+
     private string SortTableBySelectedColumn()
     {
         var table = _currentTable ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
@@ -3720,12 +4528,10 @@ public class MainViewModel : INotifyPropertyChanged
         var table = _currentTable?.Clone() ?? TabularParser.DetectAndParse(InputText, _hasHeaders);
         if (table == null || (table.Columns.Count == 0 && table.Rows.Count == 0))
         {
-            // Try parsing lines as single column table
-            var lines = InputText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            table = new TabularData
+            table = LineListTabularParser.Instance.Parse(InputText, _hasHeaders) ?? new TabularData
             {
                 Columns = new List<string> { "Value" },
-                Rows = lines.Select(l => new List<string> { l.Trim() }).ToList(),
+                Rows = new List<List<string>>(),
                 HasHeaders = true
             };
         }
@@ -3738,6 +4544,118 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
         return converter(table);
+    }
+
+    private string ConvertLinesToTableAction()
+    {
+        var table = LineListTabularParser.Instance.Parse(InputText, assumeHeader: null);
+        if (table == null || table.Columns.Count == 0) return InputText;
+
+        if (!string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, table.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                table.OverrideHeaders(customHeaders);
+            }
+        }
+
+        _currentTable = table;
+        _isTableModeActive = true;
+        UpdateColumnsAndPreviewFromCurrentTable();
+        SelectedCenterTabIndex = 0; // Switch to Table Grid View
+        SelectedSidebarTabIndex = 1; // Switch to Tabular sidebar tab
+        IsTabularTabHighlighted = true;
+        StatusMessage = $"Converted {table.Rows.Count} items to tabular grid ({table.Columns.Count} column)";
+        return TabularConverter.ToCsv(table, ',');
+    }
+
+    private string SplitLinesToTableAction()
+    {
+        if (string.IsNullOrWhiteSpace(InputText)) return InputText;
+
+        string delim = string.IsNullOrEmpty(SplitDelimiter) ? "," : SplitDelimiter;
+        var rawLines = InputText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        var rows = new List<List<string>>();
+
+        foreach (var line in rawLines)
+        {
+            string[] parts;
+            if (SplitIsRegex)
+            {
+                try
+                {
+                    parts = Regex.Split(line, delim);
+                }
+                catch
+                {
+                    parts = line.Split(delim);
+                }
+            }
+            else
+            {
+                parts = line.Split(delim);
+            }
+
+            var rowCells = parts.Select(p => SplitTrimItems ? p.Trim() : p).ToList();
+            if (SplitRemoveEmpty)
+            {
+                rowCells = rowCells.Where(c => !string.IsNullOrEmpty(c)).ToList();
+            }
+            if (rowCells.Count > 0)
+            {
+                rows.Add(rowCells);
+            }
+        }
+
+        if (rows.Count == 0) return InputText;
+
+        int maxCols = rows.Max(r => r.Count);
+        bool hasHeaders = TabularParser.DetectHasHeaders(rows.Select(r => (IReadOnlyList<string>)r).ToList());
+
+        var table = new TabularData
+        {
+            Delimiter = delim.Length == 1 ? delim[0] : ',',
+            HasHeaders = hasHeaders
+        };
+
+        if (hasHeaders && rows.Count > 0)
+        {
+            table.Columns = rows[0];
+            while (table.Columns.Count < maxCols)
+            {
+                table.Columns.Add($"Column {table.Columns.Count + 1}");
+            }
+            table.Rows = rows.Skip(1).ToList();
+        }
+        else
+        {
+            table.Columns = Enumerable.Range(1, maxCols).Select(i => $"Column {i}").ToList();
+            table.Rows = rows;
+        }
+
+        foreach (var row in table.Rows)
+        {
+            while (row.Count < table.Columns.Count) row.Add(string.Empty);
+        }
+
+        if (!string.IsNullOrWhiteSpace(_surrogateHeaders))
+        {
+            var customHeaders = TabularParser.ParseHeaderList(_surrogateHeaders, table.Delimiter);
+            if (customHeaders.Count > 0)
+            {
+                table.OverrideHeaders(customHeaders);
+            }
+        }
+
+        _currentTable = table;
+        _isTableModeActive = true;
+        UpdateColumnsAndPreviewFromCurrentTable();
+        SelectedCenterTabIndex = 0; // Switch to Table Grid View
+        SelectedSidebarTabIndex = 1; // Switch to Tabular sidebar tab
+        IsTabularTabHighlighted = true;
+        StatusMessage = $"Split {table.Rows.Count} rows into {table.Columns.Count} tabular columns";
+        return TabularConverter.ToCsv(table, ',');
     }
 
     private string ExtractSelectedColumn()

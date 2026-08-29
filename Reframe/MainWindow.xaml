@@ -32,6 +32,7 @@
         <KeyBinding Key="P" Modifiers="Control+Shift" Command="{Binding OpenCommandPaletteCommand}"/>
         <KeyBinding Key="F1" Command="{Binding OpenCommandPaletteCommand}"/>
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding LoadFileCommand}"/>
+        <KeyBinding Key="U" Modifiers="Control" Command="{Binding OpenWebRequestDialogCommand}"/>
         <KeyBinding Key="I" Modifiers="Control+Shift" Command="{Binding SendToInputCommand}"/>
         <KeyBinding Key="I" Modifiers="Alt" Command="{Binding SendToInputCommand}"/>
         <KeyBinding Key="F4" Command="{Binding SendToInputCommand}"/>
@@ -43,6 +44,8 @@
     <ui:FluentWindow.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        <conv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <conv:StringEqualsConverter x:Key="StringEqualsConverter"/>
         <conv:BooleanToTextWrappingConverter x:Key="BoolToWrapConv"/>
         <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
@@ -125,8 +128,8 @@
                     <ui:SymbolIcon Symbol="Code20" FontSize="18" Foreground="{DynamicResource AccentBlueBadgeBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <Border Background="#20007ACC" BorderBrush="#40007ACC" BorderThickness="1" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Format: " Foreground="{DynamicResource MutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding DetectedFormatBadge}" Foreground="{DynamicResource AccentSuccessBrush}" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="Format: " Foreground="{DynamicResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding DetectedFormatBadge}" Foreground="{DynamicResource AccentSuccessBrush}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -144,6 +147,9 @@
                     </ui:Button>
                     <ui:Button Appearance="Secondary" Command="{Binding LoadFileCommand}" ToolTip="Load input from file (Ctrl+O)" Margin="0,0,6,0" Padding="8,4" Icon="{ui:SymbolIcon Symbol=FolderOpen24}">
                         <TextBlock Text="Open" FontSize="11"/>
+                    </ui:Button>
+                    <ui:Button Appearance="Secondary" Command="{Binding OpenWebRequestDialogCommand}" ToolTip="Fetch from Web API / URL (Ctrl+U)" Margin="0,0,6,0" Padding="8,4" Icon="{ui:SymbolIcon Symbol=Globe24}">
+                        <TextBlock Text="Web Request" FontSize="11"/>
                     </ui:Button>
                     <ui:Button Appearance="Secondary" Command="{Binding ClearInputCommand}" Margin="0,0,10,0" Padding="8,4" Icon="{ui:SymbolIcon Symbol=Delete24}">
                         <TextBlock Text="Clear" FontSize="11"/>
@@ -186,12 +192,15 @@
                             <ContextMenu Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
                                 <MenuItem Header="HTML Table (Confluence / Web)" Command="{Binding LoadSampleCommand}" CommandParameter="html" Foreground="{DynamicResource AccentSuccessBrush}"/>
                                 <MenuItem Header="Numbers List (SQL IN)" Command="{Binding LoadSampleCommand}" CommandParameter="numbers"/>
-                                <MenuItem Header="CSV Table Data" Command="{Binding LoadSampleCommand}" CommandParameter="csv"/>
+                                <MenuItem Header="Email Addresses List" Command="{Binding LoadSampleCommand}" CommandParameter="emails"/>
+                                <MenuItem Header="CSV Table (Small)" Command="{Binding LoadSampleCommand}" CommandParameter="csv"/>
+                                <MenuItem Header="CSV Table (125 Rows)" Command="{Binding LoadSampleCommand}" CommandParameter="large_table"/>
                                 <MenuItem Header="TSV Table Data (Excel)" Command="{Binding LoadSampleCommand}" CommandParameter="tsv"/>
                                 <MenuItem Header="Markdown Table" Command="{Binding LoadSampleCommand}" CommandParameter="markdown"/>
                                 <MenuItem Header="JSON Array of Objects" Command="{Binding LoadSampleCommand}" CommandParameter="json"/>
                                 <MenuItem Header="YAML Configuration Document" Command="{Binding LoadSampleCommand}" CommandParameter="yaml"/>
                                 <MenuItem Header="XML Catalog Document" Command="{Binding LoadSampleCommand}" CommandParameter="xml"/>
+                                <MenuItem Header="Web Server Access Logs" Command="{Binding LoadSampleCommand}" CommandParameter="logs"/>
                                 <MenuItem Header="Delimited Single Line" Command="{Binding LoadSampleCommand}" CommandParameter="delimited"/>
                                 <MenuItem Header="URL Query String" Command="{Binding LoadSampleCommand}" CommandParameter="query"/>
                             </ContextMenu>
@@ -429,14 +438,25 @@
 
                                 <!-- Grid Quick Actions Toolbar -->
                                 <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="8,4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Analysis.FormatDescription, StringFormat='Grid: {0}'}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                        <ui:ToggleSwitch Content="Header Row"
-                                                         IsChecked="{Binding HasHeaders, Mode=TwoWay}"
-                                                         FontSize="11"
-                                                         VerticalAlignment="Center"
-                                                         ToolTip="When checked, the first row of tabular data is used for column headers. When unchecked, all rows are treated as data."/>
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Analysis.FormatDescription, StringFormat='Grid: {0}'}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <ui:ToggleSwitch Content="Header Row"
+                                                             IsChecked="{Binding HasHeaders, Mode=TwoWay}"
+                                                             FontSize="11"
+                                                             VerticalAlignment="Center"
+                                                             ToolTip="When checked, the first row of tabular data is used for column headers. When unchecked, all rows are treated as data."/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="DropSelectedColumns" ToolTip="Remove checked columns from table" Padding="6,2">
+                                                <TextBlock Text="🗑️ Drop Checked" FontSize="10.5"/>
+                                            </ui:Button>
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
 
                                 <!-- Interactive DataGrid -->
@@ -453,8 +473,8 @@
                                           SelectionUnit="FullRow"
                                           IsReadOnly="True"
                                           Sorting="PreviewDataGrid_Sorting"
-                                          FontSize="13"
-                                          RowHeight="28"
+                                          FontSize="11.5"
+                                          RowHeight="22"
                                           GridLinesVisibility="Horizontal"
                                           HorizontalGridLinesBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
                                           BorderThickness="0"
@@ -499,15 +519,6 @@
                                             </ui:Button>
                                             <ui:Button Appearance="Secondary" Command="{Binding CopyStructuredValueCommand}" ToolTip="Copy value of selected node" Padding="6,2" Margin="0,0,6,0">
                                                 <TextBlock Text="📋 Value" FontSize="10"/>
-                                            </ui:Button>
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="BeautifyJson" ToolTip="Format to JSON" Padding="6,2" Margin="0,0,3,0">
-                                                <TextBlock Text="→ JSON" FontSize="10"/>
-                                            </ui:Button>
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="JsonToYaml" ToolTip="Convert to YAML" Padding="6,2" Margin="0,0,3,0">
-                                                <TextBlock Text="→ YAML" FontSize="10"/>
-                                            </ui:Button>
-                                            <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="JsonToXml" ToolTip="Convert to XML" Padding="6,2" Margin="0,0,3,0">
-                                                <TextBlock Text="→ XML" FontSize="10"/>
                                             </ui:Button>
                                             <ui:Button Appearance="Secondary" Command="{Binding ActionCommand}" CommandParameter="FlattenStructured" ToolTip="Flatten to dot-notation paths" Padding="6,2">
                                                 <TextBlock Text="→ Flat" FontSize="10"/>
@@ -729,7 +740,7 @@
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <TextBlock Text="Flags:" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                             <CheckBox Content="Aa IgnoreCase (i)" IsChecked="{Binding RegexIgnoreCase, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Case-insensitive matching"/>
-                                            <CheckBox Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="^ and $ match line starts and ends"/>
+                                            <CheckBox  Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="^ and $ match line starts and ends"/>
                                             <CheckBox Content=". Singleline (s)" IsChecked="{Binding RegexSingleline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip=". matches any character including newline"/>
                                             <CheckBox Content="# IgnoreWhitespace (x)" IsChecked="{Binding RegexIgnoreWhitespace, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Ignore unescaped whitespace in pattern"/>
                                         </StackPanel>
@@ -803,8 +814,8 @@
                                               SelectionMode="Single"
                                               SelectionUnit="FullRow"
                                               IsReadOnly="True"
-                                              FontSize="13"
-                                              RowHeight="28"
+                                              FontSize="11.5"
+                                              RowHeight="22"
                                               GridLinesVisibility="Horizontal"
                                               HorizontalGridLinesBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
                                               BorderThickness="0"
@@ -917,11 +928,9 @@
                                             <ComboBox ItemsSource="{Binding FilteredScriptPresets}"
                                                       SelectedItem="{Binding SelectedScriptPreset, Mode=TwoWay}"
                                                       DisplayMemberPath="Title" Padding="4,4"
-                                                      Width="220" Height="26" FontSize="11" VerticalAlignment="Center"
+                                                      Width="200" Height="26" FontSize="11" VerticalAlignment="Center"
                                                       ToolTip="Select a built-in C# / LINQ transformation preset"/>
-                                            <Button Content="🧪 Sample" Command="{Binding LoadScriptSampleInputCommand}"
-                                                    Style="{DynamicResource SecondaryToolButtonStyle}" Margin="4,0,0,0" Padding="6,3" FontSize="10"
-                                                    ToolTip="Load sample input text for the selected script preset into the editor"/>
+                
                                         </StackPanel>
 
                                         <!-- Center: Quick Globals Hint -->
@@ -1086,7 +1095,6 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="OUTPUT" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Syntax:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                     <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                               SelectedItem="{Binding SelectedOutputSyntax, UpdateSourceTrigger=PropertyChanged}"
                                               Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -1304,6 +1312,22 @@
                                             </Grid>
                                         </StackPanel>
                                     </Expander>
+
+                                    <!-- Convert Lines to Table / Tabular -->
+                                    <Expander Header="Convert to Tabular Data" controls:SectionState.Key="Lines_ConvertToTable" IsExpanded="True" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <UniformGrid Columns="2" Margin="0,0,0,3">
+                                                <Button Content="📊 Lines to Table Grid" Command="{Binding ActionCommand}" CommandParameter="LinesToTable" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="✂️ Split to Columns" Command="{Binding ActionCommand}" CommandParameter="SplitLinesToTable" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            </UniformGrid>
+                                            <UniformGrid Columns="2">
+                                                <Button Content="📄 Lines to CSV" Command="{Binding ActionCommand}" CommandParameter="ToCsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📑 Lines to TSV" Command="{Binding ActionCommand}" CommandParameter="ToTsv" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="📝 Lines to Markdown" Command="{Binding ActionCommand}" CommandParameter="ToMarkdownTable" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                                <Button Content="🌐 Lines to HTML" Command="{Binding ActionCommand}" CommandParameter="ToHtmlTable" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Expander>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
@@ -1313,7 +1337,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="📊 Table" FontSize="11" VerticalAlignment="Center"/>
-                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSuccessBrush}" Margin="5,0,0,0" VerticalAlignment="Center"
                                              Visibility="{Binding IsTableTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
@@ -1485,6 +1509,37 @@
                                         </StackPanel>
                                     </Expander>
 
+                                    <!-- Add / Calculate Column (Formula) -->
+                                    <Expander Header="Add / Calculate Column (Formula)" IsExpanded="True" controls:SectionState.Key="Tabular_AddCalculatedColumn" Style="{StaticResource SectionExpanderStyle}">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Name:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                <ui:TextBox Grid.Column="1" Text="{Binding TableNewColumnName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New column name..." ClearButtonEnabled="False" FontSize="11"/>
+                                            </Grid>
+
+                                            <TextBlock Text="Formula / Expression:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" Margin="0,2,0,2"/>
+                                            <ui:TextBox Text="{Binding TableNewColumnFormula, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="=CONCAT([Col1], &quot; &quot;, [Col2])" ClearButtonEnabled="True" FontSize="11" Margin="0,0,0,3" ToolTip="Excel-like text and regex formulas (e.g. CONCAT, SPLIT, SUBSTRING, REGEXEXTRACT, REGEXREPLACE, FIND, REPLACE, IF, UPPER, TRIM)"/>
+
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Presets:" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableFormulaFunctions}" SelectedItem="{Binding SelectedFormulaFunction, Mode=TwoWay}" DisplayMemberPath="Syntax" FontSize="10.5" ToolTip="Select a formula template"/>
+                                            </Grid>
+
+                                            <UniformGrid Columns="2">
+                                                <Button Content="➕ Add to Output" Command="{Binding ActionCommand}" CommandParameter="AddCalculatedColumn" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center" ToolTip="Calculates the new column and outputs transformed table"/>
+                                                <Button Content="⚡ Apply to Grid" Command="{Binding AddCalculatedColumnAndApplyCommand}" Style="{StaticResource PrimaryToolButtonStyle}" HorizontalContentAlignment="Center" ToolTip="Calculates the new column and updates input table &amp; grid directly"/>
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Expander>
+
                                     <!-- Table Restructure & Filter -->
                                     <Expander Header="Table Structure &amp; Filter" controls:SectionState.Key="Tabular_TableStructureFilter" Style="{StaticResource SectionExpanderStyle}">
                                         <StackPanel>
@@ -1582,7 +1637,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="🌳 Structured" FontSize="11" VerticalAlignment="Center"/>
-                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSuccessBrush}" Margin="5,0,0,0" VerticalAlignment="Center"
                                              Visibility="{Binding IsStructuredTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
@@ -1693,7 +1748,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="💻 Code" FontSize="11" VerticalAlignment="Center"/>
-                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSuccessBrush}" Margin="5,0,0,0" VerticalAlignment="Center"
                                              Visibility="{Binding IsCodeTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
@@ -1735,7 +1790,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="🔤 Case / Enc" FontSize="11" VerticalAlignment="Center"/>
-                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSuccessBrush}" Margin="5,0,0,0" VerticalAlignment="Center"
                                              Visibility="{Binding IsCaseEncTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
                                              ToolTip="Recommended for current input format"/>
                                 </StackPanel>
@@ -1783,7 +1838,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="⚡ Recipes" FontSize="11" VerticalAlignment="Center"/>
-                                    <Ellipse Width="6" Height="6" Fill="#4EC9B0" Margin="5,0,0,0" VerticalAlignment="Center"
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSuccessBrush}" Margin="5,0,0,0" VerticalAlignment="Center"
                                              Visibility="{Binding IsRecipesTabHighlighted, Converter={StaticResource BooleanToVisibilityConverter}}"
                                              ToolTip="Recommended recipe available"/>
                                 </StackPanel>
@@ -1971,8 +2026,295 @@
             </Grid>
         </Border>
 
+        <!-- WEB REQUEST / CURL MODAL OVERLAY -->
+        <Grid Grid.Row="0" Grid.RowSpan="4" Panel.ZIndex="2100"
+              d:IsHidden="True"
+              d:Visibility="Collapsed"
+              Visibility="{Binding IsWebRequestDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!-- Semi-transparent backdrop -->
+            <Border Background="#B0000000" MouseDown="WebRequestBackdrop_MouseDown"/>
+
+            <!-- Floating Web Request Dialog Card -->
+            <Border Width="720" MaxHeight="660" MinHeight="480" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Background="{DynamicResource SurfaceBackgroundBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270" Color="#000000" Opacity="0.85"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Header -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Content -->
+                        <RowDefinition Height="*"/>
+                        <!-- Footer Actions -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Border Grid.Row="0" Padding="14,10" Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:SymbolIcon Symbol="Globe24" FontSize="18" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Fetch Web Request" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="Fetch API responses or web pages directly into input or output" FontSize="10.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                            <ui:Button Grid.Column="2" Appearance="Transparent" Command="{Binding CloseWebRequestDialogCommand}" Padding="6,4" ToolTip="Close (Esc)">
+                                <ui:SymbolIcon Symbol="Dismiss24" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            </ui:Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Dialog Body / Tabs -->
+                    <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedWebRequestTabIndex, Mode=TwoWay}"
+                                Background="Transparent" BorderThickness="0" Margin="0" Padding="0">
+                        <!-- TAB 1: Request Builder -->
+                        <TabItem Header="🌐 Request Builder">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,12">
+                                <StackPanel>
+                                    <!-- Presets -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                        <TextBlock Text="Presets:" FontSize="10.5" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <ui:Button Appearance="Secondary" Command="{Binding LoadWebRequestPresetCommand}" CommandParameter="json_todo" Padding="6,2" Margin="0,0,4,0">
+                                            <TextBlock Text="JSON Todo" FontSize="10"/>
+                                        </ui:Button>
+                                        <ui:Button Appearance="Secondary" Command="{Binding LoadWebRequestPresetCommand}" CommandParameter="json_users" Padding="6,2" Margin="0,0,4,0">
+                                            <TextBlock Text="Users API" FontSize="10"/>
+                                        </ui:Button>
+                                        <ui:Button Appearance="Secondary" Command="{Binding LoadWebRequestPresetCommand}" CommandParameter="httpbin_post" Padding="6,2" Margin="0,0,4,0">
+                                            <TextBlock Text="HTTPBin POST" FontSize="10"/>
+                                        </ui:Button>
+                                        <ui:Button Appearance="Secondary" Command="{Binding LoadWebRequestPresetCommand}" CommandParameter="github_user" Padding="6,2" Margin="0,0,4,0">
+                                            <TextBlock Text="GitHub API" FontSize="10"/>
+                                        </ui:Button>
+                                        <ui:Button Appearance="Secondary" Command="{Binding LoadWebRequestPresetCommand}" CommandParameter="quotes" Padding="6,2" Margin="0,0,4,0">
+                                            <TextBlock Text="Random Quote" FontSize="10"/>
+                                        </ui:Button>
+                                        <ui:Button Appearance="Secondary" Command="{Binding LoadWebRequestPresetCommand}" CommandParameter="ip_info" Padding="6,2">
+                                            <TextBlock Text="Geo / IP Info" FontSize="10"/>
+                                        </ui:Button>
+                                    </StackPanel>
+
+                                    <!-- Method & URL -->
+                                    <TextBlock Text="REQUEST METHOD &amp; URL" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"/>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" ItemsSource="{Binding WebRequestAvailableMethods}"
+                                                  SelectedItem="{Binding WebRequestMethod, Mode=TwoWay}"
+                                                  FontSize="11" FontWeight="SemiBold" Height="28" Padding="6,3" Margin="0,0,6,0"/>
+                                        <ui:TextBox Grid.Column="1" x:Name="WebRequestUrlTextBox" Text="{Binding WebRequestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="https://api.example.com/v1/data"
+                                                    FontFamily="Consolas" FontSize="11" Height="28" ClearButtonEnabled="True"
+                                                    KeyDown="WebRequestUrlTextBox_KeyDown"/>
+                                    </Grid>
+
+                                    <!-- Headers -->
+                                    <TextBlock Text="HEADERS (one per line, e.g. Authorization: Bearer token)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"/>
+                                    <ui:TextBox Text="{Binding WebRequestHeaders, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                AcceptsReturn="True" Height="70" TextWrapping="NoWrap"
+                                                FontFamily="Consolas" FontSize="10.5" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10"/>
+
+                                    <!-- Request Body (for POST/PUT/PATCH) -->
+                                    <TextBlock Text="REQUEST BODY (JSON, text, or query payload)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"/>
+                                    <ui:TextBox Text="{Binding WebRequestBody, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                AcceptsReturn="True" Height="75" TextWrapping="NoWrap"
+                                                FontFamily="Consolas" FontSize="10.5" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10"/>
+
+                                    <!-- Options Bar: Destination & Copy Tools -->
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="Send to:" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <RadioButton Content="Input Pane" IsChecked="{Binding WebRequestDestination, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Input, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <RadioButton Content="Output Pane" IsChecked="{Binding WebRequestDestination, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Output, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:Button Appearance="Secondary" Command="{Binding CopyCSharpFromRequestCommand}" ToolTip="Copy as C# HttpClient code snippet" Padding="6,2">
+                                                <TextBlock Text="Copy C#" FontSize="10"/>
+                                            </ui:Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <!-- TAB 2: Request History -->
+                        <TabItem Header="📜 History">
+                            <Grid Margin="12,10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- History Search & Clear Toolbar -->
+                                <Border Grid.Row="0" Background="{DynamicResource SurfaceHeaderBackgroundBrush}" Padding="6,4" CornerRadius="4" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBox Text="{Binding WebRequestHistoryFilter, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="Search history by URL, method, status..."
+                                                    ClearButtonEnabled="True"
+                                                    FontSize="11"/>
+                                        <ui:Button Grid.Column="1" Appearance="Secondary" Command="{Binding ClearWebRequestHistoryCommand}" ToolTip="Clear request history" Padding="8,2" Margin="6,0,0,0">
+                                            <TextBlock Text="Clear All" FontSize="10.5"/>
+                                        </ui:Button>
+                                    </Grid>
+                                </Border>
+
+                                <!-- History Items List -->
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding WebRequestHistoryView}"
+                                         SelectedItem="{Binding SelectedWebRequestHistoryItem, Mode=TwoWay}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SurfaceCardBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="8,6" Margin="0,2">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <!-- Top Line: Method Badge, URL, Timestamp -->
+                                                    <Grid Grid.Row="0" Margin="0,0,0,4">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border CornerRadius="3" Padding="6,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="#3B82F6"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="GET">
+                                                                            <Setter Property="Background" Value="#10B981"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="POST">
+                                                                            <Setter Property="Background" Value="#FF9F1C"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="PUT">
+                                                                            <Setter Property="Background" Value="#00D2FF"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="PATCH">
+                                                                            <Setter Property="Background" Value="#8B5CF6"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="DELETE">
+                                                                            <Setter Property="Background" Value="#EF4444"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="HEAD">
+                                                                            <Setter Property="Background" Value="#6B7280"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Method}" Value="OPTIONS">
+                                                                            <Setter Property="Background" Value="#6B7280"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock Text="{Binding Method}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="10"/>
+                                                        </Border>
+
+                                                        <TextBlock Grid.Column="1" Text="{Binding Url}" FontFamily="Consolas" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding Url}"/>
+
+                                                        <TextBlock Grid.Column="2" Text="{Binding RelativeTimeDisplay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10" VerticalAlignment="Center" ToolTip="{Binding FullTimestampDisplay}"/>
+                                                    </Grid>
+
+                                                    <!-- Bottom Line: Status/Summary, Destination, Actions -->
+                                                    <Grid Grid.Row="1">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding ResponseSummary}" Foreground="{DynamicResource AccentInfoBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding HeadersCountDisplay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" VerticalAlignment="Center" Margin="0,0,8,0" Visibility="{Binding HasHeaders, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                            <Border Background="#25FFFFFF" CornerRadius="2" Padding="4,1" Margin="0,0,6,0" Visibility="{Binding HasBody, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <TextBlock Text="Body" FontSize="9" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </Border>
+                                                            <TextBlock Text="➔ " Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding Destination}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <ui:Button Appearance="Primary" Command="{Binding DataContext.LoadWebRequestHistoryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" ToolTip="Load into request builder" Padding="6,2" Margin="0,0,4,0">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <ui:SymbolIcon Symbol="ArrowUndo24" FontSize="11" Margin="0,0,4,0"/>
+                                                                    <TextBlock Text="Reuse" FontSize="10"/>
+                                                                </StackPanel>
+                                                            </ui:Button>
+                                                            <ui:Button Appearance="Secondary" Command="{Binding DataContext.ExecuteWebRequestHistoryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="Fetch now with these parameters" Padding="6,2" Margin="0,0,4,0">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <ui:SymbolIcon Symbol="Play24" FontSize="11" Margin="0,0,4,0"/>
+                                                                    <TextBlock Text="Fetch" FontSize="10"/>
+                                                                </StackPanel>
+                                                            </ui:Button>
+                                                            <ui:Button Appearance="Transparent" Command="{Binding DataContext.DeleteWebRequestHistoryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" ToolTip="Remove from history" Padding="4,2">
+                                                                <ui:SymbolIcon Symbol="Delete24" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </ui:Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+
+                    <!-- Footer / Actions -->
+                    <Border Grid.Row="2" Padding="14,10" Background="{DynamicResource SurfaceDarkBackgroundBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,8,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:ProgressRing Width="16" Height="16" Margin="0,0,8,0" IsIndeterminate="True"
+                                                 Visibility="{Binding IsWebRequestLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <TextBlock Text="{Binding WebRequestStatusText}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <ui:Button Grid.Column="1" Appearance="Secondary" Command="{Binding CloseWebRequestDialogCommand}" Padding="14,6" Margin="0,0,8,0">
+                                <TextBlock Text="Cancel" FontSize="11"/>
+                            </ui:Button>
+                            <ui:Button Grid.Column="2" Appearance="Primary" Command="{Binding ExecuteWebRequestCommand}" IsEnabled="{Binding IsWebRequestLoading, Converter={StaticResource InverseBooleanConverter}}" Padding="16,6">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="ArrowDownload24" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Fetch Request" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </ui:Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
         <!-- COMMAND PALETTE / ACTION FUZZY SEARCH MODAL OVERLAY -->
         <Grid Grid.Row="0" Grid.RowSpan="4" Panel.ZIndex="2000"
+              d:IsHidden="True"
+              d:Visibility="Collapsed"
               Visibility="{Binding IsCommandPaletteOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!-- Semi-transparent backdrop -->
             <Border Background="#B0000000" MouseDown="CommandPaletteBackdrop_MouseDown"/>
