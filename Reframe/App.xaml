@@ -81,6 +81,22 @@
             <!-- Global / Shared Control Styles -->
             <!-- ======================================================== -->
 
+            <!-- Global CheckBox Style (WPF UI Fluent CheckBox - Compact / Scaled) -->
+            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource DefaultCheckBoxStyle}">
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="LayoutTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="0.88" ScaleY="0.88" />
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <!-- High-Visibility TabControl Style -->
             <Style TargetType="{x:Type TabControl}">
                 <Setter Property="Padding" Value="0" />

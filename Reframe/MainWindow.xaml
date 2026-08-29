@@ -1216,10 +1216,10 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Pre:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                <TextBlock Text="Prefix:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
                                                 <ui:TextBox Grid.Column="1" Text="{Binding LinePrefix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
-                                                <CheckBox Grid.Column="2" Content="1st" IsChecked="{Binding LinePrefixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                                <CheckBox Grid.Column="3" Content="last" IsChecked="{Binding LinePrefixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="2" Content="Skip 1st" IsChecked="{Binding LinePrefixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="3" Content="Skip last" IsChecked="{Binding LinePrefixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
                                             </Grid>
                                             <Grid Margin="0,0,0,3">
                                                 <Grid.ColumnDefinitions>
@@ -1228,10 +1228,10 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Suf:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
+                                                <TextBlock Text="Suffix:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
                                                 <ui:TextBox Grid.Column="1" Text="{Binding LineSuffix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
-                                                <CheckBox Grid.Column="2" Content="1st" IsChecked="{Binding LineSuffixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                                <CheckBox Grid.Column="3" Content="last" IsChecked="{Binding LineSuffixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="2" Content="Skip 1st" IsChecked="{Binding LineSuffixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="3" Content="Skip last" IsChecked="{Binding LineSuffixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
                                             </Grid>
                                             <Button Content="➕ Add Prefix / Suffix" Command="{Binding ActionCommand}" CommandParameter="PrefixSuffix" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </StackPanel>
