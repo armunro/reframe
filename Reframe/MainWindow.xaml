@@ -157,11 +157,11 @@
                 </StackPanel>
 
                 <!-- Search Actions / Command Palette Trigger Button -->
-                <Button Grid.Column="2" HorizontalAlignment="Left"
+                <Button Grid.Column="2" HorizontalAlignment="Right"
                         Command="{Binding OpenCommandPaletteCommand}"
                         ToolTip="Search actions and transformers (Ctrl+K or Ctrl+P)"
                         Background="#252526" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1"
-                        Padding="10,4" Margin="0,0,10,0" Cursor="Hand">
+                        Padding="10,4" Margin="0,0,8,0" Cursor="Hand">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="SearchBtnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
@@ -246,11 +246,11 @@
                                 <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                           SelectedItem="{Binding SelectedInputSyntax, UpdateSourceTrigger=PropertyChanged}"
                                           Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <CheckBox Content="Wrap" IsChecked="{Binding IsInputWordWrap, Mode=TwoWay}" FontSize="10" VerticalAlignment="Center" ToolTip="Wrap lines in input editor"/>
+                                <CheckBox Content="Wrap" IsChecked="{Binding IsInputWordWrap, Mode=TwoWay}" FontSize="11.5" VerticalAlignment="Center" ToolTip="Wrap lines in input editor"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                <ui:Button Appearance="Primary" Command="{Binding PasteInputCommand}" Padding="6,2" FontSize="11" Margin="0,0,4,0">
-                                    <TextBlock Text="Paste" FontSize="10"/>
+                                <ui:Button Appearance="Primary" Command="{Binding PasteInputCommand}" ToolTip="Paste from Clipboard (Ctrl+V)" Padding="8,3" FontSize="11" Margin="0,0,4,0" Icon="{ui:SymbolIcon Symbol=ClipboardPaste24}">
+                                    <TextBlock Text="Paste" FontWeight="SemiBold" FontSize="11"/>
                                 </ui:Button>
                             </StackPanel>
                         </Grid>
@@ -739,10 +739,10 @@
                                         <!-- Options Toggles -->
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <TextBlock Text="Flags:" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <CheckBox Content="Aa IgnoreCase (i)" IsChecked="{Binding RegexIgnoreCase, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Case-insensitive matching"/>
-                                            <CheckBox  Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="^ and $ match line starts and ends"/>
-                                            <CheckBox Content=". Singleline (s)" IsChecked="{Binding RegexSingleline, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip=". matches any character including newline"/>
-                                            <CheckBox Content="# IgnoreWhitespace (x)" IsChecked="{Binding RegexIgnoreWhitespace, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Ignore unescaped whitespace in pattern"/>
+                                            <CheckBox Content="Aa IgnoreCase (i)" IsChecked="{Binding RegexIgnoreCase, Mode=TwoWay}" FontSize="12" Margin="0,0,8,0" ToolTip="Case-insensitive matching"/>
+                                            <CheckBox  Content="^$ Multiline (m)" IsChecked="{Binding RegexMultiline, Mode=TwoWay}" FontSize="12" Margin="0,0,8,0" ToolTip="^ and $ match line starts and ends"/>
+                                            <CheckBox Content=". Singleline (s)" IsChecked="{Binding RegexSingleline, Mode=TwoWay}" FontSize="12" Margin="0,0,8,0" ToolTip=". matches any character including newline"/>
+                                            <CheckBox Content="# IgnoreWhitespace (x)" IsChecked="{Binding RegexIgnoreWhitespace, Mode=TwoWay}" FontSize="12" Margin="0,0,8,0" ToolTip="Ignore unescaped whitespace in pattern"/>
                                         </StackPanel>
 
                                         <!-- Extract & Clear Actions -->
@@ -942,7 +942,7 @@
 
                                         <!-- Action Buttons -->
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <CheckBox Content="⚡ Live Eval" IsChecked="{Binding IsScriptLiveEvaluation, Mode=TwoWay}" FontSize="11" Margin="0,0,8,0" ToolTip="Automatically evaluate script on every keystroke or input change"/>
+                                            <CheckBox Content="⚡ Live Eval" IsChecked="{Binding IsScriptLiveEvaluation, Mode=TwoWay}" FontSize="11.5" Margin="0,0,8,0" ToolTip="Automatically evaluate script on every keystroke or input change"/>
                                             <Button Content="▶ Run" Command="{Binding ExecuteCSharpScriptCommand}"
                                                     Style="{StaticResource PrimaryToolButtonStyle}" Margin="0,0,4,0" Padding="8,3" FontSize="10"
                                                     ToolTip="Execute current C# script expression (F5)"/>
@@ -1098,13 +1098,14 @@
                                     <ComboBox ItemsSource="{Binding AvailableSyntaxLanguages}"
                                               SelectedItem="{Binding SelectedOutputSyntax, UpdateSourceTrigger=PropertyChanged}"
                                               Width="105" Height="24" MinHeight="0" Padding="4,4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <CheckBox Content="Wrap" IsChecked="{Binding IsOutputWordWrap, Mode=TwoWay}" FontSize="10" VerticalAlignment="Center" ToolTip="Wrap lines in output editor"/>
+                                    <CheckBox Content="Wrap" IsChecked="{Binding IsOutputWordWrap, Mode=TwoWay}" FontSize="11.5" VerticalAlignment="Center" ToolTip="Wrap lines in output editor"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                                     <ui:Button Appearance="Success" Command="{Binding SendToInputCommand}" IsEnabled="{Binding CanSendOutputToInput}" ToolTip="Send output directly to input editor (Ctrl+Shift+I / Alt+I / F4)" Padding="12,3" Margin="0,0,6,0" Icon="{ui:SymbolIcon Symbol=ArrowUp24}">
                                         <TextBlock Text="Send to Input" FontWeight="SemiBold" FontSize="11"/>
                                     </ui:Button>
-                                    <ui:Button Appearance="Primary" Command="{Binding CopyOutputCommand}" IsEnabled="{Binding CanSendOutputToInput}" ToolTip="Copy transformed text to Clipboard" Padding="8,3" Margin="0,0,4,0" Icon="{ui:SymbolIcon Symbol=Copy24}">
+                                    <ui:Button Appearance="Primary" Command="{Binding CopyOutputCommand}" IsEnabled="{Binding CanSendOutputToInput}" ToolTip="Copy transformed text to Clipboard (Ctrl+Shift+C / F3)" Padding="8,3" Margin="0,0,4,0" Icon="{ui:SymbolIcon Symbol=Copy24}">
+                                        <TextBlock Text="Copy" FontWeight="SemiBold" FontSize="11"/>
                                     </ui:Button>
                                 </StackPanel>
                             </Grid>
@@ -1218,8 +1219,8 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Prefix:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
                                                 <ui:TextBox Grid.Column="1" Text="{Binding LinePrefix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
-                                                <CheckBox Grid.Column="2" Content="Skip 1st" IsChecked="{Binding LinePrefixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                                <CheckBox Grid.Column="3" Content="Skip last" IsChecked="{Binding LinePrefixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="2" Content="Skip 1st" IsChecked="{Binding LinePrefixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="3" Content="Skip last" IsChecked="{Binding LinePrefixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
                                             </Grid>
                                             <Grid Margin="0,0,0,3">
                                                 <Grid.ColumnDefinitions>
@@ -1230,8 +1231,8 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Suffix:" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" FontSize="10"/>
                                                 <ui:TextBox Grid.Column="1" Text="{Binding LineSuffix, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="False" FontSize="11" Margin="0,0,4,0"/>
-                                                <CheckBox Grid.Column="2" Content="Skip 1st" IsChecked="{Binding LineSuffixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                                <CheckBox Grid.Column="3" Content="Skip last" IsChecked="{Binding LineSuffixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="2" Content="Skip 1st" IsChecked="{Binding LineSuffixSkipFirst, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" ToolTip="Skip first line" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="3" Content="Skip last" IsChecked="{Binding LineSuffixSkipLast, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" ToolTip="Skip last line" VerticalAlignment="Center"/>
                                             </Grid>
                                             <Button Content="➕ Add Prefix / Suffix" Command="{Binding ActionCommand}" CommandParameter="PrefixSuffix" Style="{StaticResource ToolButtonStyle}" HorizontalContentAlignment="Center"/>
                                         </StackPanel>
@@ -1262,8 +1263,8 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <CheckBox Content="Case" IsChecked="{Binding LineReplaceCaseSensitive, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                                    <CheckBox Content="Regex" IsChecked="{Binding LineReplaceIsRegex, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="9.5" VerticalAlignment="Center"/>
+                                                    <CheckBox Content="Case" IsChecked="{Binding LineReplaceCaseSensitive, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                    <CheckBox Content="Regex" IsChecked="{Binding LineReplaceIsRegex, Mode=TwoWay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="10.5" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <Button Grid.Column="1" Content="🔄 Replace" Command="{Binding ActionCommand}" CommandParameter="ReplaceInLines" Style="{StaticResource ToolButtonStyle}" Padding="8,3" HorizontalContentAlignment="Center"/>
                                             </Grid>
@@ -1590,7 +1591,7 @@
                                             <CheckBox Content="Include other columns in value"
                                                       IsChecked="{Binding KeyValueIncludeRestOfColumns, UpdateSourceTrigger=PropertyChanged}"
                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                      FontSize="10"
+                                                      FontSize="11"
                                                       Margin="0,0,0,3"
                                                       ToolTip="When checked, the value is an object or map containing all other properties and columns instead of a single column."/>
                                             <UniformGrid Columns="3">

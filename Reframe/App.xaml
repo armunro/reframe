@@ -51,10 +51,58 @@
             <SolidColorBrush x:Key="MutedTextBrush" Color="#888888" />
             <SolidColorBrush x:Key="DimTextBrush" Color="#686868" />
 
-            <!-- Calmer Slate-Blue Accents -->
-            <SolidColorBrush x:Key="SystemAccentColorBrush" Color="#668BC4" />
-            <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#465E8A" />
-            <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="#56A5B8" />
+            <!-- Fluent Blue Accents -->
+            <Color x:Key="SystemAccentColor">#0078D4</Color>
+            <Color x:Key="SystemAccentColorPrimary">#0078D4</Color>
+            <Color x:Key="SystemAccentColorSecondary">#005A9E</Color>
+            <Color x:Key="SystemAccentColorTertiary">#2886DE</Color>
+            <SolidColorBrush x:Key="SystemAccentColorBrush" Color="#0078D4" />
+            <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#005A9E" />
+            <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="#2886DE" />
+            <SolidColorBrush x:Key="SystemAccentBrush" Color="#0078D4" />
+
+            <!-- WPF UI Accent Fill, Text & Control Brushes -->
+            <Color x:Key="AccentFillColorDefault">#0078D4</Color>
+            <Color x:Key="AccentFillColorSecondary">#106EBE</Color>
+            <Color x:Key="AccentFillColorTertiary">#005A9E</Color>
+            <Color x:Key="AccentFillColorDisabled">#330078D4</Color>
+            <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#0078D4" />
+            <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#106EBE" />
+            <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#005A9E" />
+            <SolidColorBrush x:Key="AccentFillColorDisabledBrush" Color="#330078D4" />
+            <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#2886DE" />
+            <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#4A9FE7" />
+            <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush" Color="#0078D4" />
+            <SolidColorBrush x:Key="SystemFillColorAttentionBrush" Color="#0078D4" />
+            <SolidColorBrush x:Key="AccentFillColorSelectedTextBackgroundBrush" Color="#0078D4" />
+
+            <!-- WPF UI Primary Button Brushes -->
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#0078D4" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#106EBE" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#005A9E" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#330078D4" />
+            <SolidColorBrush x:Key="AccentButtonBorder" Color="#0078D4" />
+            <SolidColorBrush x:Key="AccentButtonBorderPointerOver" Color="#106EBE" />
+            <SolidColorBrush x:Key="AccentButtonBorderPressed" Color="#005A9E" />
+            <SolidColorBrush x:Key="AccentButtonBorderDisabled" Color="#00000000" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#CCFFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#585858" />
+
+            <!-- WPF UI ToggleSwitch Brushes -->
+            <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#0078D4" />
+            <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#106EBE" />
+            <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#005A9E" />
+            <SolidColorBrush x:Key="ToggleSwitchFillOnDisabled" Color="#330078D4" />
+            <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="#0078D4" />
+            <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Color="#106EBE" />
+            <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Color="#005A9E" />
+            <SolidColorBrush x:Key="ToggleSwitchStrokeOnDisabled" Color="#330078D4" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnDisabled" Color="#808080" />
 
             <SolidColorBrush x:Key="AccentSuccessBrush" Color="#10B981" />
             <SolidColorBrush x:Key="AccentWarningBrush" Color="#FF9F1C" />
@@ -84,9 +132,10 @@
             <!-- Global CheckBox Style (WPF UI Fluent CheckBox - Compact / Scaled) -->
             <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource DefaultCheckBoxStyle}">
                 <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="FontSize" Value="12.5" />
                 <Setter Property="LayoutTransform">
                     <Setter.Value>
-                        <ScaleTransform ScaleX="0.88" ScaleY="0.88" />
+                        <ScaleTransform ScaleX="0.94" ScaleY="0.94" />
                     </Setter.Value>
                 </Setter>
                 <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -421,12 +470,12 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="btnBorder" Property="Background" Value="#5472A5" />
-                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#7BA3DD" />
+                                    <Setter TargetName="btnBorder" Property="Background" Value="#106EBE" />
+                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#2886DE" />
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="btnBorder" Property="Background" Value="#324566" />
-                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#24334C" />
+                                    <Setter TargetName="btnBorder" Property="Background" Value="#004578" />
+                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#005A9E" />
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter TargetName="btnBorder" Property="Opacity" Value="0.5" />
